@@ -1,0 +1,27 @@
+name: "Numerales en japonés"
+fields:
+  - "Numeral"
+  - "Kanji"
+  - "Lectura A"
+  - "Lectura B"
+css: |
+  .card { font-family: 'Noto Sans JP', Arial, sans-serif; font-size: 28px; text-align: center; }
+  .numeral { font-size: 42px; font-weight: 700; }
+  .kanji { font-size: 54px; }
+  .lectura { font-size: 36px; margin-top: 8px; }
+templates:
+  - name: "Kanji -> Numeral"
+    qfmt: '<div class="kanji">{{Kanji}}</div><div style="font-size: medium; color: gray;">(Numeral)</div>'
+    afmt: '{{FrontSide}}<hr id="answer"><div class="numeral">{{Numeral}}</div>'
+  - name: "Numeral -> Kanji"
+    qfmt: '<div class="numeral">{{Numeral}}</div><div style="font-size: medium; color: gray;">(Kanji)</div>'
+    afmt: '{{FrontSide}}<hr id="answer"><div class="kanji">{{Kanji}}</div>'
+  - name: "Lectura A -> Numeral"
+    qfmt: '<div class="lectura">{{Lectura A}}</div><div style="font-size: medium; color: gray;">(Numeral)</div>'
+    afmt: '{{FrontSide}}<hr id="answer"><div class="numeral">{{Numeral}}</div>'
+  - name: "Lectura B -> Numeral"
+    qfmt: '<div class="lectura">{{Lectura B}}</div><div style="font-size: medium; color: gray;">(Numeral)</div>'
+    afmt: '{{FrontSide}}<hr id="answer"><div class="numeral">{{Numeral}}</div><div class="kanji" style="font-size: 50%;">{{Kanji}}</div>'
+  - name: "Numeral -> Lecturas"
+    qfmt: '<div class="numeral">{{Numeral}}</div><div style="font-size: medium; color: gray;">(Lecturas)</div>'
+    afmt: '{{FrontSide}}<hr id="answer"><div class="lectura">{{Lectura A}}<br/>{{Lectura B}}</div>'
