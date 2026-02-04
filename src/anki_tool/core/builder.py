@@ -4,6 +4,7 @@ import yaml
 from pathlib import Path
 from typing import List, Dict, Any
 
+
 class AnkiBuilder:
     def __init__(self, deck_name: str, model_config: Dict[str, Any]):
         self.deck_name = deck_name
@@ -23,15 +24,11 @@ class AnkiBuilder:
             self.model_config["name"],
             fields=[{"name": f} for f in self.model_config["fields"]],
             templates=self.model_config["templates"],
-            css=self.model_config.get("css", "")
+            css=self.model_config.get("css", ""),
         )
 
     def add_note(self, field_values: List[str], tags: List[str] = None):
-        note = genanki.Note(
-            model=self.model,
-            fields=field_values,
-            tags=tags or []
-        )
+        note = genanki.Note(model=self.model, fields=field_values, tags=tags or [])
         self.deck.add_note(note)
 
     def add_media(self, file_path: Path):
