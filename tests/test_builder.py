@@ -43,7 +43,8 @@ def test_builder_initialization():
 
 def test_builder_invalid_config():
     """Test that AnkiBuilder raises error with invalid config."""
-    invalid_config = {"name": "Test Model"}  # Missing required fields
+    # Missing required 'fields' and 'templates' keys
+    invalid_config = {"name": "Test Model"}
     with pytest.raises(DeckBuildError):
         AnkiBuilder("Test Deck", invalid_config)
 

@@ -11,8 +11,7 @@ install:  ## Install dependencies
 	pip install -e .
 
 dev:  ## Install development dependencies
-	pip install -r requirements.txt
-	pip install -e .
+	pip install -e ".[dev]"
 	pre-commit install
 
 test:  ## Run tests

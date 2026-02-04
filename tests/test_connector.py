@@ -23,7 +23,12 @@ def test_invoke_success(mock_post):
 
 @patch("anki_tool.core.connector.requests.post")
 def test_invoke_connection_error(mock_post):
-    """Test handling of connection errors."""
+    """Test handling of connection errors.
+    
+    Note: The connector wraps requests.exceptions.ConnectionError into
+    AnkiConnectError, but the mock here raises a generic Exception to test
+    unexpected error scenarios.
+    """
     mock_post.side_effect = Exception("Connection refused")
     
     connector = AnkiConnector()
