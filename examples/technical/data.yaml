@@ -1,0 +1,96 @@
+- concept: "List Comprehension"
+  language: "python"
+  code: |
+    numbers = [1, 2, 3, 4, 5]
+    squares = [x**2 for x in numbers]
+    # Result: [1, 4, 9, 16, 25]
+  explanation: "List comprehensions provide a concise way to create lists based on existing lists. More readable and often faster than using loops."
+  tags: ["python", "basics", "syntax"]
+  id: "py_001"
+
+- concept: "Dictionary Comprehension"
+  language: "python"
+  code: |
+    words = ['hello', 'world']
+    lengths = {word: len(word) for word in words}
+    # Result: {'hello': 5, 'world': 5}
+  explanation: "Similar to list comprehensions but creates dictionaries. Useful for transforming data structures."
+  tags: ["python", "basics", "syntax"]
+  id: "py_002"
+
+- concept: "Lambda Function"
+  language: "python"
+  code: |
+    square = lambda x: x**2
+    result = square(5)  # Returns 25
+    
+    # Common with map/filter
+    numbers = [1, 2, 3, 4]
+    doubled = list(map(lambda x: x*2, numbers))
+  explanation: "Anonymous functions defined with lambda. Useful for simple operations, especially with map(), filter(), and sorted()."
+  tags: ["python", "functions", "advanced"]
+  id: "py_003"
+
+- concept: "Context Manager (with statement)"
+  language: "python"
+  code: |
+    with open('file.txt', 'r') as f:
+        content = f.read()
+    # File automatically closed
+  explanation: "Context managers ensure resources are properly managed. The file is automatically closed even if an exception occurs."
+  tags: ["python", "best-practices", "files"]
+  id: "py_004"
+
+- concept: "Destructuring Assignment"
+  language: "javascript"
+  code: |
+    const person = { name: 'John', age: 30 };
+    const { name, age } = person;
+    
+    const colors = ['red', 'green', 'blue'];
+    const [first, second] = colors;
+  explanation: "Destructuring allows unpacking values from arrays or properties from objects into distinct variables."
+  tags: ["javascript", "es6", "syntax"]
+  id: "js_001"
+
+- concept: "Arrow Functions"
+  language: "javascript"
+  code: |
+    // Traditional function
+    function add(a, b) { return a + b; }
+    
+    // Arrow function
+    const add = (a, b) => a + b;
+    
+    // With block body
+    const multiply = (a, b) => {
+      return a * b;
+    };
+  explanation: "Arrow functions provide a shorter syntax and lexically bind 'this'. Ideal for callbacks and functional programming."
+  tags: ["javascript", "es6", "functions"]
+  id: "js_002"
+
+- concept: "Slice Operation"
+  language: "go"
+  code: |
+    // Create a slice
+    nums := []int{1, 2, 3, 4, 5}
+    
+    // Slice operations
+    subset := nums[1:4]  // [2, 3, 4]
+    first3 := nums[:3]   // [1, 2, 3]
+    last2 := nums[3:]    // [4, 5]
+  explanation: "Slices are dynamic arrays in Go. The syntax [low:high] creates a slice including low but excluding high."
+  tags: ["go", "basics", "slices"]
+  id: "go_001"
+
+- concept: "SQL JOIN"
+  language: "sql"
+  code: |
+    SELECT users.name, orders.total
+    FROM users
+    INNER JOIN orders ON users.id = orders.user_id
+    WHERE orders.total > 100;
+  explanation: "INNER JOIN returns records that have matching values in both tables. Essential for relational database queries."
+  tags: ["sql", "joins", "queries"]
+  id: "sql_001"
