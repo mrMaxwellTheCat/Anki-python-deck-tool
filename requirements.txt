@@ -1,0 +1,10 @@
+genanki
+requests
+pyyaml
+click
+# Dev dependencies
+pytest
+ruff
+mypy
+types-requests
+types-PyYAML
