@@ -5,9 +5,10 @@ from configuration and data.
 """
 
 import hashlib
-import genanki
 from pathlib import Path
 from typing import Any
+
+import genanki
 
 from anki_tool.core.exceptions import DeckBuildError
 
@@ -17,7 +18,8 @@ class AnkiBuilder:
 
     Args:
         deck_name: Name of the deck to create.
-        model_config: Dictionary containing model configuration (name, fields, templates, css).
+        model_config: Dictionary containing model configuration (name,
+            fields, templates, css).
 
     Attributes:
         deck_name: Name of the deck.

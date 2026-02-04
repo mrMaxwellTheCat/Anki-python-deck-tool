@@ -1,7 +1,8 @@
 """Tests for the AnkiBuilder class."""
 
+
 import pytest
-from pathlib import Path
+
 from anki_tool.core.builder import AnkiBuilder
 from anki_tool.core.exceptions import DeckBuildError
 
@@ -64,7 +65,7 @@ def test_add_note():
     }
     builder = AnkiBuilder("Test Deck", config)
     builder.add_note(["Question", "Answer"], tags=["test"])
-    
+
     assert len(builder.deck.notes) == 1
     assert builder.deck.notes[0].fields == ["Question", "Answer"]
     assert "test" in builder.deck.notes[0].tags
@@ -85,7 +86,7 @@ def test_add_note_without_tags():
     }
     builder = AnkiBuilder("Test Deck", config)
     builder.add_note(["Question", "Answer"])
-    
+
     assert len(builder.deck.notes) == 1
     assert builder.deck.notes[0].tags == []
 
@@ -105,10 +106,10 @@ def test_write_to_file(tmp_path):
     }
     builder = AnkiBuilder("Test Deck", config)
     builder.add_note(["Question", "Answer"])
-    
+
     output_path = tmp_path / "test_deck.apkg"
     builder.write_to_file(output_path)
-    
+
     assert output_path.exists()
     assert output_path.stat().st_size > 0
 
@@ -127,11 +128,11 @@ def test_add_media(tmp_path):
         ],
     }
     builder = AnkiBuilder("Test Deck", config)
-    
+
     # Create a dummy media file
     media_file = tmp_path / "test_image.jpg"
     media_file.write_text("fake image content")
-    
+
     builder.add_media(media_file)
     assert len(builder.media_files) == 1
     assert str(media_file.absolute()) in builder.media_files
@@ -151,8 +152,8 @@ def test_add_media_nonexistent_file(tmp_path):
         ],
     }
     builder = AnkiBuilder("Test Deck", config)
-    
+
     nonexistent_file = tmp_path / "does_not_exist.jpg"
     builder.add_media(nonexistent_file)
-    
+
     assert len(builder.media_files) == 0

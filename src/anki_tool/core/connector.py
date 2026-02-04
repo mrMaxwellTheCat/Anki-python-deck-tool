@@ -5,9 +5,10 @@ Anki via the AnkiConnect add-on API.
 """
 
 import base64
-import requests
 from pathlib import Path
 from typing import Any
+
+import requests
 
 from anki_tool.core.exceptions import AnkiConnectError
 
@@ -92,7 +93,8 @@ class AnkiConnector:
 
         Args:
             file_path: Path to the media file to store.
-            filename: Optional custom filename. If not provided, uses the original filename.
+            filename: Optional custom filename. If not provided, uses the
+                original filename.
 
         Raises:
             FileNotFoundError: If the media file doesn't exist.

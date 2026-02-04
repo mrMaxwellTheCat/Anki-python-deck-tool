@@ -1,13 +1,12 @@
 """Tests for custom exceptions."""
 
-import pytest
 from anki_tool.core.exceptions import (
+    AnkiConnectError,
     AnkiToolError,
     ConfigValidationError,
     DataValidationError,
-    MediaMissingError,
-    AnkiConnectError,
     DeckBuildError,
+    MediaMissingError,
 )
 
 
