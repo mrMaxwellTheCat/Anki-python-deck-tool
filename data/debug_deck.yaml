@@ -1,0 +1,7 @@
+- id: debug-0000
+  field_a: "field_a"
+  field_b: "field_b"
+  field_c: "field_c"
+- id: debug-0001
+  field_a: "field_a"
+  field_b: "field_b"
