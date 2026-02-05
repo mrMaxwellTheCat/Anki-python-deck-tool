@@ -1,6 +1,5 @@
 """Tests for the AnkiBuilder class."""
 
-
 import pytest
 
 from anki_tool.core.builder import AnkiBuilder
