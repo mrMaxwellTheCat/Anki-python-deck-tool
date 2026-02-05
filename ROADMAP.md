@@ -50,7 +50,7 @@ Transform the Anki Python Deck Tool into a comprehensive, user-friendly solution
 - [x] **Static Type Checking**
     - [x] Configure `mypy` settings in `pyproject.toml`.
     - [x] Add type hints to all public functions.
-    - [ ] Eliminate all `Any` types in core modules.
+    - [x] Eliminate all `Any` types in core modules.
     - [ ] Add generic type support for Deck definitions.
 
 - [x] **Docstrings & Documentation**

@@ -7,11 +7,50 @@ from configuration and data.
 import hashlib
 import re
 from pathlib import Path
-from typing import Any
+from typing import TypedDict
 
 import genanki
 
 from anki_tool.core.exceptions import DeckBuildError
+
+
+class ModelTemplate(TypedDict):
+    """Type definition for a model template.
+
+    Attributes:
+        name: The template name.
+        qfmt: The question format (HTML).
+        afmt: The answer format (HTML).
+    """
+
+    name: str
+    qfmt: str
+    afmt: str
+
+
+class ModelConfig(TypedDict):
+    """Type definition for a model configuration.
+
+    Attributes:
+        name: The model name (required).
+        fields: List of field names (required).
+        templates: List of card templates (required).
+        css: Optional CSS styling.
+    """
+
+    name: str
+    fields: list[str]
+    templates: list[ModelTemplate]
+
+
+class ModelConfigComplete(ModelConfig, total=False):
+    """Extended model config with optional fields.
+
+    Attributes:
+        css: Optional CSS styling for the model.
+    """
+
+    css: str
 
 
 class AnkiBuilder:
@@ -30,7 +69,7 @@ class AnkiBuilder:
         media_files: List of media file paths to include in the package.
     """
 
-    def __init__(self, deck_name: str, model_config: dict[str, Any]):
+    def __init__(self, deck_name: str, model_config: ModelConfigComplete):
         self.deck_name = deck_name
         self.model_config = model_config
         self.model = self._build_model()

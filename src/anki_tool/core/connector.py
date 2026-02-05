@@ -6,11 +6,14 @@ Anki via the AnkiConnect add-on API.
 
 import base64
 from pathlib import Path
-from typing import Any
+from typing import cast
 
 import requests
 
 from anki_tool.core.exceptions import AnkiConnectError
+
+# Type alias for JSON values returned by AnkiConnect
+JSONValue = dict[str, "JSONValue"] | list["JSONValue"] | str | int | float | bool | None
 
 
 class AnkiConnector:
@@ -31,7 +34,7 @@ class AnkiConnector:
         """
         self.url = url
 
-    def invoke(self, action: str, **params) -> Any:
+    def invoke(self, action: str, **params) -> JSONValue:
         """Invoke an AnkiConnect API action.
 
         Args:
@@ -62,7 +65,7 @@ class AnkiConnector:
         data = response.json()
         if data.get("error"):
             raise AnkiConnectError(f"AnkiConnect Error: {data['error']}", action=action)
-        return data.get("result")
+        return cast(JSONValue, data.get("result"))
 
     def import_package(self, apkg_path: Path) -> None:
         """Import an .apkg file into Anki.
