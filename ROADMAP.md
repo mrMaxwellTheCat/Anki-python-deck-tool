@@ -85,10 +85,10 @@ Transform the Anki Python Deck Tool into a comprehensive, user-friendly solution
 - [x] **Fixture Management**
     - [x] Create example YAML files for testing various scenarios (in `examples/` directory).
     - [x] Add fixtures for different note types (basic, language-learning, technical).
-    - [ ] Add test media files (images, audio).
+    - [x] Add test media files (images, audio).
 
 - [x] **Coverage Goals**
-    - [x] Achieve >90% code coverage (currently at 96.77%).
+    - [x] Achieve >90% code coverage (currently at 97.49%).
     - [x] Set up coverage reporting in CI (Codecov integration).
 
 ## 4. Feature Implementation Plan
