@@ -34,9 +34,9 @@ def test_builder_initialization():
         ],
         "css": ".card { font-family: arial; }",
     }
-    builder = AnkiBuilder("Test Deck", config)
+    builder = AnkiBuilder("Test Deck", [config])
     assert builder.deck_name == "Test Deck"
-    assert builder.model is not None
+    assert "Test Model" in builder.models
     assert builder.deck is not None
 
 
@@ -45,7 +45,7 @@ def test_builder_invalid_config():
     # Missing required 'fields' and 'templates' keys
     invalid_config = {"name": "Test Model"}
     with pytest.raises(DeckBuildError):
-        AnkiBuilder("Test Deck", invalid_config)
+        AnkiBuilder("Test Deck", [invalid_config])
 
 
 def test_add_note():
@@ -61,7 +61,7 @@ def test_add_note():
             }
         ],
     }
-    builder = AnkiBuilder("Test Deck", config)
+    builder = AnkiBuilder("Test Deck", [config])
     builder.add_note(["Question", "Answer"], tags=["test"])
 
     assert len(builder.deck.notes) == 1
@@ -82,7 +82,7 @@ def test_add_note_without_tags():
             }
         ],
     }
-    builder = AnkiBuilder("Test Deck", config)
+    builder = AnkiBuilder("Test Deck", [config])
     builder.add_note(["Question", "Answer"])
 
     assert len(builder.deck.notes) == 1
@@ -102,7 +102,7 @@ def test_write_to_file(tmp_path):
             }
         ],
     }
-    builder = AnkiBuilder("Test Deck", config)
+    builder = AnkiBuilder("Test Deck", [config])
     builder.add_note(["Question", "Answer"])
 
     output_path = tmp_path / "test_deck.apkg"
@@ -125,7 +125,7 @@ def test_add_media(tmp_path):
             }
         ],
     }
-    builder = AnkiBuilder("Test Deck", config)
+    builder = AnkiBuilder("Test Deck", [config])
 
     # Create a dummy media file
     media_file = tmp_path / "test_image.jpg"
@@ -149,9 +149,41 @@ def test_add_media_nonexistent_file(tmp_path):
             }
         ],
     }
-    builder = AnkiBuilder("Test Deck", config)
+    builder = AnkiBuilder("Test Deck", [config])
 
     nonexistent_file = tmp_path / "does_not_exist.jpg"
     builder.add_media(nonexistent_file)
 
     assert len(builder.media_files) == 0
+
+
+def test_builder_multiple_models():
+    """Test AnkiBuilder with multiple model configurations."""
+    config1 = {
+        "name": "Model 1",
+        "fields": ["F1", "F2"],
+        "templates": [{"name": "T1", "qfmt": "{{F1}}", "afmt": "{{F2}}"}],
+    }
+    config2 = {
+        "name": "Model 2",
+        "fields": ["FieldA", "FieldB", "FieldC"],
+        "templates": [{"name": "T2", "qfmt": "{{FieldA}}", "afmt": "{{FieldB}}"}],
+    }
+
+    builder = AnkiBuilder("Multi Deck", [config1, config2])
+
+    assert len(builder.models) == 2
+    assert "Model 1" in builder.models
+    assert "Model 2" in builder.models
+
+    # Add note with Model 1 (implicit)
+    builder.add_note(["V1", "V2"])
+    assert builder.deck.notes[0].model.name == "Model 1"
+
+    # Add note with Model 2 (explicit)
+    builder.add_note(["VA", "VB", "VC"], model_name="Model 2")
+    assert builder.deck.notes[1].model.name == "Model 2"
+
+    # Add note with non-existent model
+    with pytest.raises(DeckBuildError, match="Model 'Unknown' not found"):
+        builder.add_note(["X"], model_name="Unknown")

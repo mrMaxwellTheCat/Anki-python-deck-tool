@@ -58,21 +58,22 @@ class AnkiBuilder:
 
     Args:
         deck_name: Name of the deck to create.
-        model_config: Dictionary containing model configuration (name,
-            fields, templates, css).
+        model_configs: List of dictionaries containing model configurations.
 
     Attributes:
         deck_name: Name of the deck.
-        model_config: Model configuration dictionary.
-        model: The genanki Model instance.
+        model_configs: List of model configuration dictionaries.
+        models: Dictionary mapping model names to genanki.Model instances.
         deck: The genanki Deck instance.
         media_files: List of media file paths to include in the package.
     """
 
-    def __init__(self, deck_name: str, model_config: ModelConfigComplete):
+    def __init__(self, deck_name: str, model_configs: list[ModelConfigComplete]):
         self.deck_name = deck_name
-        self.model_config = model_config
-        self.model = self._build_model()
+        if not model_configs:
+            raise DeckBuildError("At least one model configuration is required")
+        self.model_configs = model_configs
+        self.models = self._build_models()
         self.deck = genanki.Deck(self.stable_id(deck_name), deck_name)
         self.media_files: list[str] = []
 
@@ -111,38 +112,59 @@ class AnkiBuilder:
         text = re.sub(r"\$(.*?)\$", r"\\(\1\\)", text)
         return text
 
-    def _build_model(self) -> genanki.Model:
-        """Build the genanki Model from configuration.
+    def _build_models(self) -> dict[str, genanki.Model]:
+        """Build genanki Models from configurations.
 
         Returns:
-            A configured genanki.Model instance.
+            A dictionary mapping model names to genanki.Model instances.
 
         Raises:
-            DeckBuildError: If model configuration is invalid.
+            DeckBuildError: If any model configuration is invalid.
         """
-        try:
-            return genanki.Model(
-                self.stable_id(self.model_config["name"]),
-                self.model_config["name"],
-                fields=[{"name": f} for f in self.model_config["fields"]],
-                templates=self.model_config["templates"],
-                css=self.model_config.get("css", ""),
-            )
-        except (KeyError, TypeError) as e:
-            raise DeckBuildError(f"Invalid model configuration: {e}") from e
+        models = {}
+        for config in self.model_configs:
+            try:
+                model_name = config["name"]
+                models[model_name] = genanki.Model(
+                    self.stable_id(model_name),
+                    model_name,
+                    fields=[{"name": f} for f in config["fields"]],
+                    templates=config["templates"],
+                    css=config.get("css", ""),
+                )
+            except (KeyError, TypeError) as e:
+                raise DeckBuildError(f"Invalid model configuration: {e}") from e
+        return models
 
-    def add_note(self, field_values: list[str], tags: list[str] | None = None) -> None:
+    def add_note(
+        self,
+        field_values: list[str],
+        tags: list[str] | None = None,
+        model_name: str | None = None,
+    ) -> None:
         """Add a note to the deck.
 
         Args:
             field_values: List of field values in the same order as model fields.
             tags: Optional list of tags to apply to the note.
+            model_name: Name of the model to use. If None, uses the first model.
+
+        Raises:
+            DeckBuildError: If the specified model_name is not found.
         """
+        if model_name is None:
+            # Default to the first model
+            model = list(self.models.values())[0]
+        elif model_name in self.models:
+            model = self.models[model_name]
+        else:
+            raise DeckBuildError(f"Model '{model_name}' not found in builder")
+
         # Convert math delimiters in all field values
         converted_values = [
             self.convert_math_delimiters(value) for value in field_values
         ]
-        note = genanki.Note(model=self.model, fields=converted_values, tags=tags or [])
+        note = genanki.Note(model=model, fields=converted_values, tags=tags or [])
         self.deck.add_note(note)
 
     def add_media(self, file_path: Path) -> None:

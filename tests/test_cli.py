@@ -9,7 +9,7 @@ from unittest.mock import Mock, patch
 
 import pytest
 import yaml
-from anki_yaml_tool.cli import build, cli, push
+from anki_yaml_tool.cli import build, cli, push, validate
 from anki_yaml_tool.core.exceptions import (
     AnkiConnectError,
     DeckBuildError,
@@ -125,11 +125,69 @@ class TestBuildCommand:
         assert result.exit_code == 0
         assert "Building deck 'Test Deck'" in result.output
         assert f"Successfully created {temp_files['output']}" in result.output
-        mock_builder.assert_called_once_with(
-            "Test Deck", yaml.safe_load(open(temp_files["config"], encoding="utf-8"))
-        )
+
+        # Check that builder was called with a list of configs
+        called_args, _ = mock_builder.call_args
+        assert called_args[0] == "Test Deck"
+        assert isinstance(called_args[1], list)
+        assert called_args[1][0]["name"] == "Test Model"
+
         assert mock_instance.add_note.call_count == 2
         mock_instance.write_to_file.assert_called_once()
+
+    @patch("anki_yaml_tool.cli.AnkiBuilder")
+    def test_build_multiple_configs(self, mock_builder, runner, tmp_path):
+        """Test building with multiple config files."""
+        config1 = {
+            "name": "Model 1",
+            "fields": ["F1"],
+            "templates": [{"name": "T1", "qfmt": "{{F1}}", "afmt": "{{F1}}"}],
+        }
+        config2 = {
+            "name": "Model 2",
+            "fields": ["F2"],
+            "templates": [{"name": "T2", "qfmt": "{{F2}}", "afmt": "{{F2}}"}],
+        }
+        data = [
+            {"f1": "val1", "model": "Model 1"},
+            {"f2": "val2", "model": "Model 2"},
+        ]
+
+        cfg1_path = tmp_path / "cfg1.yaml"
+        cfg2_path = tmp_path / "cfg2.yaml"
+        data_path = tmp_path / "data.yaml"
+
+        cfg1_path.write_text(yaml.dump(config1))
+        cfg2_path.write_text(yaml.dump(config2))
+        data_path.write_text(yaml.dump(data))
+
+        mock_instance = Mock()
+        mock_builder.return_value = mock_instance
+
+        result = runner.invoke(
+            build,
+            [
+                "--data",
+                str(data_path),
+                "--config",
+                str(cfg1_path),
+                "--config",
+                str(cfg2_path),
+            ],
+        )
+
+        assert result.exit_code == 0
+        assert mock_builder.call_count == 1
+        model_configs = mock_builder.call_args[0][1]
+        assert len(model_configs) == 2
+        assert model_configs[0]["name"] == "Model 1"
+        assert model_configs[1]["name"] == "Model 2"
+
+        # Check add_note calls with correct models
+        calls = mock_instance.add_note.call_args_list
+        assert len(calls) == 2
+        assert calls[0][1]["model_name"] == "Model 1"
+        assert calls[1][1]["model_name"] == "Model 2"
 
     @patch("anki_yaml_tool.cli.AnkiBuilder")
     def test_build_with_tags(self, mock_builder, runner, temp_files):
@@ -349,6 +407,109 @@ class TestBuildCommand:
 
             assert result.exit_code == 1
             assert "Unexpected error" in result.output
+
+
+class TestValidateCommand:
+    """Tests for the validate command."""
+
+    def test_validate_successful(self, runner, temp_files):
+        """Test successful validation."""
+        result = runner.invoke(
+            validate,
+            ["--data", temp_files["data"], "--config", temp_files["config"]],
+        )
+        assert result.exit_code == 0
+        assert "Validation passed successfully!" in result.output
+
+    def test_validate_with_warnings(self, runner, tmp_path):
+        """Test validation with warnings (missing fields)."""
+        config = {
+            "name": "Model",
+            "fields": ["Front", "Back"],
+            "templates": [{"name": "T", "qfmt": "{{Front}}", "afmt": "{{Back}}"}],
+        }
+        # Note missing 'back' field
+        data = [{"front": "Q1"}]
+
+        cfg_path = tmp_path / "config.yaml"
+        data_path = tmp_path / "data.yaml"
+        cfg_path.write_text(yaml.dump(config))
+        data_path.write_text(yaml.dump(data))
+
+        result = runner.invoke(
+            validate,
+            ["--data", str(data_path), "--config", str(cfg_path)],
+        )
+        assert result.exit_code == 0
+        assert "Validation passed with warnings." in result.output
+        assert "Missing fields: back" in result.output
+
+    def test_validate_strict_mode(self, runner, tmp_path):
+        """Test validation strict mode failing on warnings."""
+        config = {
+            "name": "Model",
+            "fields": ["Front", "Back"],
+            "templates": [{"name": "T", "qfmt": "{{Front}}", "afmt": "{{Back}}"}],
+        }
+        data = [{"front": "Q1"}]
+
+        cfg_path = tmp_path / "config.yaml"
+        data_path = tmp_path / "data.yaml"
+        cfg_path.write_text(yaml.dump(config))
+        data_path.write_text(yaml.dump(data))
+
+        result = runner.invoke(
+            validate,
+            ["--data", str(data_path), "--config", str(cfg_path), "--strict"],
+        )
+        assert result.exit_code != 0
+        assert "Validation failed due to warnings in strict mode." in result.output
+
+    def test_validate_unclosed_html(self, runner, tmp_path):
+        """Test validation warning for unclosed HTML tags."""
+        config = {
+            "name": "Model",
+            "fields": ["F"],
+            "templates": [{"name": "T", "qfmt": "{{F}}", "afmt": "{{F}}"}],
+        }
+        data = [{"f": "<b>Bold text"}]  # Unclosed <b>
+
+        cfg_path = tmp_path / "config.yaml"
+        data_path = tmp_path / "data.yaml"
+        cfg_path.write_text(yaml.dump(config))
+        data_path.write_text(yaml.dump(data))
+
+        result = runner.invoke(
+            validate,
+            ["--data", str(data_path), "--config", str(cfg_path)],
+        )
+        assert result.exit_code == 0
+        assert "Unclosed tag: <b>" in result.output
+
+    def test_validate_duplicate_ids(self, runner, tmp_path):
+        """Test validation warning for duplicate IDs."""
+        config = {
+            "name": "Model",
+            "fields": ["F"],
+            "templates": [{"name": "T", "qfmt": "{{F}}", "afmt": "{{F}}"}],
+        }
+        data = [
+            {"f": "1", "id": "dup"},
+            {"f": "2", "id": "dup"},
+        ]
+
+        cfg_path = tmp_path / "config.yaml"
+        data_path = tmp_path / "data.yaml"
+        cfg_path.write_text(yaml.dump(config))
+        data_path.write_text(yaml.dump(data))
+
+        result = runner.invoke(
+            validate,
+            ["--data", str(data_path), "--config", str(cfg_path)],
+        )
+        assert result.exit_code == 0
+        assert "Duplicate note IDs found:" in result.output
+        assert "ID 'dup' appears 2 times" in result.output
 
 
 class TestPushCommand:

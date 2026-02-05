@@ -117,6 +117,7 @@ def validate_note_fields(
     note_data: dict,
     required_fields: list[str],
     validate_missing: Literal["error", "warn", "ignore"] = "warn",
+    check_empty: bool = True,
 ) -> tuple[bool, list[str]]:
     """Validate that note data contains all required fields.
 
@@ -127,25 +128,33 @@ def validate_note_fields(
             - "error": Return False if any fields are missing
             - "warn": Return True but include missing fields in the list
             - "ignore": Always return True with empty list
+        check_empty: Whether to also check if required fields are empty.
 
     Returns:
         A tuple of (is_valid, missing_fields):
             - is_valid: True if validation passes, False otherwise
-            - missing_fields: List of missing field names
+            - missing_fields: List of missing or empty field names
     """
     if validate_missing == "ignore":
         return True, []
 
-    # Convert field names to lowercase for case-insensitive comparison
-    note_fields = {k.lower() for k in note_data.keys()}
-    required_lower = {f.lower() for f in required_fields}
+    # Map keys to their original case for better error messages
+    actual_keys = {k.lower(): k for k in note_data.keys()}
+    required_lower = [f.lower() for f in required_fields]
 
-    missing = required_lower - note_fields
+    missing = []
+    for field_lower in required_lower:
+        if field_lower not in actual_keys:
+            missing.append(field_lower)
+        elif check_empty:
+            value = note_data[actual_keys[field_lower]]
+            if value is None or (isinstance(value, str) and not value.strip()):
+                missing.append(field_lower)
 
     if validate_missing == "error" and missing:
-        return False, list(missing)
+        return False, missing
 
-    return True, list(missing)
+    return True, missing
 
 
 def check_duplicate_ids(notes: list[dict]) -> dict[str, int]:

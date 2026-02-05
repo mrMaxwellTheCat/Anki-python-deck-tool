@@ -218,6 +218,20 @@ def test_validate_note_fields_ignore_missing():
     assert missing == []
 
 
+def test_validate_note_fields_empty_values():
+    """Test validating note fields with empty values."""
+    note_data = {"front": "Q", "back": ""}
+    required = ["front", "back"]
+
+    # With check_empty=True (default)
+    valid, missing = validate_note_fields(note_data, required)
+    assert "back" in missing
+
+    # With check_empty=False
+    valid, missing = validate_note_fields(note_data, required, check_empty=False)
+    assert "back" not in missing
+
+
 def test_check_duplicate_ids_none():
     """Test checking for duplicate IDs when there are none."""
     notes = [{"id": "1"}, {"id": "2"}, {"id": "3"}]

@@ -95,52 +95,52 @@ Transform the Anki Python Deck Tool into a comprehensive, user-friendly solution
 
 ### 4.1 Multiple Note Types Support
 
-- [ ] **Architecture Changes**
-    - [ ] Design multi-model support: allow multiple configs in a single build.
-    - [ ] Update CLI to accept multiple `--config` arguments or a single config with multiple models.
-    - [ ] Update data format to specify which model each note uses.
+- [x] **Architecture Changes**
+    - [x] Design multi-model support: allow multiple configs in a single build.
+    - [x] Update CLI to accept multiple `--config` arguments.
+    - [x] Update data format to specify which model each note uses.
 
-- [ ] **Implementation**
-    - [ ] Extend `AnkiBuilder` to manage multiple models simultaneously.
-    - [ ] Add model selection logic when processing notes.
-    - [ ] Update documentation with multi-model examples.
+- [x] **Implementation**
+    - [x] Extend `AnkiBuilder` to manage multiple models simultaneously.
+    - [x] Add model selection logic when processing notes.
+    - [x] Update documentation with multi-model examples.
 
 ### 4.2 Media Support
 
 - [x] **Schema Update**
-    - [x] Allow a `media` field in data YAML (list of filenames or paths).
-    - [x] Support media references in field content (e.g., `<img src="image.jpg">`).
+    - [x] Allow a `media` field in data YAML.
+    - [x] Support media references in field content.
 
 - [x] **Discovery & Validation**
-    - [x] Implement automatic media file discovery from configured directories.
-    - [x] Support relative paths from YAML file location or absolute paths.
-    - [x] Add validation to verify all referenced media files exist.
+    - [x] Implement automatic media file discovery.
+    - [x] Support relative/absolute paths.
+    - [x] Add validation for referenced media.
     - [x] Provide clear error messages for missing media.
 
 - [x] **Implementation**
-    - [x] Create `MediaHandler` class in `src/anki_yaml_tool/core/media.py`.
-    - [x] Wire up CLI to call `builder.add_media()` for discovered files.
-    - [x] Add `--media-dir` option to specify media directory.
+    - [x] Create `MediaHandler` in `media.py`.
+    - [x] Wire up CLI to use `add_media()`.
+    - [x] Add `--media-dir` option.
 
 ### 4.3 Data Validation & Integrity
 
 - [x] **Schema Validation**
-    - [x] Integrate `pydantic` for type-safe config and data models.
-    - [x] Define schemas for config files (ModelConfig) and data files (NoteData).
-    - [x] Provide detailed validation error messages.
+    - [x] Integrate `pydantic` for config and data models.
+    - [x] Define schemas for config and data files.
+    - [x] Provide detailed validation errors.
 
-- [ ] **Consistency Checks**
-    - [ ] Warn about duplicate note IDs within the same build.
-    - [ ] Validate field names match between config and data.
-    - [ ] Check for empty required fields.
+- [x] **Consistency Checks**
+    - [x] Warn about duplicate note IDs.
+    - [x] Validate field names match.
+    - [x] Check for empty required fields.
 
-- [ ] **HTML Validation**
-    - [ ] Basic checks for unclosed HTML tags in field content.
-    - [ ] Warn about common formatting issues.
+- [x] **HTML Validation**
+    - [x] Basic checks for unclosed HTML tags.
+    - [x] Warn about common formatting issues.
 
-- [ ] **CLI Command**
-    - [ ] Add `anki-yaml-tool validate` command to run checks without building.
-    - [ ] Support `--strict` mode for failing on warnings.
+- [x] **CLI Command**
+    - [x] Add `anki-yaml-tool validate` command.
+    - [x] Support `--strict` mode.
 
 ### 4.4 CLI Enhancements
 
@@ -550,11 +550,11 @@ Define the core interaction modes for the GUI application, providing both manual
 
 ### Phase 2: Core Enhancements (In Progress)
 **Next priorities:**
-- Multiple note type support (allow multiple configs in one build)
-- Media file handling (integrate existing `add_media()` functionality)
-- Schema validation (integrate pydantic for type-safe configs)
-- Enhanced CLI features (verbose mode, init command, batch processing)
-- Additional examples (medical terminology, cloze deletion, audio cards)
+- [x] Multiple note type support (allow multiple configs in one build)
+- [x] Media file handling (integrate existing `add_media()` functionality)
+- [x] Schema validation (integrate pydantic for type-safe configs)
+- [x] Enhanced CLI features (validate command, multiple configs)
+- [ ] Additional examples (medical terminology, cloze deletion, audio cards)
 
 ### Phase 3: Advanced Features (Planned)
 - Directory-based batch processing (recursive deck building)
