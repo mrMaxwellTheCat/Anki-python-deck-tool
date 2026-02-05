@@ -14,8 +14,6 @@ from click.testing import CliRunner
 from anki_tool.cli import build, cli, push
 from anki_tool.core.exceptions import (
     AnkiConnectError,
-    ConfigValidationError,
-    DataValidationError,
     DeckBuildError,
 )
 
