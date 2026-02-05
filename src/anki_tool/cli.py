@@ -23,6 +23,7 @@ def cli():
     """Anki Python Deck Tool - Build and push decks from YAML."""
     pass
 
+
 @cli.command()
 @click.option(
     "--data",
@@ -42,9 +43,7 @@ def cli():
     default="deck.apkg",
     help="Output .apkg path",
 )
-@click.option(
-    "--deck-name", default="Generated Deck", help="Name of the Anki deck"
-)
+@click.option("--deck-name", default="Generated Deck", help="Name of the Anki deck")
 def build(data, config, output, deck_name):
     """Build an .apkg file from YAML data."""
     click.echo(f"Building deck '{deck_name}'...")
@@ -113,8 +112,10 @@ def push(apkg, sync):
         click.echo(f"Unexpected error: {e}", err=True)
         raise click.Abort() from e
 
+
 def main():
     cli()
+
 
 if __name__ == "__main__":
     main()
