@@ -139,7 +139,7 @@ Transform the Anki Python Deck Tool into a comprehensive, user-friendly solution
     - [ ] Warn about common formatting issues.
 
 - [ ] **CLI Command**
-    - [ ] Add `anki-yaml-tool-tool validate` command to run checks without building.
+    - [ ] Add `anki-yaml-tool validate` command to run checks without building.
     - [ ] Support `--strict` mode for failing on warnings.
 
 ### 4.4 CLI Enhancements
@@ -150,7 +150,7 @@ Transform the Anki Python Deck Tool into a comprehensive, user-friendly solution
     - [ ] Log deck building progress, file operations, and API calls.
 
 - [ ] **Init Command**
-    - [ ] Add `anki-yaml-tool-tool init [project-name]` to scaffold new projects.
+    - [ ] Add `anki-yaml-tool init [project-name]` to scaffold new projects.
     - [ ] Generate example config, data files, and directory structure.
     - [ ] Support different templates (basic, language-learning, technical).
 
@@ -160,7 +160,7 @@ Transform the Anki Python Deck Tool into a comprehensive, user-friendly solution
     - [ ] Progress indicators for batch operations.
 
 - [ ] **Configuration Files**
-    - [ ] Support `.anki-yaml-tool-tool.yaml` config file in project root.
+    - [ ] Support `.anki-yaml-tool.yaml` config file in project root.
     - [ ] Allow setting default values for common options.
     - [ ] Support profile-based configurations (dev, prod).
 
@@ -405,7 +405,7 @@ Define the core interaction modes for the GUI application, providing both manual
 ### 6.1 PyPI Package
 
 - [x] **Basic Package**
-    - [x] Published on PyPI as `anki-yaml-tool-tool`
+    - [x] Published on PyPI as `anki-yaml-tool`
     - [x] Automated releases via GitHub Actions
     - [ ] Semantic versioning strategy
     - [ ] Changelog automation
