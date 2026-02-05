@@ -107,20 +107,20 @@ Transform the Anki Python Deck Tool into a comprehensive, user-friendly solution
 
 ### 4.2 Media Support
 
-- [ ] **Schema Update**
-    - [ ] Allow a `media` field in data YAML (list of filenames or paths).
-    - [ ] Support media references in field content (e.g., `<img src="image.jpg">`).
+- [x] **Schema Update**
+    - [x] Allow a `media` field in data YAML (list of filenames or paths).
+    - [x] Support media references in field content (e.g., `<img src="image.jpg">`).
 
-- [ ] **Discovery & Validation**
-    - [ ] Implement automatic media file discovery from configured directories.
-    - [ ] Support relative paths from YAML file location or absolute paths.
-    - [ ] Add validation to verify all referenced media files exist.
-    - [ ] Provide clear error messages for missing media.
+- [x] **Discovery & Validation**
+    - [x] Implement automatic media file discovery from configured directories.
+    - [x] Support relative paths from YAML file location or absolute paths.
+    - [x] Add validation to verify all referenced media files exist.
+    - [x] Provide clear error messages for missing media.
 
-- [ ] **Implementation**
-    - [ ] Create `MediaHandler` class in `src/anki_tool/core/media.py`.
-    - [ ] Wire up CLI to call `builder.add_media()` for discovered files.
-    - [ ] Add `--media-dir` option to specify media directory.
+- [x] **Implementation**
+    - [x] Create `MediaHandler` class in `src/anki_tool/core/media.py`.
+    - [x] Wire up CLI to call `builder.add_media()` for discovered files.
+    - [x] Add `--media-dir` option to specify media directory.
 
 ### 4.3 Data Validation & Integrity
 

@@ -16,6 +16,12 @@ from anki_tool.core.exceptions import (
     ConfigValidationError,
     DataValidationError,
     DeckBuildError,
+    MediaMissingError,
+)
+from anki_tool.core.media import (
+    discover_media_files,
+    get_media_references,
+    validate_media_file,
 )
 
 
@@ -46,7 +52,12 @@ def cli():
     help="Output .apkg path",
 )
 @click.option("--deck-name", default="Generated Deck", help="Name of the Anki deck")
-def build(data, config, output, deck_name):
+@click.option(
+    "--media-dir",
+    type=click.Path(exists=True),
+    help="Directory containing media files to include",
+)
+def build(data, config, output, deck_name, media_dir):
     """Build an .apkg file from YAML data."""
     click.echo(f"Building deck '{deck_name}'...")
 
@@ -57,11 +68,19 @@ def build(data, config, output, deck_name):
 
         builder = AnkiBuilder(deck_name, model_config)
 
+        # Track all media references found in notes
+        all_media_refs: set[str] = set()
+
         for item in items:
             # Map YAML keys to model fields in order
             field_values = [
                 str(item.get(f.lower(), "")) for f in model_config["fields"]
             ]
+
+            # Extract media references from all field values
+            for field_value in field_values:
+                refs = get_media_references(field_value)
+                all_media_refs.update(refs)
 
             # Get tags, ensuring it's always a list
             tags_raw = item.get("tags", [])
@@ -74,10 +93,56 @@ def build(data, config, output, deck_name):
 
             builder.add_note(field_values, tags=tags)
 
+        # Add media files if media directory is provided
+        if media_dir:
+            media_path = Path(media_dir)
+            click.echo(f"Discovering media files in {media_path}...")
+
+            # Discover all media files in the directory
+            discovered_files = discover_media_files(media_path)
+            click.echo(f"Found {len(discovered_files)} media files")
+
+            # Add all discovered media files
+            for media_file in discovered_files:
+                builder.add_media(media_file)
+
+            # Validate that all referenced media files exist
+            if all_media_refs:
+                click.echo(f"Validating {len(all_media_refs)} media references...")
+                missing_refs = []
+
+                for ref in all_media_refs:
+                    ref_path = media_path / ref
+                    try:
+                        validate_media_file(ref_path)
+                    except MediaMissingError:
+                        missing_refs.append(ref)
+
+                if missing_refs:
+                    msg = (
+                        f"Warning: {len(missing_refs)} "
+                        "referenced media files not found:"
+                    )
+                    click.echo(msg, err=True)
+                    for ref in missing_refs:
+                        click.echo(f"  - {ref}", err=True)
+
+        elif all_media_refs:
+            click.echo(
+                f"Warning: Found {len(all_media_refs)} media references "
+                "but no --media-dir specified",
+                err=True,
+            )
+
         builder.write_to_file(Path(output))
         click.echo(f"Successfully created {output}")
 
-    except (ConfigValidationError, DataValidationError, DeckBuildError) as e:
+    except (
+        ConfigValidationError,
+        DataValidationError,
+        DeckBuildError,
+        MediaMissingError,
+    ) as e:
         click.echo(f"Error: {e}", err=True)
         raise click.Abort() from e
     except Exception as e:
