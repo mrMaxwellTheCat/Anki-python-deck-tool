@@ -112,15 +112,15 @@ Reorganized project documentation and significantly improved AI assistant instru
 
 **Reserved for these files only**:
 
-| File | Purpose |
-|------|---------|
-| `README.md` | Main project documentation |
-| `CONTRIBUTING.md` | Contribution guidelines |
-| `CHANGELOG.md` | Version history |
-| `CODE_OF_CONDUCT.md` | Community standards |
-| `SECURITY.md` | Security policy |
-| `ROADMAP.md` | Project roadmap |
-| `LICENSE` | License file |
+| File                 | Purpose                    |
+|----------------------|----------------------------|
+| `README.md`          | Main project documentation |
+| `CONTRIBUTING.md`    | Contribution guidelines    |
+| `CHANGELOG.md`       | Version history            |
+| `CODE_OF_CONDUCT.md` | Community standards        |
+| `SECURITY.md`        | Security policy            |
+| `ROADMAP.md`         | Project roadmap            |
+| `LICENSE`            | License file               |
 
 **Everything else** (summaries, guides, technical docs) → `docs/` directory
 
@@ -284,14 +284,14 @@ Use conventional commit format:
 
 ## Quick Reference
 
-| Task | Location |
-|------|----------|
+| Task               | Location                          |
+|--------------------|-----------------------------------|
 | Full AI guidelines | `.github/copilot-instructions.md` |
-| Claude quick ref | `.claude-instructions.md` |
-| Technical docs | `docs/` directory |
-| VSCode tasks | `.vscode/tasks.json` |
-| User documentation | `README.md` |
-| Contribution guide | `CONTRIBUTING.md` |
+| Claude quick ref   | `.claude-instructions.md`         |
+| Technical docs     | `docs/` directory                 |
+| VSCode tasks       | `.vscode/tasks.json`              |
+| User documentation | `README.md`                       |
+| Contribution guide | `CONTRIBUTING.md`                 |
 
 ---
 

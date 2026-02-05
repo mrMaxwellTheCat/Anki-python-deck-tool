@@ -37,11 +37,11 @@ The root directory should only contain these standard documentation files:
 
 ## Current Documentation
 
-| File | Description |
-|------|-------------|
-| `VSCODE_TASKS_SETUP.md` | Complete guide to VSCode tasks for running CI locally |
-| `BRANCH_CLEANUP_SUMMARY.md` | Summary of branch cleanup and merge decisions |
-| `VSCODE_TASKS.md` | Quick reference for VSCode task usage |
+| File                        | Description                                           |
+|-----------------------------|-------------------------------------------------------|
+| `VSCODE_TASKS_SETUP.md`     | Complete guide to VSCode tasks for running CI locally |
+| `BRANCH_CLEANUP_SUMMARY.md` | Summary of branch cleanup and merge decisions         |
+| `VSCODE_TASKS.md`           | Quick reference for VSCode task usage                 |
 
 ## Adding New Documentation
 
