@@ -183,8 +183,8 @@ def create_distribution_package() -> None:
     dist_dir = project_root / "dist"
     platform_name = get_platform_name()
 
-    # Get version from pyproject.toml (simplified approach)
-    version = "0.1.0"  # Could parse from pyproject.toml
+    # TODO: Parse version from pyproject.toml to maintain single source of truth
+    version = "0.1.0"
 
     package_name = f"anki-tool-{version}-{platform_name}"
     package_dir = dist_dir / package_name

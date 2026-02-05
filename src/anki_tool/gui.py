@@ -66,7 +66,11 @@ class AnkiToolGUI:
             row=1, column=0, sticky=tk.W, pady=5
         )
         ttk.Entry(main_frame, textvariable=self.data_file_var, width=50).grid(
-            row=1, column=1, sticky=(tk.W, tk.E), pady=5, padx=5  # type: ignore[arg-type]
+            row=1,
+            column=1,
+            sticky=(tk.W, tk.E),  # type: ignore[arg-type]
+            pady=5,
+            padx=5,
         )
         ttk.Button(main_frame, text="Browse...", command=self._browse_data_file).grid(
             row=1, column=2, pady=5
@@ -77,7 +81,11 @@ class AnkiToolGUI:
             row=2, column=0, sticky=tk.W, pady=5
         )
         ttk.Entry(main_frame, textvariable=self.config_file_var, width=50).grid(
-            row=2, column=1, sticky=(tk.W, tk.E), pady=5, padx=5  # type: ignore[arg-type]
+            row=2,
+            column=1,
+            sticky=(tk.W, tk.E),  # type: ignore[arg-type]
+            pady=5,
+            padx=5,
         )
         ttk.Button(main_frame, text="Browse...", command=self._browse_config_file).grid(
             row=2, column=2, pady=5
@@ -88,7 +96,11 @@ class AnkiToolGUI:
             row=3, column=0, sticky=tk.W, pady=5
         )
         ttk.Entry(main_frame, textvariable=self.output_file_var, width=50).grid(
-            row=3, column=1, sticky=(tk.W, tk.E), pady=5, padx=5  # type: ignore[arg-type]
+            row=3,
+            column=1,
+            sticky=(tk.W, tk.E),  # type: ignore[arg-type]
+            pady=5,
+            padx=5,
         )
         ttk.Button(main_frame, text="Browse...", command=self._browse_output_file).grid(
             row=3, column=2, pady=5
@@ -99,12 +111,20 @@ class AnkiToolGUI:
             row=4, column=0, sticky=tk.W, pady=5
         )
         ttk.Entry(main_frame, textvariable=self.deck_name_var, width=50).grid(
-            row=4, column=1, sticky=(tk.W, tk.E), pady=5, padx=5  # type: ignore[arg-type]
+            row=4,
+            column=1,
+            sticky=(tk.W, tk.E),  # type: ignore[arg-type]
+            pady=5,
+            padx=5,
         )
 
         # Separator
         ttk.Separator(main_frame, orient="horizontal").grid(
-            row=5, column=0, columnspan=3, sticky=(tk.W, tk.E), pady=20  # type: ignore[arg-type]
+            row=5,
+            column=0,
+            columnspan=3,
+            sticky=(tk.W, tk.E),  # type: ignore[arg-type]
+            pady=20,
         )
 
         # Build button
@@ -118,7 +138,11 @@ class AnkiToolGUI:
 
         # Separator
         ttk.Separator(main_frame, orient="horizontal").grid(
-            row=7, column=0, columnspan=3, sticky=(tk.W, tk.E), pady=20  # type: ignore[arg-type]
+            row=7,
+            column=0,
+            columnspan=3,
+            sticky=(tk.W, tk.E),  # type: ignore[arg-type]
+            pady=20,
         )
 
         # Push section
@@ -145,7 +169,11 @@ class AnkiToolGUI:
             main_frame, text="Ready", relief=tk.SUNKEN, anchor=tk.W
         )
         self.status_label.grid(
-            row=11, column=0, columnspan=3, sticky=(tk.W, tk.E), pady=(20, 0)  # type: ignore[arg-type]
+            row=11,
+            column=0,
+            columnspan=3,
+            sticky=(tk.W, tk.E),  # type: ignore[arg-type]
+            pady=(20, 0),
         )
 
         # Configure column weights for resizing
