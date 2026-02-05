@@ -37,3 +37,5 @@ tmpclaude*
 # Coverage reports
 .coverage
 coverage.*
+
+*cache*
