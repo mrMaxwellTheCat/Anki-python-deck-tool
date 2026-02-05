@@ -9,9 +9,9 @@ from pathlib import Path
 import click
 import yaml
 
-from anki_tool.core.builder import AnkiBuilder
-from anki_tool.core.connector import AnkiConnector
-from anki_tool.core.exceptions import (
+from anki_yaml_tool.core.builder import AnkiBuilder
+from anki_yaml_tool.core.connector import AnkiConnector
+from anki_yaml_tool.core.exceptions import (
     AnkiConnectError,
     ConfigValidationError,
     DataValidationError,
@@ -20,7 +20,7 @@ from anki_tool.core.exceptions import (
 
 
 @click.group()
-@click.version_option(version=version("anki-yaml-tool"), prog_name="anki-yaml-tool")
+@click.version_option(version=version("anki_yaml_tool"), prog_name="anki_yaml_tool")
 def cli():
     """Anki Python Deck Tool - Build and push decks from YAML."""
     pass

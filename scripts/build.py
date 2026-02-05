@@ -7,7 +7,7 @@ import sys
 def build():
     # Define paths
     base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-    src_path = os.path.join(base_dir, "src", "anki_tool", "cli.py")
+    src_path = os.path.join(base_dir, "src", "anki_yaml_tool", "cli.py")
     assets_dir = os.path.join(base_dir, "assets")
 
     # Base command
@@ -18,9 +18,9 @@ def build():
         "--clean",
         "--noconfirm",
         "--name",
-        "anki-yaml-tool",
+        "anki_yaml_tool",
         "--onefile",
-        "--copy-metadata=anki-yaml-tool",
+        "--copy-metadata=anki_yaml_tool",
         f"--paths={os.path.join(base_dir, 'src')}",
     ]
 

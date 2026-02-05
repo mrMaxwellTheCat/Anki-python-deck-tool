@@ -10,7 +10,7 @@ from typing import Any
 
 import genanki
 
-from anki_tool.core.exceptions import DeckBuildError
+from anki_yaml_tool.core.exceptions import DeckBuildError
 
 
 class AnkiBuilder:

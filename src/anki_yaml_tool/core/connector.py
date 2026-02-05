@@ -10,7 +10,7 @@ from typing import Any
 
 import requests
 
-from anki_tool.core.exceptions import AnkiConnectError
+from anki_yaml_tool.core.exceptions import AnkiConnectError
 
 
 class AnkiConnector:
