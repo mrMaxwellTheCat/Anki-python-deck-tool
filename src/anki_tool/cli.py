@@ -7,9 +7,9 @@ from importlib.metadata import version
 from pathlib import Path
 
 import click
-import yaml
 
 from anki_tool.core.builder import AnkiBuilder
+from anki_tool.core.config import load_deck_data, load_model_config
 from anki_tool.core.connector import AnkiConnector
 from anki_tool.core.exceptions import (
     AnkiConnectError,
@@ -51,19 +51,9 @@ def build(data, config, output, deck_name):
     click.echo(f"Building deck '{deck_name}'...")
 
     try:
-        # Load configuration
-        with open(config, encoding="utf-8") as f:
-            model_config = yaml.safe_load(f)
-
-        if not model_config:
-            raise ConfigValidationError("Config file is empty", config)
-
-        # Load data
-        with open(data, encoding="utf-8") as f:
-            items = yaml.safe_load(f)
-
-        if not items:
-            raise DataValidationError("Data file is empty", data)
+        # Load configuration and data using the config module
+        model_config = load_model_config(config)
+        items = load_deck_data(data)
 
         builder = AnkiBuilder(deck_name, model_config)
 
@@ -72,7 +62,13 @@ def build(data, config, output, deck_name):
             field_values = [
                 str(item.get(f.lower(), "")) for f in model_config["fields"]
             ]
-            tags = item.get("tags", [])
+
+            # Get tags, ensuring it's always a list
+            tags_raw = item.get("tags", [])
+            tags: list[str] = (
+                tags_raw if isinstance(tags_raw, list) else [str(tags_raw)]
+            )
+
             if "id" in item:
                 tags.append(f"id::{item['id']}")
 

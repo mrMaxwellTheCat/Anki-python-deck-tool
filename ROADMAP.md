@@ -60,7 +60,7 @@ Transform the Anki Python Deck Tool into a comprehensive, user-friendly solution
 
 - [x] **Refactoring**
     - [x] **Error Handling**: Custom exceptions (`AnkiConnectError`, `ConfigValidationError`, etc.).
-    - [ ] **Decouple Parser**: Extract configuration loading into `src/anki_tool/core/config.py`.
+    - [x] **Decouple Parser**: Extract configuration loading into `src/anki_tool/core/config.py`.
     - [ ] **Media Handler**: Create dedicated `src/anki_tool/core/media.py` for media file operations.
     - [ ] **Validator Module**: Create `src/anki_tool/core/validators.py` for schema validation.
 
@@ -73,7 +73,7 @@ Transform the Anki Python Deck Tool into a comprehensive, user-friendly solution
     - [x] `connector.py`: Mock `requests.post` to simulate AnkiConnect responses.
     - [x] `exceptions.py`: Test all custom exception types.
     - [x] `cli.py`: Comprehensive CLI command tests.
-    - [ ] Add tests for config loading and validation.
+    - [x] Add tests for config loading and validation.
     - [ ] Add tests for media file handling.
 
 - [ ] **Integration Tests**
