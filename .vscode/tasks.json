@@ -1,0 +1,292 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    // ========================================
+    // Existing Debug Task
+    // ========================================
+    {
+      "label": "Build and Push Debug Deck",
+      "type": "shell",
+      "command": "python -m anki_tool.cli build --data data/debug_deck.yaml --config configs/debug_config.yaml --output data/debug_deck.apkg ; python -m anki_tool.cli push --apkg data/debug_deck.apkg",
+      "group": "build",
+      "presentation": {
+        "reveal": "always",
+        "panel": "new"
+      },
+      "problemMatcher": []
+    },
+
+    // ========================================
+    // Individual CI Tasks (GitHub Actions)
+    // ========================================
+    {
+      "label": "CI: Lint - Ruff Check",
+      "type": "shell",
+      "command": "ruff check .",
+      "problemMatcher": [],
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
+        "panel": "shared",
+        "showReuseMessage": false,
+        "clear": true
+      },
+      "group": "test"
+    },
+    {
+      "label": "CI: Lint - Ruff Format Check",
+      "type": "shell",
+      "command": "ruff format --check .",
+      "problemMatcher": [],
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
+        "panel": "shared",
+        "showReuseMessage": false,
+        "clear": true
+      },
+      "group": "test"
+    },
+    {
+      "label": "CI: Type Check - mypy",
+      "type": "shell",
+      "command": "mypy src --ignore-missing-imports",
+      "problemMatcher": {
+        "owner": "python",
+        "fileLocation": ["relative", "${workspaceFolder}"],
+        "pattern": {
+          "regexp": "^(.+):(\\d+):(\\d+): (error|warning|note): (.+)$",
+          "file": 1,
+          "line": 2,
+          "column": 3,
+          "severity": 4,
+          "message": 5
+        }
+      },
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
+        "panel": "shared",
+        "showReuseMessage": false,
+        "clear": true
+      },
+      "group": "test"
+    },
+    {
+      "label": "CI: Test - pytest (basic)",
+      "type": "shell",
+      "command": "pytest tests/ -v --tb=short",
+      "problemMatcher": [],
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
+        "panel": "shared",
+        "showReuseMessage": false,
+        "clear": true
+      },
+      "group": {
+        "kind": "test",
+        "isDefault": true
+      }
+    },
+    {
+      "label": "CI: Test - pytest with Coverage",
+      "type": "shell",
+      "command": "pytest tests/ -v --tb=short --cov=anki_tool --cov-report=term-missing --cov-report=html --cov-report=xml",
+      "problemMatcher": [],
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
+        "panel": "shared",
+        "showReuseMessage": false,
+        "clear": true
+      },
+      "group": "test"
+    },
+    {
+      "label": "CI: Security - pip-audit",
+      "type": "shell",
+      "command": "pip-audit --desc --skip-editable",
+      "problemMatcher": [],
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
+        "panel": "shared",
+        "showReuseMessage": false,
+        "clear": true
+      },
+      "group": "test"
+    },
+    {
+      "label": "CI: Security - bandit",
+      "type": "shell",
+      "command": "bandit -r src/ -c pyproject.toml",
+      "problemMatcher": [],
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
+        "panel": "shared",
+        "showReuseMessage": false,
+        "clear": true
+      },
+      "group": "test"
+    },
+
+    // ========================================
+    // Composite CI Tasks (Multiple Workflows)
+    // ========================================
+    {
+      "label": "CI Workflow: Lint Job",
+      "dependsOn": [
+        "CI: Lint - Ruff Check",
+        "CI: Lint - Ruff Format Check"
+      ],
+      "dependsOrder": "sequence",
+      "problemMatcher": [],
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
+        "panel": "shared",
+        "showReuseMessage": false,
+        "clear": true
+      },
+      "group": "test"
+    },
+    {
+      "label": "CI Workflow: Security Job",
+      "dependsOn": [
+        "CI: Security - pip-audit",
+        "CI: Security - bandit"
+      ],
+      "dependsOrder": "sequence",
+      "problemMatcher": [],
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
+        "panel": "shared",
+        "showReuseMessage": false,
+        "clear": true
+      },
+      "group": "test"
+    },
+    {
+      "label": "CI Workflow: Full Pipeline (All Checks)",
+      "dependsOn": [
+        "CI: Lint - Ruff Check",
+        "CI: Lint - Ruff Format Check",
+        "CI: Type Check - mypy",
+        "CI: Test - pytest with Coverage",
+        "CI: Security - pip-audit",
+        "CI: Security - bandit"
+      ],
+      "dependsOrder": "sequence",
+      "problemMatcher": [],
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": true,
+        "panel": "shared",
+        "showReuseMessage": false,
+        "clear": true
+      },
+      "group": {
+        "kind": "build",
+        "isDefault": false
+      }
+    },
+
+    // ========================================
+    // Utility Tasks (Formatting, Reports)
+    // ========================================
+    {
+      "label": "Format: Apply Ruff Formatting",
+      "type": "shell",
+      "command": "ruff format .",
+      "problemMatcher": [],
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
+        "panel": "shared",
+        "showReuseMessage": false,
+        "clear": true
+      }
+    },
+    {
+      "label": "Format: Apply Ruff Auto-Fixes",
+      "type": "shell",
+      "command": "ruff check --fix .",
+      "problemMatcher": [],
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
+        "panel": "shared",
+        "showReuseMessage": false,
+        "clear": true
+      }
+    },
+    {
+      "label": "Coverage: Open HTML Report",
+      "type": "shell",
+      "command": "start htmlcov/index.html",
+      "windows": {
+        "command": "start htmlcov/index.html"
+      },
+      "linux": {
+        "command": "xdg-open htmlcov/index.html"
+      },
+      "osx": {
+        "command": "open htmlcov/index.html"
+      },
+      "problemMatcher": [],
+      "presentation": {
+        "echo": true,
+        "reveal": "silent",
+        "focus": false,
+        "panel": "shared"
+      }
+    },
+
+    // ========================================
+    // Installation Tasks
+    // ========================================
+    {
+      "label": "Install: Dev Dependencies",
+      "type": "shell",
+      "command": "pip install -e \".[dev]\"",
+      "problemMatcher": [],
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
+        "panel": "shared",
+        "showReuseMessage": false,
+        "clear": true
+      }
+    },
+    {
+      "label": "Install: Security Tools",
+      "type": "shell",
+      "command": "pip install pip-audit bandit[toml]",
+      "problemMatcher": [],
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
+        "panel": "shared",
+        "showReuseMessage": false,
+        "clear": true
+      }
+    }
+  ]
+}
