@@ -20,7 +20,7 @@ from anki_tool.core.exceptions import (
 
 
 @click.group()
-@click.version_option(version=version("anki-tool"), prog_name="anki-tool")
+@click.version_option(version=version("anki-yaml-tool"), prog_name="anki-yaml-tool")
 def cli():
     """Anki Python Deck Tool - Build and push decks from YAML."""
     pass

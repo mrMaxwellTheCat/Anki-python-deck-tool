@@ -19,7 +19,7 @@ To build any example:
 
 ```bash
 cd examples/<example-name>
-anki-tool build --data data.yaml --config config.yaml --output example.apkg --deck-name "Example Deck"
+anki-yaml-tool build --data data.yaml --config config.yaml --output example.apkg --deck-name "Example Deck"
 ```
 
 ## Contributing Examples

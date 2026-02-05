@@ -5,7 +5,7 @@ This example demonstrates a vocabulary card template suitable for language learn
 ## Features
 
 - **Four fields**: Word, Translation, Example sentence, and Pronunciation
-- **Two card types**: 
+- **Two card types**:
   - Recognition (see word → recall translation)
   - Recall (see translation → produce word)
 - **Conditional display**: Pronunciation and examples only shown if provided
@@ -19,7 +19,7 @@ This example demonstrates a vocabulary card template suitable for language learn
 ## Building
 
 ```bash
-anki-tool build --data data.yaml --config config.yaml --output french_vocab.apkg --deck-name "French Basics"
+anki-yaml-tool build --data data.yaml --config config.yaml --output french_vocab.apkg --deck-name "French Basics"
 ```
 
 ## Customization Ideas

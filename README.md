@@ -109,7 +109,7 @@ Here's a minimal example to get you started:
    - front: "Hello"
      back: "Bonjour"
      tags: ["basics", "greetings"]
-   
+
    - front: "Goodbye"
      back: "Au revoir"
      tags: ["basics"]
@@ -117,24 +117,24 @@ Here's a minimal example to get you started:
 
 3. **Build the deck**:
    ```bash
-   anki-tool build --data my_cards.yaml --config my_model.yaml --output french.apkg --deck-name "French Basics"
+   anki-yaml-tool build --data my_cards.yaml --config my_model.yaml --output french.apkg --deck-name "French Basics"
    ```
 
 4. **Push to Anki** (optional, requires AnkiConnect):
    ```bash
-   anki-tool push --apkg french.apkg --sync
+   anki-yaml-tool push --apkg french.apkg --sync
    ```
 
 ## Usage
 
-The tool provides a CLI entry point \`anki-tool\` with two main commands: \`build\` and \`push\`.
+The tool provides a CLI entry point \`anki-yaml-tool-tool-tool-tool-tool-tool\` with two main commands: \`build\` and \`push\`.
 
 ### 1. Build a Deck (\`build\`)
 
 Generates an \`.apkg\` file from your YAML data and configuration.
 
 ```bash
-anki-tool build --data data/my_deck.yaml --config configs/japanese_num.yaml --output "My Deck.apkg" --deck-name "Japanese Numbers"
+anki-yaml-tool-tool-tool-tool-tool-tool build --data data/my_deck.yaml --config configs/japanese_num.yaml --output "My Deck.apkg" --deck-name "Japanese Numbers"
 ```
 
 **Options:**
@@ -145,7 +145,7 @@ anki-tool build --data data/my_deck.yaml --config configs/japanese_num.yaml --ou
 
 **Example with all options:**
 ```bash
-anki-tool build \\
+anki-yaml-tool-tool-tool-tool-tool-tool build \\
   --data data/vocabulary.yaml \\
   --config configs/basic_model.yaml \\
   --output builds/vocabulary_v1.apkg \\
@@ -157,7 +157,7 @@ anki-tool build \\
 Uploads a generated \`.apkg\` file to Anki via AnkiConnect.
 
 ```bash
-anki-tool push --apkg "My Deck.apkg" --sync
+anki-yaml-tool-tool-tool-tool-tool-tool push --apkg "My Deck.apkg" --sync
 ```
 
 **Options:**
@@ -328,7 +328,7 @@ pytest tests/test_builder.py -v
 - **Schema Validation**: Validate YAML structure using pydantic or jsonschema.
 - **Multiple Note Types**: Support multiple note types in a single deck build.
 - **Verbose Logging**: Add \`--verbose\` flag for detailed logging.
-- **Init Command**: Scaffold new projects with example files (\`anki-tool init\`).
+- **Init Command**: Scaffold new projects with example files (\`anki-yaml-tool-tool-tool-tool-tool-tool init\`).
 - **GUI Interface**: Graphical interface for users who prefer not to use the command line.
 - **Packaged Releases**: Standalone executables for Windows, macOS, and Linux.
 

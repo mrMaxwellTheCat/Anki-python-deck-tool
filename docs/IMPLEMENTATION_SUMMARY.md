@@ -113,9 +113,9 @@ Successfully implemented Phase 1 (Critical Infrastructure) and Phase 2 (Communit
 #### 11. CLI Enhancement
 - ✅ Added `--version` flag to CLI:
   - Uses `importlib.metadata.version()` to read from package metadata
-  - Displays as "anki-tool, version X.X.X"
+  - Displays as "anki-yaml-tool, version X.X.X"
   - Integrated with Click's `@click.version_option` decorator
-- ✅ **Result**: Users can check installed version with `anki-tool --version`
+- ✅ **Result**: Users can check installed version with `anki-yaml-tool --version`
 
 ## Test Results
 
@@ -191,7 +191,7 @@ If you want to continue improving, the remaining tasks from the plan are:
 - Implement media file support
 - Add schema validation with pydantic
 - Support multiple note types per deck
-- Add `anki-tool init` command
+- Add `anki-yaml-tool init` command
 
 ## Verification
 
@@ -205,8 +205,8 @@ To verify all improvements:
 
 2. **Version Flag**: ✅ Verified
    ```bash
-   anki-tool --version
-   # Result: anki-tool, version 0.1.0
+   anki-yaml-tool --version
+   # Result: anki-yaml-tool, version 0.1.0
    ```
 
 3. **Security Scanning**: ✅ Ready

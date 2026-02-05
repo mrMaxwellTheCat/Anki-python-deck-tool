@@ -12,7 +12,7 @@ A clear and concise description of the feature you'd like to see.
 ## Problem or Use Case
 Describe the problem this feature would solve, or the use case it would enable.
 
-**Example:** "I often need to [use case], but currently anki-tool doesn't support this, which means I have to [workaround]."
+**Example:** "I often need to [use case], but currently anki-yaml-tool doesn't support this, which means I have to [workaround]."
 
 ## Proposed Solution
 Describe how you envision this feature working.

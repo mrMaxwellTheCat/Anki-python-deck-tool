@@ -10,7 +10,7 @@ This is the simplest possible Anki deck configuration - a basic front/back flash
 ## Building
 
 ```bash
-anki-tool build --data data.yaml --config config.yaml --output basic.apkg --deck-name "Basic Flashcards"
+anki-yaml-tool build --data data.yaml --config config.yaml --output basic.apkg --deck-name "Basic Flashcards"
 ```
 
 ## Customization

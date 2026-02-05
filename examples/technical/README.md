@@ -17,7 +17,7 @@ This example demonstrates a code snippet card template ideal for memorizing prog
 ## Building
 
 ```bash
-anki-tool build --data data.yaml --config config.yaml --output programming.apkg --deck-name "Programming Concepts"
+anki-yaml-tool build --data data.yaml --config config.yaml --output programming.apkg --deck-name "Programming Concepts"
 ```
 
 ## Use Cases
@@ -86,7 +86,7 @@ Link to documentation or tutorials:
   language: "javascript"
   code: |
     import { useState } from 'react';
-    
+
     function Counter() {
       const [count, setCount] = useState(0);
       return <button onClick={() => setCount(count + 1)}>

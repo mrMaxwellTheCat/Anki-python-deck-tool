@@ -72,7 +72,7 @@ Codecov provides visual coverage reports and tracks coverage over time. It's fre
 **Status: REQUIRED for releases** - Only needed when you want to publish to PyPI.
 
 ### What is PyPI?
-PyPI (Python Package Index) is where Python packages are published so users can install them with `pip install anki-tool`.
+PyPI (Python Package Index) is where Python packages are published so users can install them with `pip install anki-yaml-tool`.
 
 ### Option A: Trusted Publishing (RECOMMENDED - No Token Needed!)
 
@@ -93,7 +93,7 @@ This is the modern, secure way. GitHub Actions can publish directly to PyPI with
    - Go to your PyPI account: [https://pypi.org/manage/account/publishing/](https://pypi.org/manage/account/publishing/)
    - Click **Add a new publisher**
    - Fill in the form:
-     - **PyPI Project Name**: `anki-tool` (must match `name` in `pyproject.toml`)
+     - **PyPI Project Name**: `anki-yaml-tool` (must match `name` in `pyproject.toml`)
      - **Owner**: `mrMaxwellTheCat` (your GitHub username)
      - **Repository name**: `Anki-python-deck-tool`
      - **Workflow name**: `release.yml`
@@ -111,8 +111,8 @@ Only use this if trusted publishing doesn't work.
 1. **Generate PyPI API Token**
    - Go to PyPI account settings: [https://pypi.org/manage/account/token/](https://pypi.org/manage/account/token/)
    - Click **Add API token**
-   - Token name: `github-actions-anki-tool`
-   - Scope: Select **Project: anki-tool** (or "Entire account" if project doesn't exist yet)
+   - Token name: `github-actions-anki-yaml-tool`
+   - Scope: Select **Project: anki-yaml-tool** (or "Entire account" if project doesn't exist yet)
    - Click **Add token**
    - **IMPORTANT**: Copy the token immediately (starts with `pypi-`). You won't see it again!
 

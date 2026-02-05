@@ -21,10 +21,10 @@ Thank you for your interest in contributing to the Anki Python Deck Tool! This d
 2. **Create a virtual environment**:
    ```bash
    python -m venv venv
-   
+
    # On Windows:
    .\venv\Scripts\activate
-   
+
    # On Linux/Mac:
    source venv/bin/activate
    ```
@@ -33,7 +33,7 @@ Thank you for your interest in contributing to the Anki Python Deck Tool! This d
    ```bash
    # Install the package in editable mode with dev dependencies
    pip install -e ".[dev]"
-   
+
    # Or use the Makefile
    make dev
    ```
@@ -118,14 +118,14 @@ make all
   ```python
   def build_deck(data_path: str, config_path: str) -> str:
       """Build an Anki deck from YAML files.
-      
+
       Args:
           data_path: Path to the data YAML file.
           config_path: Path to the config YAML file.
-      
+
       Returns:
           Path to the generated .apkg file.
-      
+
       Raises:
           ConfigValidationError: If config file is invalid.
           DataValidationError: If data file is invalid.
@@ -149,7 +149,7 @@ make all
 ## Project Structure
 
 ```
-anki-tool/
+anki-yaml-tool/
 ├── src/
 │   └── anki_tool/
 │       ├── __init__.py
