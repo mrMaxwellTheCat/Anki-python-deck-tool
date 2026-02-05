@@ -4,11 +4,11 @@
 
 ### ⭐ Most Common
 
-| Task | Description |
-|------|-------------|
+| Task                                        | Description                   |
+|---------------------------------------------|-------------------------------|
 | **CI Workflow: Full Pipeline (All Checks)** | Run ALL checks before pushing |
-| **CI: Test - pytest with Coverage** | Run tests (use this often) |
-| **Format: Apply Ruff Formatting** | Auto-format code |
+| **CI: Test - pytest with Coverage**         | Run tests (use this often)    |
+| **Format: Apply Ruff Formatting**           | Auto-format code              |
 
 ### 📋 All Available Tasks
 

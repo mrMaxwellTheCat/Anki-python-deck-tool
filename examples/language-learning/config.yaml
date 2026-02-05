@@ -1,4 +1,4 @@
-name: "Vocabulary Card"
+name: "APDT Examples::Vocabulary Card"
 fields:
   - "Word"
   - "Translation"
@@ -21,7 +21,7 @@ templates:
         {{Example}}
       </div>
       {{/Example}}
-  
+
   - name: "Recall (Translation → Word)"
     qfmt: |
       <div class="translation">{{Translation}}</div>
@@ -50,28 +50,28 @@ css: |
     max-width: 600px;
     margin: 0 auto;
   }
-  
+
   .word {
     font-size: 32px;
     font-weight: bold;
     color: #2980b9;
     margin-bottom: 10px;
   }
-  
+
   .pronunciation {
     font-size: 18px;
     color: #7f8c8d;
     font-style: italic;
     margin-bottom: 20px;
   }
-  
+
   .translation {
     font-size: 28px;
     color: #27ae60;
     font-weight: 500;
     margin: 20px 0;
   }
-  
+
   .example {
     font-size: 18px;
     color: #555;
@@ -81,12 +81,12 @@ css: |
     margin-top: 20px;
     text-align: left;
   }
-  
+
   .example em {
     color: #7f8c8d;
     font-weight: bold;
   }
-  
+
   hr {
     border: 0;
     border-top: 2px solid #ecf0f1;

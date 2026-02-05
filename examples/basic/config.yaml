@@ -1,4 +1,4 @@
-name: "Basic Flashcard"
+name: "APDT Examples::Basic Flashcard"
 fields:
   - "Front"
   - "Back"
@@ -19,17 +19,17 @@ css: |
     background-color: #f9f9f9;
     padding: 40px;
   }
-  
+
   .front {
     font-weight: bold;
     color: #2c3e50;
   }
-  
+
   .back {
     color: #27ae60;
     margin-top: 20px;
   }
-  
+
   hr {
     border: 0;
     border-top: 2px solid #ddd;
