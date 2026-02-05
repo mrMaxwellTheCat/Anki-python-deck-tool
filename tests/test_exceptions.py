@@ -1,6 +1,6 @@
 """Tests for custom exceptions."""
 
-from anki_tool.core.exceptions import (
+from anki_yaml_tool.core.exceptions import (
     AnkiConnectError,
     AnkiToolError,
     ConfigValidationError,

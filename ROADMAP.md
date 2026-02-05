@@ -60,9 +60,9 @@ Transform the Anki Python Deck Tool into a comprehensive, user-friendly solution
 
 - [x] **Refactoring**
     - [x] **Error Handling**: Custom exceptions (`AnkiConnectError`, `ConfigValidationError`, etc.).
-    - [x] **Decouple Parser**: Extract configuration loading into `src/anki_tool/core/config.py`.
-    - [x] **Media Handler**: Create dedicated `src/anki_tool/core/media.py` for media file operations.
-    - [x] **Validator Module**: Create `src/anki_tool/core/validators.py` for schema validation.
+    - [x] **Decouple Parser**: Extract configuration loading into `src/anki_yaml_tool/core/config.py`.
+    - [x] **Media Handler**: Create dedicated `src/anki_yaml_tool/core/media.py` for media file operations.
+    - [x] **Validator Module**: Create `src/anki_yaml_tool/core/validators.py` for schema validation.
 
 ## 3. Testing Strategy
 
@@ -118,7 +118,7 @@ Transform the Anki Python Deck Tool into a comprehensive, user-friendly solution
     - [x] Provide clear error messages for missing media.
 
 - [x] **Implementation**
-    - [x] Create `MediaHandler` class in `src/anki_tool/core/media.py`.
+    - [x] Create `MediaHandler` class in `src/anki_yaml_tool/core/media.py`.
     - [x] Wire up CLI to call `builder.add_media()` for discovered files.
     - [x] Add `--media-dir` option to specify media directory.
 
@@ -275,7 +275,7 @@ Automatically rebuild and push decks when input files change, enabling real-time
     - [ ] Handle errors without crashing the watcher
 
 - [ ] **Implementation**
-    - [ ] Create `FileWatcher` class in `src/anki_tool/core/watcher.py`
+    - [ ] Create `FileWatcher` class in `src/anki_yaml_tool/core/watcher.py`
     - [ ] Implement file change detection with debouncing (e.g., 500ms delay)
     - [ ] Integrate with existing build/push workflow
     - [ ] Add graceful shutdown on Ctrl+C

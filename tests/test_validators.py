@@ -1,7 +1,7 @@
 """Tests for the validation module."""
 
 import pytest
-from anki_tool.core.validators import (
+from anki_yaml_tool.core.validators import (
     ModelConfigSchema,
     ModelTemplate,
     NoteData,

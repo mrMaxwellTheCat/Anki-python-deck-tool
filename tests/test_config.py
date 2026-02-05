@@ -3,8 +3,8 @@
 from pathlib import Path
 
 import pytest
-from anki_tool.core.config import load_deck_data, load_model_config
-from anki_tool.core.exceptions import ConfigValidationError, DataValidationError
+from anki_yaml_tool.core.config import load_deck_data, load_model_config
+from anki_yaml_tool.core.exceptions import ConfigValidationError, DataValidationError
 
 
 def test_load_model_config_success(tmp_path):

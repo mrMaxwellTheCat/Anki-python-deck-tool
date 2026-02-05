@@ -10,7 +10,7 @@ from typing import cast
 
 import requests
 
-from anki_tool.core.exceptions import AnkiConnectError
+from anki_yaml_tool.core.exceptions import AnkiConnectError
 
 # Type alias for JSON values returned by AnkiConnect
 JSONValue = dict[str, "JSONValue"] | list["JSONValue"] | str | int | float | bool | None

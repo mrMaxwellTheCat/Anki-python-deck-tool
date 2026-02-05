@@ -1,9 +1,8 @@
 """Tests for the AnkiBuilder class."""
 
 import pytest
-
-from anki_tool.core.builder import AnkiBuilder
-from anki_tool.core.exceptions import DeckBuildError
+from anki_yaml_tool.core.builder import AnkiBuilder
+from anki_yaml_tool.core.exceptions import DeckBuildError
 
 
 def test_stable_id_consistency():

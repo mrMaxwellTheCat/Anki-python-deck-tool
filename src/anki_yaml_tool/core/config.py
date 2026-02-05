@@ -10,9 +10,9 @@ from typing import cast
 import yaml
 from pydantic import ValidationError
 
-from anki_tool.core.builder import ModelConfigComplete
-from anki_tool.core.exceptions import ConfigValidationError, DataValidationError
-from anki_tool.core.validators import ModelConfigSchema
+from anki_yaml_tool.core.builder import ModelConfigComplete
+from anki_yaml_tool.core.exceptions import ConfigValidationError, DataValidationError
+from anki_yaml_tool.core.validators import ModelConfigSchema
 
 
 def load_model_config(config_path: Path | str) -> ModelConfigComplete:

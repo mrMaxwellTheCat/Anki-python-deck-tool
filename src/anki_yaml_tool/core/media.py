@@ -6,7 +6,7 @@ media files for Anki decks.
 
 from pathlib import Path
 
-from anki_tool.core.exceptions import MediaMissingError
+from anki_yaml_tool.core.exceptions import MediaMissingError
 
 
 def validate_media_file(file_path: Path | str) -> Path:

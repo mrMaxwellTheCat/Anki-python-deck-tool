@@ -8,17 +8,17 @@ from pathlib import Path
 
 import click
 
-from anki_tool.core.builder import AnkiBuilder
-from anki_tool.core.config import load_deck_data, load_model_config
-from anki_tool.core.connector import AnkiConnector
-from anki_tool.core.exceptions import (
+from anki_yaml_tool.core.builder import AnkiBuilder
+from anki_yaml_tool.core.config import load_deck_data, load_model_config
+from anki_yaml_tool.core.connector import AnkiConnector
+from anki_yaml_tool.core.exceptions import (
     AnkiConnectError,
     ConfigValidationError,
     DataValidationError,
     DeckBuildError,
     MediaMissingError,
 )
-from anki_tool.core.media import (
+from anki_yaml_tool.core.media import (
     discover_media_files,
     get_media_references,
     validate_media_file,
