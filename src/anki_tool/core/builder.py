@@ -5,6 +5,7 @@ from configuration and data.
 """
 
 import hashlib
+import re
 from pathlib import Path
 from typing import Any
 
@@ -51,6 +52,26 @@ class AnkiBuilder:
         digest = hashlib.md5(name.encode("utf-8")).hexdigest()
         return int(digest[:8], 16)
 
+    @staticmethod
+    def convert_math_delimiters(text: str) -> str:
+        r"""Convert LaTeX-style math delimiters to Anki LaTeX format.
+
+        Converts:
+        - $$...$$ to \[...\] (display math)
+        - $...$ to \(...\) (inline math)
+
+        Args:
+            text: The text containing math delimiters.
+
+        Returns:
+            Text with math delimiters converted to Anki LaTeX format.
+        """
+        # First replace block math $$ ... $$ (must be done before inline)
+        text = re.sub(r"\$\$(.*?)\$\$", r"\\[\1\\]", text, flags=re.DOTALL)
+        # Then replace inline math $ ... $
+        text = re.sub(r"\$(.*?)\$", r"\\(\1\\)", text)
+        return text
+
     def _build_model(self) -> genanki.Model:
         """Build the genanki Model from configuration.
 
@@ -78,7 +99,11 @@ class AnkiBuilder:
             field_values: List of field values in the same order as model fields.
             tags: Optional list of tags to apply to the note.
         """
-        note = genanki.Note(model=self.model, fields=field_values, tags=tags or [])
+        # Convert math delimiters in all field values
+        converted_values = [
+            self.convert_math_delimiters(value) for value in field_values
+        ]
+        note = genanki.Note(model=self.model, fields=converted_values, tags=tags or [])
         self.deck.add_note(note)
 
     def add_media(self, file_path: Path) -> None:
