@@ -1,0 +1,102 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        // ========================================
+        // Development Tasks
+        // ========================================
+        {
+            "label": "Build and Push Debug Deck",
+            "type": "shell",
+            "command": "python -m anki_tool.cli build --data data/debug_deck.yaml --config configs/debug_config.yaml --output data/debug_deck.apkg ; python -m anki_tool.cli push --apkg data/debug_deck.apkg",
+            "group": "build",
+            "presentation": {
+                "reveal": "always",
+                "panel": "new"
+            },
+            "problemMatcher": []
+        },
+        // ========================================
+        // Utility Tasks (Formatting, Reports)
+        // ========================================
+        {
+            "label": "Format: Apply Ruff Formatting",
+            "type": "shell",
+            "command": "python -m ruff format .",
+            "problemMatcher": [],
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": false,
+                "panel": "shared",
+                "showReuseMessage": false,
+                "clear": true
+            }
+        },
+        {
+            "label": "Format: Apply Ruff Auto-Fixes",
+            "type": "shell",
+            "command": "python -m ruff check --fix .",
+            "problemMatcher": [],
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": false,
+                "panel": "shared",
+                "showReuseMessage": false,
+                "clear": true
+            }
+        },
+        {
+            "label": "Coverage: Open HTML Report",
+            "type": "shell",
+            "command": "start htmlcov/index.html",
+            "windows": {
+                "command": "start htmlcov/index.html"
+            },
+            "linux": {
+                "command": "xdg-open htmlcov/index.html"
+            },
+            "osx": {
+                "command": "open htmlcov/index.html"
+            },
+            "problemMatcher": [],
+            "presentation": {
+                "echo": true,
+                "reveal": "silent",
+                "focus": false,
+                "panel": "shared"
+            }
+        },
+        // ========================================
+        // Installation Tasks
+        // ========================================
+        {
+            "label": "Install: Dev Dependencies",
+            "type": "shell",
+            "command": "python -m pip install -e \".[dev]\"",
+            "problemMatcher": [],
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": false,
+                "panel": "shared",
+                "showReuseMessage": false,
+                "clear": true
+            }
+        },
+        {
+            "label": "Install: Security Tools",
+            "type": "shell",
+            "command": "python -m pip install pip-audit bandit[toml]",
+            "problemMatcher": [],
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": false,
+                "panel": "shared",
+                "showReuseMessage": false,
+                "clear": true
+            }
+        }
+    ]
+}

@@ -16,9 +16,6 @@ build/
 *.egg-info/
 
 # IDEs
-.vscode/
-!.vscode/tasks.json
-!.vscode/README.md
 .idea/
 *.swp
 

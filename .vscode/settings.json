@@ -1,0 +1,10 @@
+{
+    "files.exclude": {
+        "tmpclaude*": true,
+        ".coverage": true,
+        ".pytest_cache": true,
+        "htmlcov": true,
+        "coverage.xml": true,
+        "*cache*": true,
+    }
+}
