@@ -164,6 +164,43 @@ Transform the Anki Python Deck Tool into a comprehensive, user-friendly solution
     - [ ] Allow setting default values for common options.
     - [ ] Support profile-based configurations (dev, prod).
 
+- [ ] **Directory-Based Batch Processing**
+    - [ ] **Architecture Design**
+        - [ ] Define directory structure conventions
+        - [ ] Design deck identification strategy (see options below)
+        - [ ] Specify file naming conventions for data vs config files
+        - [ ] Define sub-deck creation from nested directories
+        - [ ] Handle file discovery and filtering (ignore non-YAML files)
+    - [ ] **Directory Organization Strategies (To Be Decided)**
+        - **Option A: One directory per deck**
+            - Each subdirectory contains `data.yaml` and `config.yaml`
+            - Directory name maps to deck name
+            - Nested directories create sub-decks in Anki hierarchy
+        - **Option B: Filename-based identification**
+            - Files named like `spanish_data.yaml` + `spanish_config.yaml`
+            - All files can coexist in same directory
+            - Pair files by matching prefixes
+        - **Option C: Content-based metadata**
+            - YAML files contain `deck_name` and `type` metadata fields
+            - Most flexible but requires schema changes
+            - Allows multiple decks in single directory without naming conventions
+    - [ ] **Implementation**
+        - [ ] Add `--input-dir` option to `build` command
+        - [ ] Implement recursive directory scanning
+        - [ ] Create file pairing logic (data + config)
+        - [ ] Add progress tracking for multi-deck builds
+        - [ ] Support filtering by deck name pattern
+        - [ ] Handle errors gracefully (skip invalid pairs, report at end)
+    - [ ] **CLI Interface**
+        - [ ] `anki-yaml-tool build --input-dir ./decks`
+        - [ ] `anki-yaml-tool build --input-dir ./decks --deck-filter "spanish*"`
+        - [ ] `anki-yaml-tool build --input-dir ./decks --output-dir ./builds`
+        - [ ] Support `--push` flag for build + push in one command
+    - [ ] **Integration with Existing Features**
+        - [ ] Works with media file support (scan directories for media)
+        - [ ] Compatible with validation command
+        - [ ] Respects existing error handling and exceptions
+
 ### 4.5 Advanced YAML Features
 
 - [ ] **YAML Includes**
@@ -178,6 +215,94 @@ Transform the Anki Python Deck Tool into a comprehensive, user-friendly solution
 - [ ] **Conditional Content**
     - [ ] Support conditional inclusion based on tags or custom flags.
     - [ ] Enable/disable notes or entire sections dynamically.
+
+### 4.6 Bidirectional Sync (Pull from Anki)
+
+Enable pulling existing decks and note types from Anki Desktop into YAML format for editing, then pushing changes back. This creates a full round-trip workflow for Anki deck management.
+
+- [ ] **Architecture & Design**
+    - [ ] Design YAML serialization format for pulled decks
+    - [ ] Define mapping from Anki model structure to config YAML
+    - [ ] Specify field mapping and template extraction
+    - [ ] Handle media file export and organization
+    - [ ] Design conflict resolution strategy for round-trip edits
+
+- [ ] **AnkiConnect Integration**
+    - [ ] Implement `get_deck_names()` method (uses `deckNames` action)
+    - [ ] Implement `get_model_names()` method (uses `modelNames` action)
+    - [ ] Implement `export_deck()` method (uses `exportPackage` or manual extraction)
+    - [ ] Implement `get_notes()` method for deck content extraction
+    - [ ] Implement `get_model()` method for note type definitions
+    - [ ] Add comprehensive error handling for read operations
+
+- [ ] **YAML Export Format**
+    - [ ] Design data file structure (match current format)
+    - [ ] Design config file structure (fields, templates, CSS)
+    - [ ] Handle special characters and escaping
+    - [ ] Preserve note IDs for update tracking
+    - [ ] Export media file references
+
+- [ ] **CLI Commands**
+    - [ ] `anki-yaml-tool pull --deck "Spanish Vocabulary" --output ./decks/spanish`
+    - [ ] `anki-yaml-tool pull --all-decks --output ./decks`
+    - [ ] `anki-yaml-tool pull --list-decks` (shows available decks)
+    - [ ] `anki-yaml-tool pull --model "Basic" --output ./configs`
+
+- [ ] **Round-Trip Workflow**
+    - [ ] Pull deck from Anki → Edit YAML files → Build → Push back
+    - [ ] Preserve note IDs to update existing notes instead of duplicating
+    - [ ] Handle deleted notes (mark as deleted in YAML or skip)
+    - [ ] Support incremental updates (only push changed notes)
+
+- [ ] **Implementation Considerations**
+    - **Feasibility**: HIGH (AnkiConnect supports required read operations)
+    - **Existing Infrastructure**: Generic `invoke()` method available in `AnkiConnector`
+    - **Testing**: Follow existing patterns in `test_connector.py`
+
+### 4.7 File Watching Mode
+
+Automatically rebuild and push decks when input files change, enabling real-time workflow during card creation.
+
+- [ ] **Technology Selection**
+    - [ ] Evaluate `watchdog` library for cross-platform file monitoring
+    - [ ] Alternative: `watchfiles` (Rust-based, faster)
+    - [ ] Ensure compatibility with Windows, macOS, and Linux
+
+- [ ] **Architecture Design**
+    - [ ] Define watch scope (single file, directory, recursive)
+    - [ ] Design debouncing logic (handle rapid successive saves)
+    - [ ] Specify rebuild trigger events (modify, create, delete)
+    - [ ] Handle errors without crashing the watcher
+
+- [ ] **Implementation**
+    - [ ] Create `FileWatcher` class in `src/anki_tool/core/watcher.py`
+    - [ ] Implement file change detection with debouncing (e.g., 500ms delay)
+    - [ ] Integrate with existing build/push workflow
+    - [ ] Add graceful shutdown on Ctrl+C
+    - [ ] Implement smart rebuilding (only changed deck if directory input)
+
+- [ ] **CLI Command**
+    - [ ] `anki-yaml-tool watch --data data.yaml --config config.yaml --push`
+    - [ ] `anki-yaml-tool watch --input-dir ./decks --push`
+    - [ ] Support `--no-push` flag for build-only mode
+    - [ ] Display file change events in real-time
+
+- [ ] **User Experience**
+    - [ ] Clear console output showing detected changes
+    - [ ] Success/error notifications for each rebuild
+    - [ ] Option to suppress verbose output
+    - [ ] Visual indicator that watcher is active
+
+- [ ] **Error Handling**
+    - [ ] Continue watching after build errors (don't crash)
+    - [ ] Display error messages without breaking watch loop
+    - [ ] Retry on transient AnkiConnect errors
+    - [ ] Graceful handling of file access errors (file locked, etc.)
+
+- [ ] **Integration Considerations**
+    - Works with single files or directory-based batch processing
+    - Compatible with auto-push to Anki
+    - Respects existing validation and error handling
 
 ## 5. Graphical User Interface (GUI)
 
@@ -211,7 +336,58 @@ Transform the Anki Python Deck Tool into a comprehensive, user-friendly solution
     - [ ] Preview of generated cards
     - [ ] Recent projects list
 
-### 5.3 GUI Features (Phase 2)
+### 5.3 GUI Modes & Workflows
+
+Define the core interaction modes for the GUI application, providing both manual control and automated workflows.
+
+- [ ] **Mode Architecture**
+    - [ ] Design mode switching interface
+    - [ ] Define shared state between modes
+    - [ ] Implement mode persistence (remember last used mode)
+
+- [ ] **Manual Mode**
+    - [ ] File/directory picker for input(s) (data + config or directory)
+    - [ ] Output location selector with options:
+        - Custom path (save .apkg file to specific location)
+        - Internal tmp directory (for auto-push + auto-cleanup)
+    - [ ] Toggle for auto-push after build
+    - [ ] Build button with progress bar
+    - [ ] Push button (enabled after successful build)
+    - [ ] Remember last used paths and settings
+    - [ ] "Build Again" button (rebuilds with same inputs if files changed)
+
+- [ ] **Watch Mode**
+    - [ ] Input/output configuration panel (same as manual mode)
+    - [ ] "Start Watching" / "Stop Watching" toggle button
+    - [ ] Auto-push toggle (independent control)
+    - [ ] Real-time file change indicators
+    - [ ] Live status display:
+        - "Watching for changes..."
+        - "Building deck..."
+        - "Pushing to Anki..."
+        - "Build successful" / "Error: [message]"
+    - [ ] Auto-scroll log of build events
+    - [ ] Smart rebuilding (only changed deck if directory input)
+
+- [ ] **Shared Features (Both Modes)**
+    - [ ] Project management: Save/load input/output configurations
+    - [ ] Recent projects dropdown
+    - [ ] Deck name input field
+    - [ ] Validation feedback (before build/watch starts)
+    - [ ] Success/error notifications (system tray or GUI alerts)
+
+- [ ] **Input Type Support**
+    - [ ] Single deck: Select one data file + one config file
+    - [ ] Directory: Select directory for batch processing
+    - [ ] Both modes handle both input types seamlessly
+
+- [ ] **User Experience Enhancements**
+    - [ ] Keyboard shortcuts (Ctrl+B for build, Ctrl+W for watch)
+    - [ ] Drag-and-drop support for file selection
+    - [ ] Settings panel for defaults (AnkiConnect URL, timeouts)
+    - [ ] Dark mode support
+
+### 5.4 GUI Features (Phase 2)
 
 - [ ] **Editor Integration**
     - [ ] Built-in config editor with templates
@@ -381,10 +557,12 @@ Transform the Anki Python Deck Tool into a comprehensive, user-friendly solution
 - Additional examples (medical terminology, cloze deletion, audio cards)
 
 ### Phase 3: Advanced Features (Planned)
-- GUI development (framework evaluation and implementation)
+- Directory-based batch processing (recursive deck building)
+- Bidirectional sync (pull decks from Anki to YAML)
+- File watching mode (auto-rebuild on file changes)
+- GUI development (framework evaluation and implementation with manual + watch modes)
 - Plugin system (custom processors and validators)
 - Advanced YAML features (includes, templates, variables)
-- Batch processing enhancements
 - Integration tests
 
 ### Phase 4: Distribution & Growth (Planned)
