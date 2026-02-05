@@ -125,6 +125,25 @@ Here's a minimal example to get you started:
    anki-yaml-tool push --apkg french.apkg --sync
    ```
 
+## Building Executable
+
+To compile the tool into a single executable file:
+
+```bash
+make build-exe
+```
+
+The resulting executable will be located in the `dist/` directory.
+
+### Customizing the Icon
+
+To use a custom icon for the executable, place your icon file in the `assets/` directory at the project root.
+
+- **Windows**: `assets/icon.ico`
+- **Mac**: `assets/icon.icns`
+
+If these files exist, the build process will automatically use them.
+
 ## Usage
 
 The tool provides a CLI entry point \`anki-yaml-tool-tool-tool-tool-tool-tool\` with two main commands: \`build\` and \`push\`.

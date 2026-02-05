@@ -113,6 +113,17 @@
                 "showReuseMessage": false,
                 "clear": true
             }
+        },
+        {
+            "label": "Build Executable (Local)",
+            "type": "shell",
+            "command": "make build-exe",
+            "problemMatcher": [],
+            "group": {
+                "kind": "build",
+                "isDefault": false
+            },
+            "detail": "Build the executable for the current operating system using PyInstaller."
         }
     ]
 }

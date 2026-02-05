@@ -24,6 +24,7 @@ dev = [
     "types-requests",
     "types-PyYAML",
     "pre-commit>=3.5.0",
+    "pyinstaller>=6.0.0",
 ]
 
 [build-system]

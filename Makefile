@@ -39,4 +39,7 @@ clean:  ## Clean build artifacts
 build:  ## Build distribution packages
 	python -m build
 
+build-exe:  ## Build single-file executable
+	python scripts/build.py
+
 all: format lint type-check test  ## Run all checks
