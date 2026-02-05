@@ -28,3 +28,6 @@ build/
 # Generated logs or temp files
 *.log
 *.tmp
+
+# Claude
+tmpclaude*
