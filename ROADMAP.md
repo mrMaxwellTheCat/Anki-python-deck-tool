@@ -124,10 +124,10 @@ Transform the Anki Python Deck Tool into a comprehensive, user-friendly solution
 
 ### 4.3 Data Validation & Integrity
 
-- [ ] **Schema Validation**
-    - [ ] Integrate `pydantic` for type-safe config and data models.
-    - [ ] Define schemas for config files (ModelConfig) and data files (NoteData).
-    - [ ] Provide detailed validation error messages.
+- [x] **Schema Validation**
+    - [x] Integrate `pydantic` for type-safe config and data models.
+    - [x] Define schemas for config files (ModelConfig) and data files (NoteData).
+    - [x] Provide detailed validation error messages.
 
 - [ ] **Consistency Checks**
     - [ ] Warn about duplicate note IDs within the same build.

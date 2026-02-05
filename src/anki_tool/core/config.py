@@ -8,9 +8,11 @@ from pathlib import Path
 from typing import cast
 
 import yaml
+from pydantic import ValidationError
 
 from anki_tool.core.builder import ModelConfigComplete
 from anki_tool.core.exceptions import ConfigValidationError, DataValidationError
+from anki_tool.core.validators import ModelConfigSchema
 
 
 def load_model_config(config_path: Path | str) -> ModelConfigComplete:
@@ -32,21 +34,28 @@ def load_model_config(config_path: Path | str) -> ModelConfigComplete:
         raise FileNotFoundError(f"Configuration file not found: {config_path}")
 
     with open(path, encoding="utf-8") as f:
-        model_config = yaml.safe_load(f)
+        raw_config = yaml.safe_load(f)
 
-    if not model_config:
+    if not raw_config:
         raise ConfigValidationError("Config file is empty", str(config_path))
 
-    # Validate required fields
-    required_fields = {"name", "fields", "templates"}
-    missing_fields = required_fields - set(model_config.keys())
-    if missing_fields:
-        raise ConfigValidationError(
-            f"Missing required fields: {', '.join(missing_fields)}",
-            str(config_path),
-        )
+    # Use Pydantic for validation
+    try:
+        validated_config = ModelConfigSchema(**raw_config)
+        # Convert Pydantic model back to dict for compatibility
+        return cast(ModelConfigComplete, validated_config.model_dump())
+    except ValidationError as e:
+        # Convert Pydantic validation errors to ConfigValidationError
+        error_messages = []
+        for error in e.errors():
+            field = " -> ".join(str(loc) for loc in error["loc"])
+            msg = error["msg"]
+            error_messages.append(f"{field}: {msg}")
 
-    return cast(ModelConfigComplete, model_config)
+        raise ConfigValidationError(
+            "Invalid configuration:\n  " + "\n  ".join(error_messages),
+            str(config_path),
+        ) from e
 
 
 def load_deck_data(data_path: Path | str) -> list[dict[str, str | list[str]]]:

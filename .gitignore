@@ -29,15 +29,12 @@ output/
 *.log
 *.tmp
 
-# Claude / Claudecode
-tmpclaude*
-
 # Coverage reports
 .coverage
 coverage.*
 htmlcov/
 
-*cache*
+**/*cache*
+**/*tmp*
 
-CLAUDE.md
 *.spec

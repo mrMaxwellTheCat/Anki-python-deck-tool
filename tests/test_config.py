@@ -64,8 +64,10 @@ fields:
     with pytest.raises(ConfigValidationError) as exc_info:
         load_model_config(config_file)
 
-    assert "missing required fields" in str(exc_info.value).lower()
-    assert "templates" in str(exc_info.value).lower()
+    # Pydantic error message includes "Field required" or similar
+    error_msg = str(exc_info.value).lower()
+    assert "templates" in error_msg
+    assert "required" in error_msg or "missing" in error_msg
 
 
 def test_load_model_config_without_css(tmp_path):
@@ -87,7 +89,8 @@ templates:
     config = load_model_config(config_file)
 
     assert config["name"] == "Test Model"
-    assert "css" not in config or config.get("css") is None
+    # Pydantic includes css field with default empty string
+    assert config.get("css") == ""
 
 
 def test_load_deck_data_success(tmp_path):
