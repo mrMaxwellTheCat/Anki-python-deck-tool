@@ -3,6 +3,7 @@
 [![Python Version](https://img.shields.io/badge/python-3.10%2B-blue)]()
 [![License: GPL-3.0](https://img.shields.io/badge/License-GPL%203.0-blue.svg)](https://opensource.org/licenses/GPL-3.0)
 [![CI Status](https://github.com/mrMaxwellTheCat/Anki-python-deck-tool/workflows/CI/badge.svg)](https://github.com/mrMaxwellTheCat/Anki-python-deck-tool/actions)
+[![codecov](https://codecov.io/gh/mrMaxwellTheCat/Anki-python-deck-tool/branch/main/graph/badge.svg)](https://codecov.io/gh/mrMaxwellTheCat/Anki-python-deck-tool)
 
 A professional, modular command-line tool to generate Anki decks (`.apkg`) from human-readable YAML source files and push them directly to Anki via AnkiConnect.
 
