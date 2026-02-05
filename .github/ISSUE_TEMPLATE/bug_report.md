@@ -30,7 +30,7 @@ Please complete the following information:
 
 - OS: [e.g., Windows 11, macOS 13, Ubuntu 22.04]
 - Python Version: [e.g., 3.10.5]
-- anki-yaml-tool-tool Version: [anki-yaml-tool-yaml-tool --version`]
+- anki-yaml-tool Version: [anki-yaml-tool-yaml-tool --version`]
 - Installation Method: [pip, source, etc.]
 
 ## Configuration Files

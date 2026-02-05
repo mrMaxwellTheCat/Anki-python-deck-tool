@@ -34,7 +34,7 @@ This file provides instructions for GitHub Copilot, Claude, and other AI coding 
 
 ### Error Handling
 
-- Use custom exceptions defined in `src/anki_tool/core/exceptions.py`:
+- Use custom exceptions defined in `src/anki_yaml_tool/core/exceptions.py`:
   - `ConfigValidationError` - Invalid configuration file
   - `DataValidationError` - Invalid data file
   - `MediaMissingError` - Missing media file
@@ -45,7 +45,7 @@ This file provides instructions for GitHub Copilot, Claude, and other AI coding 
 
 ### Imports
 
-- Use absolute imports (e.g., `from anki_tool.core import builder`)
+- Use absolute imports (e.g., `from anki_yaml_tool.core import builder`)
 - Never use relative imports
 - Group imports: stdlib → third-party → local
 - Use `from typing import` only when necessary (prefer built-in types)
@@ -76,7 +76,7 @@ This file provides instructions for GitHub Copilot, Claude, and other AI coding 
 pytest tests/
 
 # With coverage
-pytest tests/ --cov=anki_tool --cov-report=term-missing
+pytest tests/ --cov=anki_yaml_tool --cov-report=term-missing
 
 # Or use VSCode tasks (Ctrl+Shift+P → "Tasks: Run Task")
 ```
@@ -217,7 +217,7 @@ from .builder import AnkiBuilder
 from typing import List, Dict
 
 # Good
-from anki_tool.core.builder import AnkiBuilder
+from anki_yaml_tool.core.builder import AnkiBuilder
 ```
 
 ### Printing Output
@@ -398,7 +398,7 @@ When reviewing (or having code reviewed):
 | Fix linting    | `ruff check --fix .`                |
 | Type check     | `mypy src --ignore-missing-imports` |
 | Run tests      | `pytest tests/`                     |
-| Coverage       | `pytest --cov=anki_tool`            |
+| Coverage       | `pytest --cov=anki_yaml_tool`       |
 | Security scan  | `pip-audit && bandit -r src/`       |
 | Install deps   | `pip install -e ".[dev]"`           |
 

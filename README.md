@@ -278,7 +278,7 @@ Anki-python-deck-tool/
 ├── data/                        # Example data files
 │   └── debug_deck.yaml
 ├── src/
-│   └── anki-yaml-tool/
+│   └── anki_yaml_tool/
 │       ├── __init__.py
 │       ├── cli.py               # CLI entry points
 │       └── core/
@@ -335,7 +335,7 @@ make all
 pytest
 
 # Run with coverage
-pytest --cov=anki-yaml-tool
+pytest --cov=anki_yaml_tool
 
 # Run specific test file
 pytest tests/test_builder.py -v

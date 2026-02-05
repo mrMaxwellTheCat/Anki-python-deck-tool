@@ -52,7 +52,7 @@ Thank you for your interest in contributing to the Anki Python Deck Tool! This d
 pytest
 
 # Run with coverage
-pytest --cov=anki-yaml-tool
+pytest --cov=anki_yaml_tool
 
 # Run specific test file
 pytest tests/test_builder.py
@@ -107,7 +107,7 @@ make all
 - Follow PEP 8 style guidelines
 - Use Python 3.10+ type hints (use `list[str]` instead of `List[str]`, and `X | Y` instead of `Optional[X]`)
 - Maximum line length: 88 characters
-- Use absolute imports (e.g., `from anki-yaml-tool.core import builder`)
+- Use absolute imports (e.g., `from anki_yaml_tool.core import builder`)
 
 ### Documentation
 
@@ -135,7 +135,7 @@ make all
 
 ### Error Handling
 
-- Use custom exceptions from `anki-yaml-tool.core.exceptions`
+- Use custom exceptions from `anki_yaml_tool.core.exceptions`
 - Don't use bare `except:` blocks
 - Always provide meaningful error messages
 
@@ -151,7 +151,7 @@ make all
 ```
 anki-yaml-tool/
 ├── src/
-│   └── anki-yaml-tool/
+│   └── anki_yaml_tool/
 │       ├── __init__.py
 │       ├── cli.py           # CLI entry points
 │       └── core/
