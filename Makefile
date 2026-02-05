@@ -1,28 +1,28 @@
 # Makefile for Anki Python Deck Tool
 
-define HELP_MSG
-Available commands:
-  install              Install dependencies
-  dev                  Install development dependencies
-  test                 Run tests
-  lint                 Run linting checks
-  format               Format code
-  type-check           Run type checking
-  clean                Clean build artifacts
-  build                Build distribution packages
-  build-exe            Build single-file executable
-  install-system-wide  Install executable system-wide
-  examples             Build and push all example decks
-  example-basic        Build and push basic example
-  example-language     Build and push language learning example
-  example-technical    Build and push technical example
-  all                  Run all checks
-endef
 
 .PHONY: help install test lint format type-check clean dev build build-exe install-system-wide all examples example-basic example-language example-technical example-math
 
-help:  ## Show this help message
-	@echo $(HELP_MSG)
+# Show this help message
+help:
+	@echo Available commands:
+	@echo   install              - Install dependencies
+	@echo   dev                  - Install development dependencies
+	@echo   test                 - Run tests
+	@echo   lint                 - Run linting checks
+	@echo   format               - Format code
+	@echo   type-check           - Run type checking
+	@echo   clean                - Clean build artifacts
+	@echo   build                - Build distribution packages
+	@echo   build-exe            - Build single-file executable
+	@echo   install-system-wide  - Install executable system-wide
+	@echo   examples             - Build and push all example decks
+	@echo   example-basic        - Build and push basic example
+	@echo   example-language     - Build and push language learning example
+	@echo   example-technical    - Build and push technical example
+	@echo   example-math         - Build and push math example
+	@echo   all                  - Run all checks
+
 
 install:  ## Install dependencies
 	python -m pip install -e .
