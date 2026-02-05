@@ -9,6 +9,8 @@
         "**/*.egg-info": true,
         "**/__pycache__": true,
         "build/": true,
+        "**/*cache*": true,
+        "**/*tmp*": true,
     },
     "python.analysis.typeCheckingMode": "strict"
 }
