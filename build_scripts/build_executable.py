@@ -140,7 +140,7 @@ def build_executables() -> None:
     # Clean previous builds
     if dist_dir.exists():
         shutil.rmtree(dist_dir)
-    
+
     build_dir = project_root / "build"
     if build_dir.exists():
         shutil.rmtree(build_dir)
@@ -182,7 +182,7 @@ def create_distribution_package() -> None:
     project_root = Path(__file__).parent.parent
     dist_dir = project_root / "dist"
     platform_name = get_platform_name()
-    
+
     # Get version from pyproject.toml (simplified approach)
     version = "0.1.0"  # Could parse from pyproject.toml
 
@@ -196,7 +196,7 @@ def create_distribution_package() -> None:
 
     # Copy executables
     print(f"\nCreating distribution package: {package_name}")
-    
+
     if platform_name == "windows":
         shutil.copy(dist_dir / "anki-tool.exe", package_dir)
         shutil.copy(dist_dir / "anki-tool-gui.exe", package_dir)
@@ -212,7 +212,7 @@ def create_distribution_package() -> None:
     shutil.copy(project_root / "LICENSE", package_dir)
 
     # Create archive
-    print(f"Creating archive...")
+    print("Creating archive...")
     if platform_name == "windows":
         archive_name = shutil.make_archive(
             str(dist_dir / package_name), "zip", dist_dir, package_name

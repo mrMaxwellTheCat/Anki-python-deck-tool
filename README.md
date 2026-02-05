@@ -33,6 +33,8 @@ A professional, modular command-line tool to generate Anki decks (`.apkg`) from 
 - **Flexible Architecture**: Modular design supporting multiple note types and custom configurations.
 - **Type-Safe**: Modern Python type hints throughout the codebase.
 - **Well-Tested**: Comprehensive test suite with pytest.
+- **GUI Interface**: User-friendly graphical interface for users who prefer not to use the command line.
+- **Standalone Executables**: Pre-built executables available for Windows, macOS, and Linux.
 
 ## Prerequisites
 
@@ -47,7 +49,23 @@ Before using this tool, ensure you have the following:
 
 ## Installation
 
-### Quick Install
+### Option 1: Standalone Executables (Recommended for Users)
+
+**No Python installation required!** Download pre-built executables for your platform from the [Releases page](https://github.com/mrMaxwellTheCat/Anki-python-deck-tool/releases).
+
+**Available for:**
+- Windows (`.zip`)
+- macOS (`.tar.gz`)
+- Linux (`.tar.gz`)
+
+Each release includes:
+- `anki-tool` - Command-line interface
+- `anki-tool-gui` - Graphical user interface
+- Documentation (README.md, LICENSE)
+
+Simply extract the archive and run the executables. No dependencies needed!
+
+### Option 2: Install from Source
 
 It is recommended to install the tool in a virtual environment.
 
@@ -126,9 +144,32 @@ Here's a minimal example to get you started:
 
 ## Usage
 
-The tool provides a CLI entry point \`anki-tool\` with two main commands: \`build\` and \`push\`.
+The tool provides both a **Graphical User Interface (GUI)** and a **Command-Line Interface (CLI)**.
 
-### 1. Build a Deck (\`build\`)
+### Graphical User Interface (GUI)
+
+For users who prefer a visual interface, simply run:
+
+\`\`\`bash
+anki-tool-gui
+\`\`\`
+
+Or, if using a standalone executable, double-click `anki-tool-gui` (or `anki-tool-gui.exe` on Windows).
+
+**Features:**
+- File browsers for easy file selection
+- Visual form for deck configuration
+- Build and push buttons with progress feedback
+- Status messages and error dialogs
+- Optional AnkiWeb sync
+
+The GUI provides the same functionality as the CLI but with an intuitive visual interface.
+
+### Command-Line Interface (CLI)
+
+The CLI provides two main commands: \`build\` and \`push\`.
+
+#### 1. Build a Deck (\`build\`)
 
 Generates an \`.apkg\` file from your YAML data and configuration.
 
@@ -151,7 +192,7 @@ anki-tool build \\
   --deck-name "Spanish Vocabulary"
 \`\`\`
 
-### 2. Push to Anki (\`push\`)
+#### 2. Push to Anki (\`push\`)
 
 Uploads a generated \`.apkg\` file to Anki via AnkiConnect.
 
@@ -321,6 +362,22 @@ pytest --cov=anki_tool
 pytest tests/test_builder.py -v
 \`\`\`
 
+### Building Standalone Executables
+
+To build standalone executables for your platform:
+
+\`\`\`bash
+# Install development dependencies (includes PyInstaller)
+pip install -e ".[dev]"
+
+# Run the build script
+python build_scripts/build_executable.py
+\`\`\`
+
+The executables will be created in the `dist/` directory along with a platform-specific archive (`.zip` for Windows, `.tar.gz` for macOS/Linux).
+
+For more details on building executables, see [build_scripts/README.md](build_scripts/README.md).
+
 ## Future Plans
 
 - **Media Support**: Automatically detect and include media files (images, audio) referenced in YAML.
@@ -328,8 +385,6 @@ pytest tests/test_builder.py -v
 - **Multiple Note Types**: Support multiple note types in a single deck build.
 - **Verbose Logging**: Add \`--verbose\` flag for detailed logging.
 - **Init Command**: Scaffold new projects with example files (\`anki-tool init\`).
-- **GUI Interface**: Graphical interface for users who prefer not to use the command line.
-- **Packaged Releases**: Standalone executables for Windows, macOS, and Linux.
 
 See [ROADMAP.md](ROADMAP.md) for the complete development roadmap.
 

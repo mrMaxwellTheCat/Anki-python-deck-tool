@@ -6,7 +6,6 @@ This module provides a simple GUI for users who prefer not to use the command li
 import tkinter as tk
 from pathlib import Path
 from tkinter import filedialog, messagebox, ttk
-from typing import Optional
 
 import yaml
 
@@ -50,7 +49,7 @@ class AnkiToolGUI:
         """Create and layout all GUI widgets."""
         # Create main container with padding
         main_frame = ttk.Frame(self.root, padding="20")
-        main_frame.grid(row=0, column=0, sticky=(tk.W, tk.E, tk.N, tk.S))
+        main_frame.grid(row=0, column=0, sticky=(tk.W, tk.E, tk.N, tk.S))  # type: ignore[arg-type]
         self.root.columnconfigure(0, weight=1)
         self.root.rowconfigure(0, weight=1)
 
@@ -67,7 +66,7 @@ class AnkiToolGUI:
             row=1, column=0, sticky=tk.W, pady=5
         )
         ttk.Entry(main_frame, textvariable=self.data_file_var, width=50).grid(
-            row=1, column=1, sticky=(tk.W, tk.E), pady=5, padx=5
+            row=1, column=1, sticky=(tk.W, tk.E), pady=5, padx=5  # type: ignore[arg-type]
         )
         ttk.Button(main_frame, text="Browse...", command=self._browse_data_file).grid(
             row=1, column=2, pady=5
@@ -78,34 +77,34 @@ class AnkiToolGUI:
             row=2, column=0, sticky=tk.W, pady=5
         )
         ttk.Entry(main_frame, textvariable=self.config_file_var, width=50).grid(
-            row=2, column=1, sticky=(tk.W, tk.E), pady=5, padx=5
+            row=2, column=1, sticky=(tk.W, tk.E), pady=5, padx=5  # type: ignore[arg-type]
         )
-        ttk.Button(
-            main_frame, text="Browse...", command=self._browse_config_file
-        ).grid(row=2, column=2, pady=5)
+        ttk.Button(main_frame, text="Browse...", command=self._browse_config_file).grid(
+            row=2, column=2, pady=5
+        )
 
         # Output file selection
         ttk.Label(main_frame, text="Output File (.apkg):").grid(
             row=3, column=0, sticky=tk.W, pady=5
         )
         ttk.Entry(main_frame, textvariable=self.output_file_var, width=50).grid(
-            row=3, column=1, sticky=(tk.W, tk.E), pady=5, padx=5
+            row=3, column=1, sticky=(tk.W, tk.E), pady=5, padx=5  # type: ignore[arg-type]
         )
-        ttk.Button(
-            main_frame, text="Browse...", command=self._browse_output_file
-        ).grid(row=3, column=2, pady=5)
+        ttk.Button(main_frame, text="Browse...", command=self._browse_output_file).grid(
+            row=3, column=2, pady=5
+        )
 
         # Deck name
         ttk.Label(main_frame, text="Deck Name:").grid(
             row=4, column=0, sticky=tk.W, pady=5
         )
         ttk.Entry(main_frame, textvariable=self.deck_name_var, width=50).grid(
-            row=4, column=1, sticky=(tk.W, tk.E), pady=5, padx=5
+            row=4, column=1, sticky=(tk.W, tk.E), pady=5, padx=5  # type: ignore[arg-type]
         )
 
         # Separator
         ttk.Separator(main_frame, orient="horizontal").grid(
-            row=5, column=0, columnspan=3, sticky=(tk.W, tk.E), pady=20
+            row=5, column=0, columnspan=3, sticky=(tk.W, tk.E), pady=20  # type: ignore[arg-type]
         )
 
         # Build button
@@ -119,7 +118,7 @@ class AnkiToolGUI:
 
         # Separator
         ttk.Separator(main_frame, orient="horizontal").grid(
-            row=7, column=0, columnspan=3, sticky=(tk.W, tk.E), pady=20
+            row=7, column=0, columnspan=3, sticky=(tk.W, tk.E), pady=20  # type: ignore[arg-type]
         )
 
         # Push section
@@ -146,7 +145,7 @@ class AnkiToolGUI:
             main_frame, text="Ready", relief=tk.SUNKEN, anchor=tk.W
         )
         self.status_label.grid(
-            row=11, column=0, columnspan=3, sticky=(tk.W, tk.E), pady=(20, 0)
+            row=11, column=0, columnspan=3, sticky=(tk.W, tk.E), pady=(20, 0)  # type: ignore[arg-type]
         )
 
         # Configure column weights for resizing
@@ -252,7 +251,9 @@ class AnkiToolGUI:
             messagebox.showerror("Build Error", str(e))
         except Exception as e:
             self._update_status("Build failed")
-            messagebox.showerror("Unexpected Error", f"An unexpected error occurred:\n{e}")
+            messagebox.showerror(
+                "Unexpected Error", f"An unexpected error occurred:\n{e}"
+            )
 
     def _push_deck(self) -> None:
         """Push the deck to Anki via AnkiConnect."""
@@ -280,19 +281,23 @@ class AnkiToolGUI:
                 connector.sync()
 
             self._update_status("Successfully imported into Anki")
+            sync_msg = " and synced" if sync else ""
             messagebox.showinfo(
-                "Success", f"Deck successfully imported into Anki{' and synced' if sync else ''}"
+                "Success", f"Deck successfully imported into Anki{sync_msg}"
             )
 
         except AnkiConnectError as e:
             self._update_status("Push failed")
-            messagebox.showerror(
-                "AnkiConnect Error",
-                f"Failed to connect to Anki:\n{e}\n\nMake sure Anki is running with the AnkiConnect add-on enabled.",
+            error_msg = (
+                f"Failed to connect to Anki:\n{e}\n\n"
+                "Make sure Anki is running with the AnkiConnect add-on enabled."
             )
+            messagebox.showerror("AnkiConnect Error", error_msg)
         except Exception as e:
             self._update_status("Push failed")
-            messagebox.showerror("Unexpected Error", f"An unexpected error occurred:\n{e}")
+            messagebox.showerror(
+                "Unexpected Error", f"An unexpected error occurred:\n{e}"
+            )
 
 
 def main() -> None:
