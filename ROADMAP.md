@@ -19,23 +19,31 @@ Transform the Anki Python Deck Tool into a comprehensive, user-friendly solution
 - [x] **Packaging Upgrade**
     - [x] Create `requirements.txt` for consistent environment setup.
     - [x] Update `pyproject.toml` with modern build system configuration.
-    - [ ] Evaluate `poetry` or `uv` for advanced dependency management.
-    - [ ] Set up optional extras for GUI, validation, and other features.
+    - [x] Set up optional extras for dev dependencies.
+    - [ ] Evaluate `poetry` or `uv` for advanced dependency management (current setup is sufficient).
 
 - [x] **GitHub Actions Workflows**
     - [x] Create `.github/workflows/ci.yml` for Continuous Integration.
         - [x] Job: Run `ruff` linting and formatting check.
         - [x] Job: Run `mypy` static type checking.
         - [x] Job: Run `pytest` suite on Ubuntu-latest, Windows-latest, and macOS-latest.
+        - [x] Job: Upload coverage to Codecov.
     - [x] Create `.github/workflows/release.yml` for automated releases.
         - [x] Trigger on tag push (v*).
         - [x] Build distribution (wheel/sdist).
         - [x] Publish to PyPI.
+    - [x] Create `.github/workflows/security.yml` for security scanning.
+        - [x] Job: Run `bandit` for security linting.
+        - [x] Job: Run `pip-audit` for dependency vulnerability scanning.
+    - [x] Create `.github/workflows/build_release.yml` for executable building.
+        - [x] Build standalone executables for Windows, macOS, and Linux.
+    - [x] Set up Dependabot for automated dependency updates.
 
 - [x] **Local Development Experience**
     - [x] Configure `ruff` and `mypy` in `pyproject.toml` with strict rules.
     - [x] Add `.pre-commit-config.yaml` to enforce linting before commit.
-    - [x] Add `Makefile` for common tasks (`make test`, `make lint`, etc.).
+    - [x] Add `Makefile` for common tasks (`make test`, `make lint`, `make build-exe`, etc.).
+    - [x] Add VSCode tasks configuration (`.vscode/tasks.json`) for local workflows.
 
 ## 2. Code Quality & Standards
 

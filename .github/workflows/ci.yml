@@ -26,6 +26,9 @@ jobs:
           python -m pip install --upgrade pip
           pip install ruff
 
+      - name: Run ruff auto-fix
+        run: ruff check . --fix
+
       - name: Run ruff check
         run: ruff check .
 
