@@ -7,6 +7,7 @@ dependencies = [
     "requests",
     "pyyaml",
     "click",
+    "pydantic>=2.0.0",
 ]
 requires-python = ">=3.10"
 readme = "README.md"
