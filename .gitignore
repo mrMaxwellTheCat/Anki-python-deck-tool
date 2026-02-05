@@ -23,6 +23,7 @@ build/
 .backup/
 *.apkg
 *.colpkg
+output/
 
 # Generated logs or temp files
 *.log
