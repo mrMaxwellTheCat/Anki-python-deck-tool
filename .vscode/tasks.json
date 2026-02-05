@@ -7,7 +7,7 @@
         {
             "label": "Build and Push Debug Deck",
             "type": "shell",
-            "command": "python -m anki_tool.cli build --data data/debug_deck.yaml --config configs/debug_config.yaml --output data/debug_deck.apkg ; python -m anki_tool.cli push --apkg data/debug_deck.apkg",
+            "command": "python -m anki_yaml_tool.cli build --data data/debug_deck.yaml --config configs/debug_config.yaml --output data/debug_deck.apkg ; python -m anki_yaml_tool.cli push --apkg data/debug_deck.apkg",
             "group": "build",
             "presentation": {
                 "reveal": "always",
@@ -18,9 +18,9 @@
         {
             "label": "Build and Push All Example Decks",
             "type": "shell",
-            "command": "python -m anki_tool.cli build --data examples/basic/data.yaml --config examples/basic/config.yaml --output examples/basic/deck.apkg --deck-name \"Testing::Basic Example\" && python -m anki_tool.cli push --apkg examples/basic/deck.apkg && python -m anki_tool.cli build --data examples/language-learning/data.yaml --config examples/language-learning/config.yaml --output examples/language-learning/deck.apkg --deck-name \"Testing::Language Learning\" && python -m anki_tool.cli push --apkg examples/language-learning/deck.apkg && python -m anki_tool.cli build --data examples/technical/data.yaml --config examples/technical/config.yaml --output examples/technical/deck.apkg --deck-name \"Testing::Technical Example\" && python -m anki_tool.cli push --apkg examples/technical/deck.apkg",
+            "command": "python -m anki_yaml_tool.cli build --data examples/basic/data.yaml --config examples/basic/config.yaml --output examples/basic/deck.apkg --deck-name \"Testing::Basic Example\" && python -m anki_yaml_tool.cli push --apkg examples/basic/deck.apkg && python -m anki_yaml_tool.cli build --data examples/language-learning/data.yaml --config examples/language-learning/config.yaml --output examples/language-learning/deck.apkg --deck-name \"Testing::Language Learning\" && python -m anki_yaml_tool.cli push --apkg examples/language-learning/deck.apkg && python -m anki_yaml_tool.cli build --data examples/technical/data.yaml --config examples/technical/config.yaml --output examples/technical/deck.apkg --deck-name \"Testing::Technical Example\" && python -m anki_yaml_tool.cli push --apkg examples/technical/deck.apkg",
             "windows": {
-                "command": "python -m anki_tool.cli build --data examples/basic/data.yaml --config examples/basic/config.yaml --output examples/basic/deck.apkg --deck-name \"Testing::Basic Example\" && python -m anki_tool.cli push --apkg examples/basic/deck.apkg && python -m anki_tool.cli build --data examples/language-learning/data.yaml --config examples/language-learning/config.yaml --output examples/language-learning/deck.apkg --deck-name \"Testing::Language Learning\" && python -m anki_tool.cli push --apkg examples/language-learning/deck.apkg && python -m anki_tool.cli build --data examples/technical/data.yaml --config examples/technical/config.yaml --output examples/technical/deck.apkg --deck-name \"Testing::Technical Example\" && python -m anki_tool.cli push --apkg examples/technical/deck.apkg"
+                "command": "python -m anki_yaml_tool.cli build --data examples/basic/data.yaml --config examples/basic/config.yaml --output examples/basic/deck.apkg --deck-name \"Testing::Basic Example\" && python -m anki_yaml_tool.cli push --apkg examples/basic/deck.apkg && python -m anki_yaml_tool.cli build --data examples/language-learning/data.yaml --config examples/language-learning/config.yaml --output examples/language-learning/deck.apkg --deck-name \"Testing::Language Learning\" && python -m anki_yaml_tool.cli push --apkg examples/language-learning/deck.apkg && python -m anki_yaml_tool.cli build --data examples/technical/data.yaml --config examples/technical/config.yaml --output examples/technical/deck.apkg --deck-name \"Testing::Technical Example\" && python -m anki_yaml_tool.cli push --apkg examples/technical/deck.apkg"
             },
             "group": "build",
             "presentation": {

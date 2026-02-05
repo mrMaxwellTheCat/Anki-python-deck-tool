@@ -184,7 +184,7 @@ ls -la tests/test_cli.py
 cat CHANGELOG.md
 
 # Run tests to ensure everything works
-pytest --cov=anki_tool
+pytest --cov=anki_yaml_tool
 # Should pass with 96.77% coverage
 ```
 

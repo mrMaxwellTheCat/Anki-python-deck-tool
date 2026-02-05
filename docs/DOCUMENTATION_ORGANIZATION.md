@@ -179,7 +179,7 @@ from .builder import AnkiBuilder
 from typing import List, Dict
 
 # ✅ Good
-from anki_tool.core.builder import AnkiBuilder
+from anki_yaml_tool.core.builder import AnkiBuilder
 ```
 
 ---
@@ -198,7 +198,7 @@ from anki_tool.core.builder import AnkiBuilder
 pytest tests/
 
 # With coverage
-pytest tests/ --cov=anki_tool --cov-report=term-missing
+pytest tests/ --cov=anki_yaml_tool --cov-report=term-missing
 
 # VSCode task (recommended)
 Ctrl+Shift+P → "Tasks: Run Task" → "CI: Test - pytest with Coverage"

@@ -150,7 +150,7 @@ TOTAL:            96.77% (155 statements, 5 missing)
 1. `pyproject.toml` - Added pytest-cov, coverage config, bandit config
 2. `.github/workflows/ci.yml` - Added coverage reporting and Codecov upload
 3. `README.md` - Added coverage badge
-4. `src/anki_tool/cli.py` - Added --version flag with importlib.metadata
+4. `src/anki_yaml_tool/cli.py` - Added --version flag with importlib.metadata
 
 ## Impact Analysis
 
@@ -199,7 +199,7 @@ To verify all improvements:
 
 1. **Test Coverage**: ✅ Verified
    ```bash
-   pytest --cov=anki_tool --cov-report=term-missing
+   pytest --cov=anki_yaml_tool --cov-report=term-missing
    # Result: 96.77% coverage, all 48 tests passing
    ```
 
