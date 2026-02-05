@@ -28,3 +28,7 @@ build/
 # Generated logs or temp files
 *.log
 *.tmp
+
+# PyInstaller
+*.spec
+build_scripts/*.spec

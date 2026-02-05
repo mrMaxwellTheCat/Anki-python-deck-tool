@@ -14,6 +14,7 @@ license = {text = "GPL-3.0-only"}
 
 [project.scripts]
 anki-tool = "anki_tool.cli:main"
+anki-tool-gui = "anki_tool.gui:main"
 
 [project.optional-dependencies]
 dev = [
@@ -23,6 +24,7 @@ dev = [
     "types-requests",
     "types-PyYAML",
     "pre-commit>=3.5.0",
+    "pyinstaller>=6.0.0",
 ]
 
 [build-system]
