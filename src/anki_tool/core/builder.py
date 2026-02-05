@@ -34,7 +34,7 @@ class AnkiBuilder:
         self.model_config = model_config
         self.model = self._build_model()
         self.deck = genanki.Deck(self.stable_id(deck_name), deck_name)
-        self.media_files = []
+        self.media_files: list[str] = []
 
     @staticmethod
     def stable_id(name: str) -> int:
