@@ -18,6 +18,7 @@ anki-tool = "anki_tool.cli:main"
 [project.optional-dependencies]
 dev = [
     "pytest>=7.4.0",
+    "pytest-cov>=4.1.0",
     "ruff>=0.1.9",
     "mypy>=1.7.0",
     "types-requests",
@@ -50,4 +51,25 @@ testpaths = ["tests"]
 python_files = "test_*.py"
 python_classes = "Test*"
 python_functions = "test_*"
-addopts = "-v --tb=short"
+addopts = "-v --tb=short --cov=anki_tool --cov-report=term-missing --cov-report=html --cov-report=xml"
+
+[tool.coverage.run]
+source = ["src/anki_tool"]
+omit = ["*/tests/*", "*/__pycache__/*", "*/venv/*"]
+
+[tool.coverage.report]
+exclude_lines = [
+    "pragma: no cover",
+    "def __repr__",
+    "raise AssertionError",
+    "raise NotImplementedError",
+    "if __name__ == .__main__.:",
+    "if TYPE_CHECKING:",
+]
+fail_under = 80
+precision = 2
+show_missing = true
+
+[tool.bandit]
+exclude_dirs = ["tests", "venv", ".venv"]
+skips = ["B101"]  # Skip assert_used - common in tests

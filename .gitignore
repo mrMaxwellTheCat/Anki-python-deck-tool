@@ -29,5 +29,5 @@ build/
 *.log
 *.tmp
 
-# Claudecode
+# Claude / Claudecode
 tmpclaude*

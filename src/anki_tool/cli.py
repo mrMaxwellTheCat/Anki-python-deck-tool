@@ -3,6 +3,7 @@
 This module provides the CLI entry points for building and pushing Anki decks.
 """
 
+from importlib.metadata import version
 from pathlib import Path
 
 import click
@@ -19,6 +20,7 @@ from anki_tool.core.exceptions import (
 
 
 @click.group()
+@click.version_option(version=version("anki-tool"), prog_name="anki-tool")
 def cli():
     """Anki Python Deck Tool - Build and push decks from YAML."""
     pass

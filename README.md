@@ -3,6 +3,7 @@
 [![Python Version](https://img.shields.io/badge/python-3.10%2B-blue)]()
 [![License: GPL-3.0](https://img.shields.io/badge/License-GPL%203.0-blue.svg)](https://opensource.org/licenses/GPL-3.0)
 [![CI Status](https://github.com/mrMaxwellTheCat/Anki-python-deck-tool/workflows/CI/badge.svg)](https://github.com/mrMaxwellTheCat/Anki-python-deck-tool/actions)
+[![codecov](https://codecov.io/gh/mrMaxwellTheCat/Anki-python-deck-tool/branch/main/graph/badge.svg)](https://codecov.io/gh/mrMaxwellTheCat/Anki-python-deck-tool)
 
 A professional, modular command-line tool to generate Anki decks (`.apkg`) from human-readable YAML source files and push them directly to Anki via AnkiConnect.
 
@@ -51,7 +52,7 @@ Before using this tool, ensure you have the following:
 
 It is recommended to install the tool in a virtual environment.
 
-\`\`\`bash
+```bash
 # Clone the repository
 git clone https://github.com/mrMaxwellTheCat/Anki-python-deck-tool.git
 cd Anki-python-deck-tool
@@ -67,13 +68,13 @@ source venv/bin/activate
 
 # Install the package
 pip install .
-\`\`\`
+```
 
 ### Development Installation
 
 For contributing or development work:
 
-\`\`\`bash
+```bash
 # Install in editable mode with development dependencies
 pip install -e ".[dev]"
 
@@ -82,7 +83,7 @@ make dev
 
 # Set up pre-commit hooks (optional but recommended)
 pre-commit install
-\`\`\`
+```
 
 See [CONTRIBUTING.md](CONTRIBUTING.md) for detailed development setup instructions.
 
@@ -91,7 +92,7 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) for detailed development setup instructio
 Here's a minimal example to get you started:
 
 1. **Create a configuration file** (\`my_model.yaml\`):
-   \`\`\`yaml
+   ```yaml
    name: "Basic Model"
    fields:
      - "Front"
@@ -101,10 +102,10 @@ Here's a minimal example to get you started:
        qfmt: "{{Front}}"
        afmt: "{{FrontSide}}<hr id=answer>{{Back}}"
    css: ".card { font-family: arial; font-size: 20px; text-align: center; }"
-   \`\`\`
+   ```
 
 2. **Create a data file** (\`my_cards.yaml\`):
-   \`\`\`yaml
+   ```yaml
    - front: "Hello"
      back: "Bonjour"
      tags: ["basics", "greetings"]
@@ -112,17 +113,17 @@ Here's a minimal example to get you started:
    - front: "Goodbye"
      back: "Au revoir"
      tags: ["basics"]
-   \`\`\`
+   ```
 
 3. **Build the deck**:
-   \`\`\`bash
+   ```bash
    anki-tool build --data my_cards.yaml --config my_model.yaml --output french.apkg --deck-name "French Basics"
-   \`\`\`
+   ```
 
 4. **Push to Anki** (optional, requires AnkiConnect):
-   \`\`\`bash
+   ```bash
    anki-tool push --apkg french.apkg --sync
-   \`\`\`
+   ```
 
 ## Usage
 
@@ -132,9 +133,9 @@ The tool provides a CLI entry point \`anki-tool\` with two main commands: \`buil
 
 Generates an \`.apkg\` file from your YAML data and configuration.
 
-\`\`\`bash
+```bash
 anki-tool build --data data/my_deck.yaml --config configs/japanese_num.yaml --output "My Deck.apkg" --deck-name "Japanese Numbers"
-\`\`\`
+```
 
 **Options:**
 - \`--data PATH\` (Required): Path to the YAML file containing note data.
@@ -143,21 +144,21 @@ anki-tool build --data data/my_deck.yaml --config configs/japanese_num.yaml --ou
 - \`--deck-name TEXT\`: Name of the deck inside Anki (Default: \`"Generated Deck"\`).
 
 **Example with all options:**
-\`\`\`bash
+```bash
 anki-tool build \\
   --data data/vocabulary.yaml \\
   --config configs/basic_model.yaml \\
   --output builds/vocabulary_v1.apkg \\
   --deck-name "Spanish Vocabulary"
-\`\`\`
+```
 
 ### 2. Push to Anki (\`push\`)
 
 Uploads a generated \`.apkg\` file to Anki via AnkiConnect.
 
-\`\`\`bash
+```bash
 anki-tool push --apkg "My Deck.apkg" --sync
-\`\`\`
+```
 
 **Options:**
 - \`--apkg PATH\` (Required): Path to the \`.apkg\` file.
@@ -173,7 +174,7 @@ This YAML file defines how your cards look. It specifies the note type structure
 
 **Example: \`configs/japanese_num.yaml\`**
 
-\`\`\`yaml
+```yaml
 name: "Japanese Numbers Model"  # Name of the Note Type in Anki
 
 css: |
@@ -199,7 +200,7 @@ templates:
       <hr id=answer>
       {{Kanji}}<br>
       <span class="highlight">{{Reading}}</span>
-\`\`\`
+```
 
 **Configuration Structure:**
 - \`name\` (required): Name of the note type/model in Anki
@@ -213,7 +214,7 @@ This YAML file defines the content of your cards. Field names must match the \`f
 
 **Example: \`data/my_deck.yaml\`**
 
-\`\`\`yaml
+```yaml
 - numeral: "1"
   kanji: "一"
   reading: "ichi"
@@ -231,7 +232,7 @@ This YAML file defines the content of your cards. Field names must match the \`f
   kanji: "三"
   reading: "san"
   tags: ["basic", "numbers"]
-\`\`\`
+```
 
 **Data Structure:**
 - Each item in the list represents one note/card
@@ -246,7 +247,7 @@ This YAML file defines the content of your cards. Field names must match the \`f
 
 ## Project Structure
 
-\`\`\`
+```
 Anki-python-deck-tool/
 ├── .github/
 │   ├── workflows/
@@ -280,7 +281,7 @@ Anki-python-deck-tool/
 ├── ROADMAP.md                   # Future development plans
 ├── pyproject.toml               # Project metadata and tool configs
 └── requirements.txt             # Project dependencies
-\`\`\`
+```
 
 ## Development
 
@@ -288,7 +289,7 @@ This project welcomes contributions! For detailed setup instructions, coding sta
 
 ### Quick Development Setup
 
-\`\`\`bash
+```bash
 # Install in development mode
 pip install -e ".[dev]"
 
@@ -306,11 +307,11 @@ make type-check
 
 # Run all checks
 make all
-\`\`\`
+```
 
 ### Running Tests
 
-\`\`\`bash
+```bash
 # Run all tests
 pytest
 
@@ -319,7 +320,7 @@ pytest --cov=anki_tool
 
 # Run specific test file
 pytest tests/test_builder.py -v
-\`\`\`
+```
 
 ## Future Plans
 
