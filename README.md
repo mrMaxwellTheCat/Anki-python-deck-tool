@@ -40,11 +40,11 @@ A professional, modular command-line tool to generate Anki decks (`.apkg`) from 
 Before using this tool, ensure you have the following:
 
 1.  **Python 3.10+** installed.
-2.  **Anki Desktop** installed and running (only required for the \`push\` command).
-3.  **AnkiConnect** add-on installed in Anki (only required for the \`push\` command).
+2.  **Anki Desktop** installed and running (only required for the `push` command).
+3.  **AnkiConnect** add-on installed in Anki (only required for the `push` command).
     *   Open Anki → Tools → Add-ons → Get Add-ons...
-    *   Code: \`2055492159\`
-    *   Restart Anki to enable the API (listens on \`127.0.0.1:8765\`).
+    *   Code: `2055492159`
+    *   Restart Anki to enable the API (listens on `127.0.0.1:8765`).
 
 ## Installation
 
@@ -91,7 +91,7 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) for detailed development setup instructio
 
 Here's a minimal example to get you started:
 
-1. **Create a configuration file** (\`my_model.yaml\`):
+1. **Create a configuration file** (`my_model.yaml`):
    ```yaml
    name: "Basic Model"
    fields:
@@ -104,7 +104,7 @@ Here's a minimal example to get you started:
    css: ".card { font-family: arial; font-size: 20px; text-align: center; }"
    ```
 
-2. **Create a data file** (\`my_cards.yaml\`):
+2. **Create a data file** (`my_cards.yaml`):
    ```yaml
    - front: "Hello"
      back: "Bonjour"
@@ -146,44 +146,44 @@ If these files exist, the build process will automatically use them.
 
 ## Usage
 
-The tool provides a CLI entry point \`anki-yaml-tool-tool-tool-tool-tool-tool\` with two main commands: \`build\` and \`push\`.
+The tool provides a CLI entry point `anki-yaml-tool` with two main commands: `build` and `push`.
 
-### 1. Build a Deck (\`build\`)
+### 1. Build a Deck (`build`)
 
-Generates an \`.apkg\` file from your YAML data and configuration.
+Generates an `.apkg` file from your YAML data and configuration.
 
 ```bash
-anki-yaml-tool-tool-tool-tool-tool-tool build --data data/my_deck.yaml --config configs/japanese_num.yaml --output "My Deck.apkg" --deck-name "Japanese Numbers"
+anki-yaml-tool-tool-tool build --data data/my_deck.yaml --config configs/japanese_num.yaml --output "My Deck.apkg" --deck-name "Japanese Numbers"
 ```
 
 **Options:**
-- \`--data PATH\` (Required): Path to the YAML file containing note data.
-- \`--config PATH\` (Required): Path to the YAML file defining the Note Type (Model).
-- \`--output PATH\`: Path where the \`.apkg\` will be saved (Default: \`deck.apkg\`).
-- \`--deck-name TEXT\`: Name of the deck inside Anki (Default: \`"Generated Deck"\`).
+- `--data PATH` (Required): Path to the YAML file containing note data.
+- `--config PATH` (Required): Path to the YAML file defining the Note Type (Model).
+- `--output PATH`: Path where the `.apkg` will be saved (Default: `deck.apkg`).
+- `--deck-name TEXT`: Name of the deck inside Anki (Default: `"Generated Deck"`).
 
 **Example with all options:**
 ```bash
-anki-yaml-tool-tool-tool-tool-tool-tool build \\
+anki-yaml-tool-tool-tool build \\
   --data data/vocabulary.yaml \\
   --config configs/basic_model.yaml \\
   --output builds/vocabulary_v1.apkg \\
   --deck-name "Spanish Vocabulary"
 ```
 
-### 2. Push to Anki (\`push\`)
+### 2. Push to Anki (`push`)
 
-Uploads a generated \`.apkg\` file to Anki via AnkiConnect.
+Uploads a generated `.apkg` file to Anki via AnkiConnect.
 
 ```bash
-anki-yaml-tool-tool-tool-tool-tool-tool push --apkg "My Deck.apkg" --sync
+anki-yaml-tool-tool-tool push --apkg "My Deck.apkg" --sync
 ```
 
 **Options:**
-- \`--apkg PATH\` (Required): Path to the \`.apkg\` file.
-- \`--sync\`: Force a synchronization with AnkiWeb after importing.
+- `--apkg PATH` (Required): Path to the `.apkg` file.
+- `--sync`: Force a synchronization with AnkiWeb after importing.
 
-**Note**: Ensure Anki is running with the AnkiConnect add-on enabled before using the \`push\` command.
+**Note**: Ensure Anki is running with the AnkiConnect add-on enabled before using the `push` command.
 
 ## File Formats
 
@@ -191,7 +191,7 @@ anki-yaml-tool-tool-tool-tool-tool-tool push --apkg "My Deck.apkg" --sync
 
 This YAML file defines how your cards look. It specifies the note type structure including fields, card templates, and styling.
 
-**Example: \`configs/japanese_num.yaml\`**
+**Example: `configs/japanese_num.yaml`**
 
 ```yaml
 name: "Japanese Numbers Model"  # Name of the Note Type in Anki
@@ -222,16 +222,16 @@ templates:
 ```
 
 **Configuration Structure:**
-- \`name\` (required): Name of the note type/model in Anki
-- \`fields\` (required): List of field names for the note type
-- \`templates\` (required): List of card templates with \`name\`, \`qfmt\` (front), and \`afmt\` (back)
-- \`css\` (optional): CSS styling for the cards
+- `name` (required): Name of the note type/model in Anki
+- `fields` (required): List of field names for the note type
+- `templates` (required): List of card templates with `name`, `qfmt` (front), and `afmt` (back)
+- `css` (optional): CSS styling for the cards
 
 ### Data File (Notes)
 
-This YAML file defines the content of your cards. Field names must match the \`fields\` in your config (case-insensitive).
+This YAML file defines the content of your cards. Field names must match the `fields` in your config (case-insensitive).
 
-**Example: \`data/my_deck.yaml\`**
+**Example: `data/my_deck.yaml`**
 
 ```yaml
 - numeral: "1"
@@ -256,8 +256,8 @@ This YAML file defines the content of your cards. Field names must match the \`f
 **Data Structure:**
 - Each item in the list represents one note/card
 - Keys should match field names from the config (case-insensitive)
-- \`tags\` (optional): List of tags to apply to the note
-- \`id\` (optional): Unique identifier that gets added as a special tag (\`id::value\`)
+- `tags` (optional): List of tags to apply to the note
+- `id` (optional): Unique identifier that gets added as a special tag (`id::value`)
 
 **Tips:**
 - Field values can contain HTML for formatting
@@ -278,7 +278,7 @@ Anki-python-deck-tool/
 ├── data/                        # Example data files
 │   └── debug_deck.yaml
 ├── src/
-│   └── anki_tool/
+│   └── anki-yaml-tool/
 │       ├── __init__.py
 │       ├── cli.py               # CLI entry points
 │       └── core/
@@ -335,7 +335,7 @@ make all
 pytest
 
 # Run with coverage
-pytest --cov=anki_tool
+pytest --cov=anki-yaml-tool
 
 # Run specific test file
 pytest tests/test_builder.py -v
@@ -346,8 +346,8 @@ pytest tests/test_builder.py -v
 - **Media Support**: Automatically detect and include media files (images, audio) referenced in YAML.
 - **Schema Validation**: Validate YAML structure using pydantic or jsonschema.
 - **Multiple Note Types**: Support multiple note types in a single deck build.
-- **Verbose Logging**: Add \`--verbose\` flag for detailed logging.
-- **Init Command**: Scaffold new projects with example files (\`anki-yaml-tool-tool-tool-tool-tool-tool init\`).
+- **Verbose Logging**: Add `--verbose` flag for detailed logging.
+- **Init Command**: Scaffold new projects with example files (`anki-yaml-tool init`).
 - **GUI Interface**: Graphical interface for users who prefer not to use the command line.
 - **Packaged Releases**: Standalone executables for Windows, macOS, and Linux.
 

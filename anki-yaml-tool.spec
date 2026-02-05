@@ -6,7 +6,7 @@ datas += copy_metadata('anki-yaml-tool')
 
 
 a = Analysis(
-    ['src\\anki_tool\\cli.py'],
+    ['src\\anki-yaml-tool\\cli.py'],
     pathex=['src'],
     binaries=[],
     datas=datas,

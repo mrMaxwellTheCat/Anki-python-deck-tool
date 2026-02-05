@@ -13,7 +13,7 @@ readme = "README.md"
 license = {text = "GPL-3.0-only"}
 
 [project.scripts]
-anki-yaml-tool = "anki_tool.cli:main"
+anki-yaml-tool = "anki-yaml-tool.cli:main"
 
 [project.optional-dependencies]
 dev = [
@@ -52,10 +52,10 @@ testpaths = ["tests"]
 python_files = "test_*.py"
 python_classes = "Test*"
 python_functions = "test_*"
-addopts = "-v --tb=short --cov=anki_tool --cov-report=term-missing --cov-report=html --cov-report=xml"
+addopts = "-v --tb=short --cov=anki-yaml-tool --cov-report=term-missing --cov-report=html --cov-report=xml"
 
 [tool.coverage.run]
-source = ["src/anki_tool"]
+source = ["src/anki-yaml-tool"]
 omit = ["*/tests/*", "*/__pycache__/*", "*/venv/*"]
 
 [tool.coverage.report]
