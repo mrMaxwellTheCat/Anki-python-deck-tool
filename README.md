@@ -1,6 +1,6 @@
 # Anki Python Deck Tool
 
-[![Python Version](https://img.shields.io/badge/python-3.8%2B-blue)]()
+[![Python Version](https://img.shields.io/badge/python-3.10%2B-blue)]()
 [![License: GPL-3.0](https://img.shields.io/badge/License-GPL%203.0-blue.svg)](https://opensource.org/licenses/GPL-3.0)
 [![CI Status](https://github.com/mrMaxwellTheCat/Anki-python-deck-tool/workflows/CI/badge.svg)](https://github.com/mrMaxwellTheCat/Anki-python-deck-tool/actions)
 
@@ -38,7 +38,7 @@ A professional, modular command-line tool to generate Anki decks (`.apkg`) from 
 
 Before using this tool, ensure you have the following:
 
-1.  **Python 3.8+** installed.
+1.  **Python 3.10+** installed.
 2.  **Anki Desktop** installed and running (only required for the `push` command).
 3.  **AnkiConnect** add-on installed in Anki (only required for the `push` command).
     *   Open Anki → Tools → Add-ons → Get Add-ons...

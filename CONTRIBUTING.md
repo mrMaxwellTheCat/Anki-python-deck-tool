@@ -6,7 +6,7 @@ Thank you for your interest in contributing to the Anki Python Deck Tool! This d
 
 ### Prerequisites
 
-- Python 3.8 or higher
+- Python 3.10 or higher
 - Git
 - pip
 
@@ -105,7 +105,7 @@ make all
 ### Python Style
 
 - Follow PEP 8 style guidelines
-- Use Python 3.8+ type hints (use `list[str]` instead of `List[str]`)
+- Use Python 3.10+ type hints (use `list[str]` instead of `List[str]`, and `X | Y` instead of `Optional[X]`)
 - Maximum line length: 88 characters
 - Use absolute imports (e.g., `from anki_tool.core import builder`)
 
