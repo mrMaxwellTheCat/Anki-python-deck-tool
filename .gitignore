@@ -35,7 +35,9 @@ tmpclaude*
 # Coverage reports
 .coverage
 coverage.*
+htmlcov/
 
 *cache*
 
 CLAUDE.md
+*.spec

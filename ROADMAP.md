@@ -72,6 +72,7 @@ Transform the Anki Python Deck Tool into a comprehensive, user-friendly solution
     - [x] `builder.py`: Test handling of empty or missing fields.
     - [x] `connector.py`: Mock `requests.post` to simulate AnkiConnect responses.
     - [x] `exceptions.py`: Test all custom exception types.
+    - [x] `cli.py`: Comprehensive CLI command tests.
     - [ ] Add tests for config loading and validation.
     - [ ] Add tests for media file handling.
 
@@ -81,14 +82,14 @@ Transform the Anki Python Deck Tool into a comprehensive, user-friendly solution
     - [ ] Test handling of invalid YAML configurations (graceful failure).
     - [ ] Test media file inclusion in generated packages.
 
-- [ ] **Fixture Management**
-    - [ ] Create "golden" YAML files for testing various scenarios.
-    - [ ] Add fixtures for different note types (basic, cloze, image occlusion).
+- [x] **Fixture Management**
+    - [x] Create example YAML files for testing various scenarios (in `examples/` directory).
+    - [x] Add fixtures for different note types (basic, language-learning, technical).
     - [ ] Add test media files (images, audio).
 
-- [ ] **Coverage Goals**
-    - [ ] Achieve >90% code coverage.
-    - [ ] Set up coverage reporting in CI.
+- [x] **Coverage Goals**
+    - [x] Achieve >90% code coverage (currently at 96.77%).
+    - [x] Set up coverage reporting in CI (Codecov integration).
 
 ## 4. Feature Implementation Plan
 
@@ -235,17 +236,24 @@ Transform the Anki Python Deck Tool into a comprehensive, user-friendly solution
 
 ### 6.2 Standalone Executables
 
-- [ ] **Windows**
-    - [ ] Build with PyInstaller or cx_Freeze
+- [x] **Basic Executable Building**
+    - [x] Build with PyInstaller (via `make build-exe` and `scripts/build.py`)
+    - [x] Support for custom icons (assets/icon.ico for Windows, assets/icon.icns for macOS)
+    - [x] Automated executable building via GitHub Actions workflow
+
+- [ ] **Windows Distribution**
+    - [x] Build standalone .exe with PyInstaller
     - [ ] Create installer with Inno Setup or NSIS
     - [ ] Code signing for trusted installation
 
-- [ ] **macOS**
+- [ ] **macOS Distribution**
+    - [x] Build standalone executable
     - [ ] Create .app bundle
     - [ ] DMG installer
     - [ ] Notarization for Gatekeeper
 
-- [ ] **Linux**
+- [ ] **Linux Distribution**
+    - [x] Build standalone executable
     - [ ] AppImage for universal compatibility
     - [ ] Snap package
     - [ ] Debian/Ubuntu .deb package
@@ -307,10 +315,11 @@ Transform the Anki Python Deck Tool into a comprehensive, user-friendly solution
     - [ ] Component interaction diagram.
     - [ ] Class hierarchy diagram.
 
-- [ ] **Examples**
-    - [ ] Create `examples/` directory with diverse use cases:
-      - [ ] Language learning (vocabulary, grammar)
-      - [ ] Technical memorization (programming, math)
+- [x] **Examples**
+    - [x] Create `examples/` directory with diverse use cases:
+      - [x] Basic example (simple card model)
+      - [x] Language learning (vocabulary, grammar)
+      - [x] Technical memorization (programming, math)
       - [ ] Medical terminology
       - [ ] Historical dates and events
       - [ ] Cloze deletion examples
@@ -349,31 +358,40 @@ Transform the Anki Python Deck Tool into a comprehensive, user-friendly solution
 
 ## Implementation Timeline
 
-### Phase 1: Foundation (Completed)
-- ✅ Basic CLI functionality
-- ✅ YAML-based deck building
-- ✅ AnkiConnect integration
-- ✅ Custom exceptions
-- ✅ Comprehensive tests
-- ✅ CI/CD setup
+### Phase 1: Foundation (✅ Completed)
+- ✅ Basic CLI functionality (`build` and `push` commands)
+- ✅ YAML-based deck building with field mapping
+- ✅ AnkiConnect integration for deck pushing
+- ✅ Custom exception hierarchy for error handling
+- ✅ Comprehensive test suite (96.77% coverage)
+- ✅ CI/CD setup across Windows, macOS, and Linux
+- ✅ Security scanning (bandit, pip-audit)
+- ✅ Automated releases to PyPI
+- ✅ Executable building capability (PyInstaller)
+- ✅ Development tooling (VSCode tasks, Makefile, pre-commit hooks)
+- ✅ Basic examples directory (basic, language-learning, technical)
+- ✅ Codecov integration
 
-### Phase 2: Core Enhancements (Next 3-6 months)
-- Multiple note type support
-- Media file handling
-- Schema validation
-- Enhanced CLI features
-- Improved documentation
+### Phase 2: Core Enhancements (In Progress)
+**Next priorities:**
+- Multiple note type support (allow multiple configs in one build)
+- Media file handling (integrate existing `add_media()` functionality)
+- Schema validation (integrate pydantic for type-safe configs)
+- Enhanced CLI features (verbose mode, init command, batch processing)
+- Additional examples (medical terminology, cloze deletion, audio cards)
 
-### Phase 3: Advanced Features (6-12 months)
-- GUI development
-- Plugin system
-- Batch processing
-- Advanced YAML features
+### Phase 3: Advanced Features (Planned)
+- GUI development (framework evaluation and implementation)
+- Plugin system (custom processors and validators)
+- Advanced YAML features (includes, templates, variables)
+- Batch processing enhancements
+- Integration tests
 
-### Phase 4: Distribution & Growth (12+ months)
-- Standalone executables
-- Community building
-- Template repository
+### Phase 4: Distribution & Growth (Planned)
+- Full distribution packages (installers for Windows/macOS/Linux)
+- Community building (GitHub Discussions, documentation site)
+- Template repository and manager
+- API documentation site
 - Advanced integrations
 
 ## Success Metrics

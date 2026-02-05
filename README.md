@@ -33,7 +33,9 @@ A professional, modular command-line tool to generate Anki decks (`.apkg`) from 
 - **Tag Support**: Automatically handles tags and ID-based tagging for organization.
 - **Flexible Architecture**: Modular design supporting multiple note types and custom configurations.
 - **Type-Safe**: Modern Python type hints throughout the codebase.
-- **Well-Tested**: Comprehensive test suite with pytest.
+- **Well-Tested**: Comprehensive test suite with pytest (96.77% coverage).
+- **Standalone Executables**: Build single-file executables for Windows, macOS, and Linux.
+- **CI/CD Pipeline**: Automated testing, security scanning, and releases.
 
 ## Prerequisites
 
@@ -144,39 +146,80 @@ To use a custom icon for the executable, place your icon file in the `assets/` d
 
 If these files exist, the build process will automatically use them.
 
+### Installing System-Wide
+
+After building the executable, you can install it system-wide to use `anki-yaml-tool` from anywhere in your terminal.
+
+#### Using VS Code Tasks (Recommended)
+
+1. Open the Command Palette (Ctrl+Shift+P / Cmd+Shift+P)
+2. Select "Tasks: Run Task"
+3. Choose "Build and Install System-Wide"
+
+This will build the executable and install it automatically.
+
+#### Manual Installation
+
+**Windows (PowerShell):**
+```powershell
+# Build the executable first
+make build-exe
+
+# Install system-wide
+powershell -ExecutionPolicy Bypass -File scripts/install-system-wide.ps1
+```
+
+**Linux/macOS (Bash):**
+```bash
+# Build the executable first
+make build-exe
+
+# Install system-wide
+bash scripts/install-system-wide.sh
+```
+
+The installation script will:
+- Copy the executable to a standard location:
+  - **Windows**: `%LOCALAPPDATA%\Programs\anki-yaml-tool\`
+  - **Linux/macOS**: `~/.local/bin/`
+- Add the installation directory to your PATH if needed
+- Guide you through any required terminal restarts
+
+After installation, you can run `anki-yaml-tool` from any directory in your terminal.
+
 ## Usage
 
-The tool provides a CLI entry point \`anki-yaml-tool-tool-tool-tool-tool-tool\` with two main commands: \`build\` and \`push\`.
+The tool provides a CLI entry point `anki-yaml-tool` with two main commands: `build` and `push`.
 
-### 1. Build a Deck (\`build\`)
+### 1. Build a Deck (`build`)
 
-Generates an \`.apkg\` file from your YAML data and configuration.
+Generates an `.apkg` file from your YAML data and configuration.
 
 ```bash
-anki-yaml-tool-tool-tool-tool-tool-tool build --data data/my_deck.yaml --config configs/japanese_num.yaml --output "My Deck.apkg" --deck-name "Japanese Numbers"
+anki-yaml-tool build --data data/my_deck.yaml --config configs/japanese_num.yaml --output "My Deck.apkg" --deck-name "Japanese Numbers"
 ```
 
 **Options:**
-- \`--data PATH\` (Required): Path to the YAML file containing note data.
-- \`--config PATH\` (Required): Path to the YAML file defining the Note Type (Model).
-- \`--output PATH\`: Path where the \`.apkg\` will be saved (Default: \`deck.apkg\`).
-- \`--deck-name TEXT\`: Name of the deck inside Anki (Default: \`"Generated Deck"\`).
+- `--data PATH` (Required): Path to the YAML file containing note data.
+- `--config PATH` (Required): Path to the YAML file defining the Note Type (Model).
+- `--output PATH`: Path where the `.apkg` will be saved (Default: `deck.apkg`).
+- `--deck-name TEXT`: Name of the deck inside Anki (Default: `"Generated Deck"`).
 
 **Example with all options:**
 ```bash
-anki-yaml-tool-tool-tool-tool-tool-tool build \\
-  --data data/vocabulary.yaml \\
-  --config configs/basic_model.yaml \\
-  --output builds/vocabulary_v1.apkg \\
+anki-yaml-tool build \
+  --data data/vocabulary.yaml \
+  --config configs/basic_model.yaml \
+  --output builds/vocabulary_v1.apkg \
   --deck-name "Spanish Vocabulary"
 ```
 
-### 2. Push to Anki (\`push\`)
+### 2. Push to Anki (`push`)
 
-Uploads a generated \`.apkg\` file to Anki via AnkiConnect.
+Uploads a generated `.apkg` file to Anki via AnkiConnect.
 
 ```bash
-anki-yaml-tool-tool-tool-tool-tool-tool push --apkg "My Deck.apkg" --sync
+anki-yaml-tool push --apkg "My Deck.apkg" --sync
 ```
 
 **Options:**
@@ -343,13 +386,13 @@ pytest tests/test_builder.py -v
 
 ## Future Plans
 
-- **Media Support**: Automatically detect and include media files (images, audio) referenced in YAML.
-- **Schema Validation**: Validate YAML structure using pydantic or jsonschema.
+- **Media Support**: Enhance media file handling (basic `add_media()` support exists).
+- **Schema Validation**: Validate YAML structure using pydantic for better error messages.
 - **Multiple Note Types**: Support multiple note types in a single deck build.
-- **Verbose Logging**: Add \`--verbose\` flag for detailed logging.
-- **Init Command**: Scaffold new projects with example files (\`anki-yaml-tool-tool-tool-tool-tool-tool init\`).
+- **Verbose Logging**: Add `--verbose` flag for detailed logging.
+- **Init Command**: Scaffold new projects with example files (`anki-yaml-tool init`).
 - **GUI Interface**: Graphical interface for users who prefer not to use the command line.
-- **Packaged Releases**: Standalone executables for Windows, macOS, and Linux.
+- **Enhanced Distribution**: Create installers and distribution packages beyond basic executables.
 
 See [ROADMAP.md](ROADMAP.md) for the complete development roadmap.
 

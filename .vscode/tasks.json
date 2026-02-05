@@ -124,6 +124,55 @@
                 "isDefault": false
             },
             "detail": "Build the executable for the current operating system using PyInstaller."
+        },
+        // ========================================
+        // System-Wide Installation Tasks
+        // ========================================
+        {
+            "label": "Install System-Wide",
+            "type": "shell",
+            "command": "powershell -ExecutionPolicy Bypass -File scripts/install-system-wide.ps1",
+            "windows": {
+                "command": "powershell -ExecutionPolicy Bypass -File scripts/install-system-wide.ps1"
+            },
+            "linux": {
+                "command": "bash scripts/install-system-wide.sh"
+            },
+            "osx": {
+                "command": "bash scripts/install-system-wide.sh"
+            },
+            "problemMatcher": [],
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": true,
+                "panel": "dedicated",
+                "showReuseMessage": false,
+                "clear": true
+            },
+            "detail": "Install the built executable system-wide so it can be run from anywhere."
+        },
+        {
+            "label": "Build and Install System-Wide",
+            "dependsOn": [
+                "Build Executable (Local)",
+                "Install System-Wide"
+            ],
+            "dependsOrder": "sequence",
+            "problemMatcher": [],
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": true,
+                "panel": "dedicated",
+                "showReuseMessage": false,
+                "clear": true
+            },
+            "detail": "Build the executable and install it system-wide in one step."
         }
     ]
 }

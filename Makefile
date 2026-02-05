@@ -1,18 +1,20 @@
 # Makefile for Anki Python Deck Tool
 
-.PHONY: help install test lint format type-check clean dev build all
+.PHONY: help install test lint format type-check clean dev build build-exe install-system-wide all
 
 help:  ## Show this help message
 	@echo Available commands:
-	@echo   install        Install dependencies
-	@echo   dev            Install development dependencies
-	@echo   test           Run tests
-	@echo   lint           Run linting checks
-	@echo   format         Format code
-	@echo   type-check     Run type checking
-	@echo   clean          Clean build artifacts
-	@echo   build          Build distribution packages
-	@echo   all            Run all checks
+	@echo   install              Install dependencies
+	@echo   dev                  Install development dependencies
+	@echo   test                 Run tests
+	@echo   lint                 Run linting checks
+	@echo   format               Format code
+	@echo   type-check           Run type checking
+	@echo   clean                Clean build artifacts
+	@echo   build                Build distribution packages
+	@echo   build-exe            Build single-file executable
+	@echo   install-system-wide  Install executable system-wide
+	@echo   all                  Run all checks
 
 install:  ## Install dependencies
 	python -m pip install -e .
@@ -41,5 +43,12 @@ build:  ## Build distribution packages
 
 build-exe:  ## Build single-file executable
 	python scripts/build.py
+
+install-system-wide:  ## Install executable system-wide
+ifeq ($(OS),Windows_NT)
+	powershell -ExecutionPolicy Bypass -File scripts/install-system-wide.ps1
+else
+	bash scripts/install-system-wide.sh
+endif
 
 all: format lint type-check test  ## Run all checks
