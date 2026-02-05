@@ -28,7 +28,7 @@ css: |
     max-width: 800px;
     margin: 0 auto;
   }
-  
+
   .concept {
     font-size: 26px;
     font-weight: bold;
@@ -36,7 +36,7 @@ css: |
     margin-bottom: 15px;
     font-family: "Helvetica Neue", Arial, sans-serif;
   }
-  
+
   .language-badge {
     display: inline-block;
     background-color: #6272a4;
@@ -47,7 +47,7 @@ css: |
     margin-bottom: 20px;
     font-family: "Helvetica Neue", Arial, sans-serif;
   }
-  
+
   pre {
     background-color: #1e1f29;
     border-radius: 8px;
@@ -55,14 +55,14 @@ css: |
     overflow-x: auto;
     border: 1px solid #44475a;
   }
-  
+
   code {
     font-family: "SF Mono", "Monaco", "Inconsolata", monospace;
     font-size: 16px;
     line-height: 1.6;
     color: #f8f8f2;
   }
-  
+
   .explanation {
     margin-top: 20px;
     padding: 15px;
@@ -72,7 +72,7 @@ css: |
     line-height: 1.6;
     font-family: "Helvetica Neue", Arial, sans-serif;
   }
-  
+
   hr {
     border: 0;
     border-top: 2px solid #44475a;
