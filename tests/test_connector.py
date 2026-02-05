@@ -4,12 +4,11 @@ from pathlib import Path
 from unittest.mock import Mock, patch
 
 import pytest
+from anki_yaml_tool.core.connector import AnkiConnector
+from anki_yaml_tool.core.exceptions import AnkiConnectError
 
-from anki_tool.core.connector import AnkiConnector
-from anki_tool.core.exceptions import AnkiConnectError
 
-
-@patch("anki_tool.core.connector.requests.post")
+@patch("anki_yaml_tool.core.connector.requests.post")
 def test_invoke_success(mock_post):
     """Test successful AnkiConnect API invocation."""
     mock_response = Mock()
@@ -23,7 +22,7 @@ def test_invoke_success(mock_post):
     mock_post.assert_called_once()
 
 
-@patch("anki_tool.core.connector.requests.post")
+@patch("anki_yaml_tool.core.connector.requests.post")
 def test_invoke_connection_error(mock_post):
     """Test handling of connection errors.
 
@@ -40,7 +39,7 @@ def test_invoke_connection_error(mock_post):
         connector.invoke("version")
 
 
-@patch("anki_tool.core.connector.requests.post")
+@patch("anki_yaml_tool.core.connector.requests.post")
 def test_invoke_ankiconnect_error(mock_post):
     """Test handling of AnkiConnect API errors."""
     mock_response = Mock()
@@ -55,7 +54,7 @@ def test_invoke_ankiconnect_error(mock_post):
     assert "Invalid action" in str(exc_info.value)
 
 
-@patch("anki_tool.core.connector.requests.post")
+@patch("anki_yaml_tool.core.connector.requests.post")
 def test_import_package(mock_post, tmp_path):
     """Test importing an .apkg package."""
     mock_response = Mock()
@@ -81,7 +80,7 @@ def test_import_package_nonexistent_file():
         connector.import_package(Path("/nonexistent/file.apkg"))
 
 
-@patch("anki_tool.core.connector.requests.post")
+@patch("anki_yaml_tool.core.connector.requests.post")
 def test_sync(mock_post):
     """Test triggering a sync with AnkiWeb."""
     mock_response = Mock()
@@ -94,7 +93,7 @@ def test_sync(mock_post):
     mock_post.assert_called_once()
 
 
-@patch("anki_tool.core.connector.requests.post")
+@patch("anki_yaml_tool.core.connector.requests.post")
 def test_store_media_file(mock_post, tmp_path):
     """Test storing a media file in Anki."""
     mock_response = Mock()
@@ -113,7 +112,7 @@ def test_store_media_file(mock_post, tmp_path):
     assert call_args[1]["json"]["action"] == "storeMediaFile"
 
 
-@patch("anki_tool.core.connector.requests.post")
+@patch("anki_yaml_tool.core.connector.requests.post")
 def test_store_media_file_custom_filename(mock_post, tmp_path):
     """Test storing a media file with a custom filename."""
     mock_response = Mock()

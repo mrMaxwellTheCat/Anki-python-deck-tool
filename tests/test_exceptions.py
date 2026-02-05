@@ -1,6 +1,6 @@
 """Tests for custom exceptions."""
 
-from anki_tool.core.exceptions import (
+from anki_yaml_tool.core.exceptions import (
     AnkiConnectError,
     AnkiToolError,
     ConfigValidationError,
@@ -10,7 +10,7 @@ from anki_tool.core.exceptions import (
 )
 
 
-def test_anki_tool_error():
+def test_anki_yaml_tool_error():
     """Test base AnkiToolError exception."""
     error = AnkiToolError("Base error")
     assert str(error) == "Base error"
