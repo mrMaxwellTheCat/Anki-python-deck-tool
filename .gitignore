@@ -33,3 +33,7 @@ build/
 
 # Claude / Claudecode
 tmpclaude*
+
+# Coverage reports
+.coverage
+coverage.*
