@@ -4,24 +4,10 @@
 .PHONY: help install test lint format type-check clean dev build build-exe install-system-wide all examples example-basic example-language example-technical example-math
 
 # Show this help message
-help:
-	@echo Available commands:
-	@echo   install              - Install dependencies
-	@echo   dev                  - Install development dependencies
-	@echo   test                 - Run tests
-	@echo   lint                 - Run linting checks
-	@echo   format               - Format code
-	@echo   type-check           - Run type checking
-	@echo   clean                - Clean build artifacts
-	@echo   build                - Build distribution packages
-	@echo   build-exe            - Build single-file executable
-	@echo   install-system-wide  - Install executable system-wide
-	@echo   examples             - Build and push all example decks
-	@echo   example-basic        - Build and push basic example
-	@echo   example-language     - Build and push language learning example
-	@echo   example-technical    - Build and push technical example
-	@echo   example-math         - Build and push math example
-	@echo   all                  - Run all checks
+help:  ## Show this help message
+	@python -c "import re, sys; \
+		print('Available commands:'); \
+		[print(f'  {t:<20} - {h}') for t, h in sorted(re.findall(r'^([a-zA-Z_-]+):.*?## (.*)$$', open(sys.argv[1]).read(), re.M))]" $(MAKEFILE_LIST)
 
 
 install:  ## Install dependencies
