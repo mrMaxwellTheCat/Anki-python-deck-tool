@@ -12,24 +12,28 @@ This file provides instructions for GitHub Copilot, Claude, and other AI coding 
 ## Code Style and Standards
 
 ### Type Hinting
+
 - All function arguments and return values must use Python 3.10+ type hints (`list[str]` instead of `List[str]`)
 - Use `| None` for optional types instead of `Optional[T]`
 - Use `typing.Optional` or `| None` where appropriate
 - All public functions must have complete type annotations
 
 ### Documentation
+
 - Use Google-style docstrings for all modules, classes, and public methods
 - Include `Args:`, `Returns:`, and `Raises:` sections
 - Keep docstrings concise but complete
 - Add inline comments only for complex or non-obvious logic
 
 ### Formatting
+
 - Follow `ruff` for linting and formatting (replaces black)
 - Maximum line length: 88 characters
 - Use `ruff format` to auto-format code
 - Use `ruff check --fix` to auto-fix linting issues
 
 ### Error Handling
+
 - Use custom exceptions defined in `src/anki_tool/core/exceptions.py`:
   - `ConfigValidationError` - Invalid configuration file
   - `DataValidationError` - Invalid data file
@@ -40,6 +44,7 @@ This file provides instructions for GitHub Copilot, Claude, and other AI coding 
 - Include context in error messages (file paths, actions that failed)
 
 ### Imports
+
 - Use absolute imports (e.g., `from anki_tool.core import builder`)
 - Never use relative imports
 - Group imports: stdlib → third-party → local
@@ -48,12 +53,14 @@ This file provides instructions for GitHub Copilot, Claude, and other AI coding 
 ## Testing
 
 ### Test Requirements
+
 - Prefer `pytest` for all testing
-- Maintain minimum 80% code coverage (currently at 96.77%)
+- Maintain minimum 80% code coverage
 - Write tests for all new features and bug fixes
 - Use descriptive test names: `test_<feature>_<scenario>_<expected_result>`
 
 ### Testing Practices
+
 - Mock external dependencies using `unittest.mock`:
   - Filesystem operations (`pathlib.Path`)
   - Network calls (AnkiConnect, HTTP requests)
@@ -63,6 +70,7 @@ This file provides instructions for GitHub Copilot, Claude, and other AI coding 
 - Test error handling and edge cases
 
 ### Running Tests
+
 ```bash
 # Quick test
 pytest tests/
@@ -92,17 +100,25 @@ make test        # Run pytest test suite
 
 ### VSCode Tasks (Recommended)
 
-Use VSCode tasks to run GitHub Actions locally:
+Use VSCode tasks for running checks and workflows locally:
 
 ```
-Ctrl+Shift+P → "Tasks: Run Task" → "CI Workflow: Full Pipeline (All Checks)"
+Ctrl+Shift+P → "Tasks: Run Task" → [Select available task]
 ```
 
-See `.vscode/README.md` for full task documentation.
+Available tasks include:
+
+- GitHub Actions workflows (CI, Security)
+- Code formatting (Ruff)
+- Coverage reports
+- Dependency installation
+
+See `.vscode/tasks.json` for all available tasks and their commands.
 
 ## Project Structure Awareness
 
 ### Architecture
+
 This project is a CLI tool with clean separation of concerns:
 
 - **`cli.py`**: Command-line interface (Click commands)
@@ -111,12 +127,14 @@ This project is a CLI tool with clean separation of concerns:
 - **`exceptions.py`**: Custom exception classes
 
 ### Key Components
+
 - **YAML configuration parsing**: Note type definitions (fields, templates, CSS)
 - **Media file processing**: Images, audio (future: auto-detection)
 - **Anki package generation**: Using `genanki` library
 - **AnkiConnect integration**: Push decks directly to Anki Desktop
 
 ### Important Functions
+
 - **`stable_id(name)`**: Generates deterministic IDs for decks/models
   - **DO NOT modify** - ensures consistency across deck updates
   - Uses SHA256 hash of name converted to integer
@@ -126,28 +144,36 @@ This project is a CLI tool with clean separation of concerns:
 ## Dependencies
 
 ### Core Dependencies
-- `genanki>=2.1.1` - Anki package generation
-- `requests>=2.31.0` - HTTP requests for AnkiConnect
-- `pyyaml>=6.0` - YAML parsing
-- `click>=8.1.0` - CLI framework
+
+- `genanki` - Anki package generation
+- `requests` - HTTP requests for AnkiConnect
+- `pyyaml` - YAML parsing
+- `click` - CLI framework
+
+See `pyproject.toml` for specific version requirements.
 
 ### Dev Dependencies
-- `pytest>=7.4.0` - Testing framework
-- `pytest-cov>=4.1.0` - Coverage reporting
-- `ruff>=0.1.9` - Linting and formatting
-- `mypy>=1.7.0` - Static type checking
-- `pre-commit>=3.5.0` - Git hooks
+
+- `pytest` - Testing framework
+- `pytest-cov` - Coverage reporting
+- `ruff` - Linting and formatting
+- `mypy` - Static type checking
+- `pre-commit` - Git hooks
 - `pip-audit` - Security vulnerability scanning
 - `bandit[toml]` - Security linting
 
+See `pyproject.toml` for specific version requirements.
+
 ### Adding Dependencies
+
 1. Add to `pyproject.toml` under appropriate section (`dependencies` or `optional-dependencies`)
 2. Run `pip install -e ".[dev]"` to install
-3. Update this section in the instructions
+3. Document the dependency if it introduces new functionality or requirements
 
 ## Common Pitfalls to Avoid
 
 ### Type Hints (Python 3.10+)
+
 ❌ **Don't**: `from typing import List, Dict, Optional`
 ✅ **Do**: Use built-in types (`list`, `dict`) and `|` operator
 
@@ -161,6 +187,7 @@ def foo(items: list[str]) -> int | None:
 ```
 
 ### Exception Handling
+
 ❌ **Don't**: Bare `except:` blocks or catching `Exception` without re-raising
 ✅ **Do**: Catch specific exceptions
 
@@ -180,6 +207,7 @@ except ConfigValidationError as e:
 ```
 
 ### Imports
+
 ❌ **Don't**: Relative imports or importing from `typing` unnecessarily
 ✅ **Do**: Absolute imports, built-in types
 
@@ -193,6 +221,7 @@ from anki_tool.core.builder import AnkiBuilder
 ```
 
 ### Printing Output
+
 ❌ **Don't**: Use `print()` statements
 ✅ **Do**: Use Click's `echo()` or proper logging
 
@@ -205,6 +234,7 @@ click.echo("Building deck...")
 ```
 
 ### Modifying Core Logic
+
 ❌ **Don't**: Modify `stable_id()` function
 ✅ **Do**: Use it as-is to ensure deck consistency
 
@@ -217,18 +247,21 @@ The `stable_id` function ensures decks/models have the same ID across updates, p
 **IMPORTANT**: Do NOT create summary, setup, or implementation files in the root directory.
 
 **✅ Correct locations**:
+
 - Technical documentation → `docs/` directory
 - Implementation summaries → `docs/` directory
 - Setup guides → `docs/` directory
 - VSCode-related docs → `.vscode/README.md` or `docs/`
 
 **❌ Avoid creating in root**:
+
 - `IMPLEMENTATION_SUMMARY.md`
 - `SETUP_GUIDE.md`
 - `*_SUMMARY.md`
 - `*_SETUP.md`
 
 **Root directory is reserved for**:
+
 - `README.md` - Main project documentation
 - `CONTRIBUTING.md` - Contribution guidelines
 - `CHANGELOG.md` - Version history
@@ -241,13 +274,13 @@ The `stable_id` function ensures decks/models have the same ID across updates, p
 
 ```
 docs/
-├── VSCODE_TASKS_SETUP.md      # VSCode tasks documentation
-├── BRANCH_CLEANUP_SUMMARY.md  # Branch management notes
-└── [other technical docs]
+├── [technical documentation files]
+├── [implementation notes]
+└── [setup guides]
 
 .vscode/
 ├── tasks.json                  # Task definitions
-└── README.md                   # VSCode setup guide
+└── README.md                   # VSCode setup guide (optional)
 
 .github/
 ├── copilot-instructions.md     # This file (AI instructions)
@@ -258,12 +291,13 @@ docs/
 ## Examples and References
 
 ### Example Files
-- **Configurations**: `examples/*/config.yaml` (basic, language-learning, technical)
-- **Data files**: `examples/*/data.yaml`
-- **Legacy configs**: `configs/` directory (deprecated)
-- **Legacy data**: `data/` directory (deprecated)
+
+- **Configurations**: See `examples/` directory for configuration file examples
+- **Data files**: See `examples/` directory for data file examples
+- **Legacy files**: The `configs/` and `data/` directories contain deprecated examples
 
 ### Documentation
+
 - **User docs**: `README.md` - Installation, usage, examples
 - **Contributor docs**: `CONTRIBUTING.md` - Development setup, workflow
 - **Project plans**: `ROADMAP.md` - Future features and phases
@@ -273,13 +307,15 @@ docs/
 - **Technical docs**: `docs/` - Implementation details, setup guides
 
 ### CI/CD and Quality
-- **Workflows**: `.github/workflows/` - GitHub Actions (CI, security, release)
-- **VSCode tasks**: `.vscode/tasks.json` - Local CI equivalent
-- **Pre-commit**: `.pre-commit-config.yaml` - Git hooks
+
+- **Workflows**: `.github/workflows/` - GitHub Actions for CI, security scanning, and releases
+- **VSCode tasks**: `.vscode/tasks.json` - Tasks for local development and testing
+- **Pre-commit**: `.pre-commit-config.yaml` - Git hooks for code quality
 
 ## Git Workflow
 
 ### Committing Changes
+
 - Write clear, descriptive commit messages
 - Use conventional commit format when appropriate:
   - `feat:` - New feature
@@ -290,13 +326,15 @@ docs/
   - `chore:` - Maintenance tasks
 
 ### Before Committing
-1. Run `make all` or VSCode task "CI Workflow: Full Pipeline"
+
+1. Run `make all` or a VSCode task for full CI checks
 2. Ensure all tests pass
 3. Verify coverage remains above 80%
 4. Check no linting errors
 5. Verify type checking passes
 
 ### Creating Pull Requests
+
 - Fill out the PR template completely
 - Ensure CI passes on all platforms
 - Update `CHANGELOG.md` in "Unreleased" section
@@ -306,6 +344,7 @@ docs/
 ## Code Review Guidelines
 
 When reviewing (or having code reviewed):
+
 - Check test coverage for new code
 - Verify type hints are complete
 - Ensure docstrings follow Google style
@@ -316,18 +355,21 @@ When reviewing (or having code reviewed):
 ## Security Considerations
 
 ### Input Validation
+
 - Always validate YAML input (config and data files)
 - Check file paths exist before reading
 - Sanitize user input before displaying
 - Use `yaml.safe_load()`, never `yaml.load()`
 
 ### Dependencies
+
 - Security scans run weekly via GitHub Actions
 - Review Dependabot PRs promptly
 - Check for known vulnerabilities with `pip-audit`
 - Keep dependencies up to date
 
 ### AnkiConnect
+
 - AnkiConnect runs on `127.0.0.1:8765` (localhost only)
 - Never expose AnkiConnect to the internet
 - Assume AnkiConnect is running locally and trusted
@@ -349,16 +391,16 @@ When reviewing (or having code reviewed):
 
 ## Quick Reference
 
-| Task | Command |
-|------|---------|
-| Run all checks | `make all` |
-| Format code | `ruff format .` |
-| Fix linting | `ruff check --fix .` |
-| Type check | `mypy src --ignore-missing-imports` |
-| Run tests | `pytest tests/` |
-| Coverage | `pytest --cov=anki_tool` |
-| Security scan | `pip-audit && bandit -r src/` |
-| Install deps | `pip install -e ".[dev]"` |
+| Task           | Command                             |
+| -------------- | ----------------------------------- |
+| Run all checks | `make all`                          |
+| Format code    | `ruff format .`                     |
+| Fix linting    | `ruff check --fix .`                |
+| Type check     | `mypy src --ignore-missing-imports` |
+| Run tests      | `pytest tests/`                     |
+| Coverage       | `pytest --cov=anki_tool`            |
+| Security scan  | `pip-audit && bandit -r src/`       |
+| Install deps   | `pip install -e ".[dev]"`           |
 
 ## Getting Help
 
@@ -366,9 +408,3 @@ When reviewing (or having code reviewed):
 - **PRs**: Use `.github/PULL_REQUEST_TEMPLATE.md`
 - **Community**: Follow `CODE_OF_CONDUCT.md`
 - **Security**: Report via `SECURITY.md` process
-
----
-
-**Version**: 2.0
-**Last Updated**: 2025-02-05
-**Maintainers**: See `CONTRIBUTING.md`
