@@ -6,5 +6,8 @@
         "htmlcov": true,
         "coverage.xml": true,
         "*cache*": true,
+        "**/*.egg-info": true,
+        "**/__pycache__": true,
+        "build/": true,
     }
 }
