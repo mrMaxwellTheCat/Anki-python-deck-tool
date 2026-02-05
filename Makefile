@@ -1,13 +1,20 @@
 # Makefile for Anki Python Deck Tool
 
-.PHONY: help install test lint format type-check clean dev
+.PHONY: help install test lint format type-check clean dev build all
 
 help:  ## Show this help message
-	@echo "Available commands:"
-	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "  %-15s %s\n", $$1, $$2}'
+	@echo Available commands:
+	@echo   install        Install dependencies
+	@echo   dev            Install development dependencies
+	@echo   test           Run tests
+	@echo   lint           Run linting checks
+	@echo   format         Format code
+	@echo   type-check     Run type checking
+	@echo   clean          Clean build artifacts
+	@echo   build          Build distribution packages
+	@echo   all            Run all checks
 
 install:  ## Install dependencies
-	pip install -r requirements.txt
 	pip install -e .
 
 dev:  ## Install development dependencies
@@ -27,11 +34,7 @@ type-check:  ## Run type checking
 	mypy src --ignore-missing-imports
 
 clean:  ## Clean build artifacts
-	rm -rf build/
-	rm -rf dist/
-	rm -rf *.egg-info
-	find . -type d -name __pycache__ -exec rm -rf {} + 2>/dev/null || true
-	find . -type f -name "*.pyc" -delete
+	python -c "import shutil, pathlib; [shutil.rmtree(p, ignore_errors=True) for p in ['build', 'dist', *pathlib.Path('.').rglob('*.egg-info'), *pathlib.Path('.').rglob('__pycache__')]]; [p.unlink() for p in pathlib.Path('.').rglob('*.pyc')]"
 
 build:  ## Build distribution packages
 	python -m build
