@@ -15,23 +15,23 @@ help:  ## Show this help message
 	@echo   all            Run all checks
 
 install:  ## Install dependencies
-	pip install -e .
+	python -m pip install -e .
 
 dev:  ## Install development dependencies
-	pip install -e ".[dev]"
-	pre-commit install
+	python -m pip install -e ".[dev]"
+	python -m pre_commit install
 
 test:  ## Run tests
-	pytest tests/ -v
+	python -m pytest tests/ -v
 
 lint:  ## Run linting checks
-	ruff check .
+	python -m ruff check .
 
 format:  ## Format code
-	ruff format .
+	python -m ruff format .
 
 type-check:  ## Run type checking
-	mypy src --ignore-missing-imports
+	python -m mypy src --ignore-missing-imports
 
 clean:  ## Clean build artifacts
 	python -c "import shutil, pathlib; [shutil.rmtree(p, ignore_errors=True) for p in ['build', 'dist', *pathlib.Path('.').rglob('*.egg-info'), *pathlib.Path('.').rglob('__pycache__')]]; [p.unlink() for p in pathlib.Path('.').rglob('*.pyc')]"
