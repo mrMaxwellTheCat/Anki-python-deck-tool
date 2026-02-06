@@ -5,11 +5,14 @@ This module provides the CLI entry points for building and pushing Anki decks.
 
 from importlib.metadata import version
 from pathlib import Path
+from typing import cast
 
 import click
 import yaml
 
-from anki_yaml_tool.core.builder import AnkiBuilder
+from anki_yaml_tool.core.builder import AnkiBuilder, ModelConfigComplete
+
+# ... existing code ...
 from anki_yaml_tool.core.config import load_deck_file
 from anki_yaml_tool.core.connector import AnkiConnector
 from anki_yaml_tool.core.exceptions import (
@@ -110,7 +113,7 @@ def build(file, output, deck_name, media_dir):
         # Load deck file
         log.info("Loading deck file: %s", file)
         model_config, items, file_deck_name, file_media_dir = load_deck_file(file)
-        model_configs = [model_config]
+        model_configs = cast(list[ModelConfigComplete], [model_config])
         log.debug("Loaded model config: %s", model_config.get("name", "unknown"))
         log.debug("Found %d notes in data section", len(items))
 
@@ -386,14 +389,14 @@ def push(apkg, sync):
         # Extract and store media files from apkg
         with zipfile.ZipFile(apkg_path, "r") as zf:
             if "media" in zf.namelist():
-                media_map = json.loads(zf.read("media").decode("utf-8"))
+                media_map: dict[str, str] = json.loads(zf.read("media").decode("utf-8"))
                 if media_map:
                     click.echo(f"Storing {len(media_map)} media files...")
                     log.info("Extracting and storing %d media files", len(media_map))
 
                     with click.progressbar(
                         media_map.items(), label="Storing media"
-                    ) as items:
+                    ) as items:  # type: ignore
                         for idx, filename in items:
                             try:
                                 content = zf.read(idx)
@@ -683,7 +686,7 @@ def _batch_build_merged(
 ) -> None:
     """Build a merged deck from multiple files."""
     all_items: list[dict] = []
-    model_configs: list[dict] = []
+    model_configs: list[ModelConfigComplete] = []
     seen_models: set[str] = set()
 
     click.echo("Merging files...")

@@ -3,7 +3,7 @@
 import sys
 
 try:
-    import colorama
+    import colorama  # type: ignore
 
     colorama.init()
     HAS_COLORAMA = True

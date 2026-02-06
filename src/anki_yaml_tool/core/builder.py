@@ -9,7 +9,7 @@ import re
 from pathlib import Path
 from typing import TypeAlias, TypedDict
 
-import genanki
+import genanki  # type: ignore
 
 from anki_yaml_tool.core.exceptions import DeckBuildError
 
