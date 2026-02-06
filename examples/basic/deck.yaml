@@ -1,5 +1,5 @@
 config:
-  name: APDT Examples::Basic Flashcard
+  name: "APDT Examples::Basic Flashcard"
   deck-name: "Examples::Basic Vocabulary"
   css: ""
   fields:

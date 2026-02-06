@@ -1,7 +1,7 @@
 # Makefile for Anki Python Deck Tool
 
 
-.PHONY: help install test lint format type-check clean dev build build-exe install-system-wide all examples example-basic example-language example-technical example-math
+.PHONY: help install test lint format type-check clean dev build build-exe install-system-wide all examples example-audio example-basic example-cloze example-historical example-language-learning example-math example-medical example-technical example-test
 
 # Show this help message
 help:  ## Show this help message
@@ -17,10 +17,15 @@ help:  ## Show this help message
 	echo     build-exe            - Build single-file executable             && \
 	echo     install-system-wide  - Install executable system-wide           && \
 	echo     examples             - Build and push all example decks         && \
+	echo     example-audio        - Build and push audio example             && \
 	echo     example-basic        - Build and push basic example             && \
-	echo     example-language     - Build and push language learning example && \
-	echo     example-technical    - Build and push technical example         && \
+	echo     example-cloze        - Build and push cloze example             && \
+	echo     example-historical   - Build and push historical example        && \
+	echo     example-language-learning - Build and push language learning example && \
 	echo     example-math         - Build and push math example              && \
+	echo     example-medical      - Build and push medical example           && \
+	echo     example-technical    - Build and push technical example         && \
+	echo     example-test         - Build and push test example              && \
 	echo     all                  - Run all checks
 
 
@@ -36,6 +41,9 @@ test:  ## Run tests
 
 lint:  ## Run linting checks
 	python -m ruff check .
+
+lint-fix:  ## Run linting checks with auto-fix
+	python -m ruff check . --fix
 
 format:  ## Format code
 	python -m ruff format .
@@ -59,27 +67,51 @@ else
 	bash scripts/install-system-wide.sh
 endif
 
-all: format lint type-check test  ## Run all checks
+all: format lint lint-fix type-check test  ## Run all checks
 
 # Example deck targets
+
+# Colors
+CYAN := \033[36m
+GREEN := \033[32m
+YELLOW := \033[33m
+RESET := \033[0m
+
+## Helper function to build and push example decks
+define build-push-example
+	@echo "$(CYAN)🔨 Building $(1) example...$(RESET)"
+	@python -m anki_yaml_tool.cli build --file examples/$(1)/deck.yaml --output examples/$(1)/deck.apkg
+	@echo "$(YELLOW)📤 Pushing to Anki...$(RESET)"
+	@python -m anki_yaml_tool.cli push --apkg examples/$(1)/deck.apkg
+	@echo "$(GREEN)✅ Done!$(RESET)"
+	@echo ""
+endef
+
+example-audio:  ## Build and push audio example
+	$(call build-push-example,audio)
+
 example-basic:  ## Build and push basic example
-	python -m anki_yaml_tool.cli build --file examples/basic/deck.yaml --output examples/basic/deck.apkg
-	python -m anki_yaml_tool.cli push --apkg examples/basic/deck.apkg
+	$(call build-push-example,basic)
 
-example-language:  ## Build and push language learning example
-	python -m anki_yaml_tool.cli build --file examples/language-learning/deck.yaml --output examples/language-learning/deck.apkg
-	python -m anki_yaml_tool.cli push --apkg examples/language-learning/deck.apkg
+example-cloze:  ## Build and push cloze example
+	$(call build-push-example,cloze)
 
-example-technical:  ## Build and push technical example
-	python -m anki_yaml_tool.cli build --file examples/technical/deck.yaml --output examples/technical/deck.apkg
-	python -m anki_yaml_tool.cli push --apkg examples/technical/deck.apkg
+example-historical: ## Build and push historical example
+	$(call build-push-example,historical)
+
+example-language-learning:  ## Build and push language learning example
+	$(call build-push-example,language-learning)
 
 example-math: ## Build and push math example
-	python -m anki_yaml_tool.cli build --file examples/math/deck.yaml --output examples/math/deck.apkg
-	python -m anki_yaml_tool.cli push --apkg examples/math/deck.apkg
+	$(call build-push-example,math)
 
-example-audio: ## Build and push audio example
-	python -m anki_yaml_tool.cli build --file examples/audio/deck.yaml --output examples/audio/deck.apkg
-	python -m anki_yaml_tool.cli push --apkg examples/audio/deck.apkg
+example-medical: ## Build and push medical example
+	$(call build-push-example,medical)
 
-examples: example-basic example-language example-technical example-math example-audio ## Build and push all example decks
+example-technical: ## Build and push technical example
+	$(call build-push-example,technical)
+
+example-test: ## Build and push test example
+	$(call build-push-example,test)
+
+examples: example-audio example-basic example-cloze example-historical example-language-learning example-math example-medical example-technical example-test  ## Build and push all example decks
