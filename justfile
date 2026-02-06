@@ -1,6 +1,5 @@
 # Anki Python Deck Tool - Just Commands
 # Use PowerShell on Windows for better compatibility
-set shell := ["powershell.exe", "-c"]
 
 [private]
 default: help
@@ -61,14 +60,14 @@ install-system-wide:
     bash scripts/install-system-wide.sh
 
 # Run all checks
-all: format lint lint-fix type-check test
+all: format lint-fix lint type-check test
 
 # Build and push a specific example deck
 _build-push-example NAME:
-    @python scripts/print_color.py "36" "🔨 Building {{NAME}} example..."
-    @python -m anki_yaml_tool.cli build --file examples/{{NAME}}/deck.yaml --output examples/{{NAME}}/deck.apkg
+    @python scripts/print_color.py "36" "🔨 Building {{ NAME }} example..."
+    @python -m anki_yaml_tool.cli build --file examples/{{ NAME }}/deck.yaml --output examples/{{ NAME }}/deck.apkg
     @python scripts/print_color.py "33" "📤 Pushing to Anki..."
-    @python -m anki_yaml_tool.cli push --apkg examples/{{NAME}}/deck.apkg
+    @python -m anki_yaml_tool.cli push --apkg examples/{{ NAME }}/deck.apkg
     @python scripts/print_color.py "32" "✅ Done!"
     @python -c "print()"
 
