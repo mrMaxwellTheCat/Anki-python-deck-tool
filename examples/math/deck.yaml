@@ -1,6 +1,6 @@
 config:
-  name: APDT-Examples::Math
-  deck-name: "Examples::Mathematics"
+  name: "anki-yaml-tool::math"
+  deck-name: "Examples::math"
   css: |
     .card {
       font-family: "Helvetica Neue", Arial, sans-serif;

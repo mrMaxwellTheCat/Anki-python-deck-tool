@@ -1,6 +1,6 @@
 config:
-  name: APDT Examples::Vocabulary Card
-  deck-name: "Examples::Vocabulary"
+  name: "anki-yaml-tool::language-learning"
+  deck-name: "Examples::language-learning"
   css: |
     .card {
       font-family: "Helvetica Neue", Arial, sans-serif;

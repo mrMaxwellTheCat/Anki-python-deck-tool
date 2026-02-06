@@ -1,6 +1,6 @@
 config:
-  name: Medical Terminology
-  deck-name: "Examples::Medical Terminology"
+  name: "anki-yaml-tool::medical"
+  deck-name: "Examples::medical"
   css: |
     .card {
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;

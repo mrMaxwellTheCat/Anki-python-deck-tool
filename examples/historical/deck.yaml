@@ -1,6 +1,6 @@
 config:
-  name: "Historical Events"
-  deck-name: "Examples::Historical Events"
+  name: "anki-yaml-tool::historical"
+  deck-name: "Examples::historical"
   css: |
     .card {
       font-family: 'Georgia', serif;

@@ -1,6 +1,6 @@
 config:
-  name: APDT Examples::Code Snippet
-  deck-name: "Examples::Technical Terms"
+  name: "anki-yaml-tool::technical"
+  deck-name: "Examples::technical"
   css: |
     .card {
       font-family: "SF Mono", "Monaco", "Inconsolata", "Fira Mono", monospace;

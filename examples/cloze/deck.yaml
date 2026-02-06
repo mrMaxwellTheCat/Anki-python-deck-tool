@@ -1,6 +1,6 @@
 config:
-  name: Cloze Deletion
-  deck-name: "Examples::Cloze Deletion Practice"
+  name: "anki-yaml-tool::cloze"
+  deck-name: "Examples::cloze"
   css: |
     .card {
       font-family: 'Helvetica Neue', Arial, sans-serif;

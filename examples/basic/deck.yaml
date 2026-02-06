@@ -1,6 +1,6 @@
 config:
-  name: "APDT Examples::Basic Flashcard"
-  deck-name: "Examples::Basic Vocabulary"
+  name: "anki-yaml-tool::basic"
+  deck-name: "Examples::basic"
   css: ""
   fields:
     - Front

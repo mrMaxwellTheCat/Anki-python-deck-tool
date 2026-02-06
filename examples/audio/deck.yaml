@@ -1,6 +1,6 @@
 config:
-  name: "Pronunciation Practice"
-  deck-name: "Examples::Pronunciation Practice"
+  name: "anki-yaml-tool::audio"
+  deck-name: "Examples::audio"
   media-folder: "./media/"
   css: |
     .card {
