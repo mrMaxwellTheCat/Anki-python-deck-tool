@@ -62,9 +62,10 @@ install-system-wide:
 # Run all checks
 all: format lint-fix lint type-check test
 
+
 # Build and push a specific example deck
 _build-push-example NAME:
-    @echo {{BLUE}}🔨 Building {{ITALIC}}{{NAME}}{{NORMAL}}{{BLUE}} example...{{NORMAL}}
+    @echo {{BLUE}}🔨 Building {{BOLD}}{{NAME}}{{NORMAL}}{{BLUE}} example...{{NORMAL}}
     @python -m anki_yaml_tool.cli build --file examples/{{ NAME }}/deck.yaml --output examples/{{ NAME }}/deck.apkg
     @echo {{YELLOW}}📤 Pushing {{BOLD}}{{NAME}}{{NORMAL}}{{YELLOW}} example to Anki...{{NORMAL}}
     @python -m anki_yaml_tool.cli push --apkg examples/{{ NAME }}/deck.apkg
