@@ -3,6 +3,7 @@
 from pathlib import Path
 
 import pytest
+
 from anki_yaml_tool.core.config import load_deck_data, load_deck_file, load_model_config
 from anki_yaml_tool.core.exceptions import ConfigValidationError, DataValidationError
 

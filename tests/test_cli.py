@@ -9,12 +9,13 @@ from unittest.mock import Mock, patch
 
 import pytest
 import yaml
+from click.testing import CliRunner
+
 from anki_yaml_tool.cli import build, cli, push, validate
 from anki_yaml_tool.core.exceptions import (
     AnkiConnectError,
     DeckBuildError,
 )
-from click.testing import CliRunner
 
 
 @pytest.fixture
@@ -313,6 +314,64 @@ class TestBuildCommand:
 
             assert result.exit_code == 1
             assert "Unexpected error" in result.output
+
+    @patch("anki_yaml_tool.cli.AnkiBuilder")
+    def test_build_case_insensitive_fields(self, mock_builder, runner, tmp_path):
+        """Test that field matching is case-insensitive.
+
+        Ensures that data keys with different casing than field names
+        are properly matched (e.g., 'Concept' field matches 'concept' data key).
+        """
+        mock_instance = Mock()
+        mock_builder.return_value = mock_instance
+
+        # Define fields with capitalized names
+        deck_data = {
+            "config": {
+                "name": "Test Model",
+                "fields": ["Concept", "Code", "Language"],
+                "templates": [
+                    {
+                        "name": "Card 1",
+                        "qfmt": "{{Concept}}",
+                        "afmt": "{{Code}} {{Language}}",
+                    }
+                ],
+            },
+            # Use capitalized keys in data (matching field names exactly)
+            "data": [
+                {
+                    "Concept": "List Comprehension",
+                    "Code": "[x**2 for x in nums]",
+                    "Language": "python",
+                }
+            ],
+        }
+
+        deck_file = tmp_path / "deck.yaml"
+        deck_file.write_text(yaml.dump(deck_data), encoding="utf-8")
+
+        result = runner.invoke(
+            build,
+            [
+                "--file",
+                str(deck_file),
+                "--output",
+                str(tmp_path / "out.apkg"),
+            ],
+        )
+
+        assert result.exit_code == 0
+
+        # Verify that add_note was called with correct field values
+        calls = mock_instance.add_note.call_args_list
+        assert len(calls) == 1
+
+        # Check that field values were correctly extracted
+        field_values = calls[0][0][0]
+        assert field_values[0] == "List Comprehension"
+        assert field_values[1] == "[x**2 for x in nums]"
+        assert field_values[2] == "python"
 
 
 class TestValidateCommand:

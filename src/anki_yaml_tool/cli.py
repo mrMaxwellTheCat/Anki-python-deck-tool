@@ -100,8 +100,12 @@ def build(file, output, deck_name, media_dir):
 
             fields = model_fields_map[target_model_name]
 
+            # Create a case-insensitive lookup dictionary
+            # Convert all data keys to lowercase for matching
+            item_lower = {k.lower(): v for k, v in item.items()}
+
             # Map YAML keys to model fields in order
-            field_values = [str(item.get(f.lower(), "")) for f in fields]
+            field_values = [str(item_lower.get(f.lower(), "")) for f in fields]
 
             # Extract media references from all field values
             for field_value in field_values:

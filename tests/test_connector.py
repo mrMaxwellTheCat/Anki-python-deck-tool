@@ -4,6 +4,7 @@ from pathlib import Path
 from unittest.mock import Mock, patch
 
 import pytest
+
 from anki_yaml_tool.core.connector import AnkiConnector
 from anki_yaml_tool.core.exceptions import AnkiConnectError
 
