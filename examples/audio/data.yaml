@@ -1,0 +1,89 @@
+- word: "Entrepreneur"
+  ipa: "ˌɑːntrəprəˈnɜːr"
+  audio: "[sound:entrepreneur.mp3]"
+  meaning: "A person who organizes and operates a business, taking on financial risks"
+  example: "She became a successful entrepreneur by starting her own tech company"
+  language: "English"
+  difficulty: "Medium"
+  tags: ["english", "business", "pronunciation"]
+
+- word: "Croissant"
+  ipa: "kwɑːˈsɑ̃ː"
+  audio: "[sound:croissant.mp3]"
+  meaning: "A buttery, flaky, crescent-shaped pastry"
+  example: "I had a fresh croissant for breakfast at the French café"
+  language: "French"
+  difficulty: "Hard"
+  tags: ["french", "food", "pronunciation"]
+
+- word: "Schedule"
+  ipa: "ˈskedʒuːl (US) / ˈʃedjuːl (UK)"
+  audio: "[sound:schedule.mp3]"
+  meaning: "A plan for carrying out a process or procedure, giving lists of intended events and times"
+  example: "Please check the schedule for tomorrow's meetings"
+  language: "English"
+  difficulty: "Easy"
+  tags: ["english", "common", "pronunciation"]
+
+- word: "Quinoa"
+  ipa: "ˈkiːnwɑː"
+  audio: "[sound:quinoa.mp3]"
+  meaning: "A grain crop grown primarily for its edible seeds, high in protein"
+  example: "Quinoa salad is a healthy and nutritious meal option"
+  language: "Spanish"
+  difficulty: "Medium"
+  tags: ["spanish", "food", "pronunciation"]
+
+- word: "Colonel"
+  ipa: "ˈkɜːrnəl"
+  audio: "[sound:colonel.mp3]"
+  meaning: "A military rank above lieutenant colonel and below brigadier general"
+  example: "Colonel Smith commanded the regiment during the operation"
+  language: "English"
+  difficulty: "Hard"
+  tags: ["english", "military", "silent-letters"]
+
+- word: "Schadenfreude"
+  ipa: "ˈʃɑːdənfrɔɪdə"
+  audio: "[sound:schadenfreude.mp3]"
+  meaning: "Pleasure derived from another person's misfortune"
+  example: "He felt a twinge of schadenfreude when his rival failed"
+  language: "German"
+  difficulty: "Hard"
+  tags: ["german", "psychology", "loanwords"]
+
+- word: "Massachusetts"
+  ipa: "ˌmæsəˈtʃuːsɪts"
+  audio: "[sound:massachusetts.mp3]"
+  meaning: "A state in the northeastern United States"
+  example: "Boston is the capital city of Massachusetts"
+  language: "English"
+  difficulty: "Medium"
+  tags: ["english", "geography", "pronunciation"]
+
+- word: "Acai"
+  ipa: "əˈsaɪiː"
+  audio: "[sound:acai.mp3]"
+  meaning: "A small, dark purple berry from the acai palm tree, known for its nutritional value"
+  example: "The smoothie bowl was topped with fresh acai berries"
+  language: "Portuguese"
+  difficulty: "Medium"
+  tags: ["portuguese", "food", "pronunciation"]
+
+- word: "Worcestershire"
+  ipa: "ˈwʊstərʃər"
+  audio: "[sound:worcestershire.mp3]"
+  meaning: "A county in England; also refers to a savory sauce used in cooking"
+  example: "Add a splash of Worcestershire sauce to enhance the flavor"
+  language: "English"
+  difficulty: "Hard"
+  tags: ["english", "geography", "food", "silent-letters"]
+
+- word: "Cacophony"
+  ipa: "kəˈkɑːfəni"
+  audio: "[sound:cacophony.mp3]"
+  meaning: "A harsh, discordant mixture of sounds"
+  example: "The construction site created a cacophony of noise throughout the day"
+  language: "English"
+  difficulty: "Medium"
+  tags: ["english", "vocabulary", "pronunciation"]

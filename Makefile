@@ -78,4 +78,8 @@ example-math: ## Build and push math example
 	python -m anki_yaml_tool.cli build --data examples/math/data.yaml --config examples/math/config.yaml --output examples/math/deck.apkg --deck-name "Testing::Math Example"
 	python -m anki_yaml_tool.cli push --apkg examples/math/deck.apkg
 
-examples: example-basic example-language example-technical example-math  ## Build and push all example decks
+example-audio: ## Build and push audio example
+	python -m anki_yaml_tool.cli build --data examples/audio/data.yaml --config examples/audio/config.yaml --output examples/audio/deck.apkg --deck-name "Testing::Audio Example"
+	python -m anki_yaml_tool.cli push --apkg examples/audio/deck.apkg
+
+examples: example-basic example-language example-technical example-math example-audio ## Build and push all example decks

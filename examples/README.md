@@ -6,7 +6,12 @@ This directory contains example configurations and data files demonstrating vari
 
 - `basic/` - Simple examples for getting started
 - `language-learning/` - Examples for vocabulary and language study
-- `technical/` - Examples for programming, math, and technical subjects
+- `math/` - Mathematical formulas and problem-solving
+- `technical/` - Examples for programming and technical subjects
+- `medical/` - Medical terminology with etymology and definitions
+- `historical/` - Historical events with dates and context
+- `cloze/` - Cloze deletion style cards for active recall
+- `audio/` - Pronunciation practice with IPA and audio support
 
 ## Using These Examples
 

@@ -1,19 +1,5 @@
-- front: "What is the capital of France?"
-  back: "Paris"
-  tags: ["geography", "europe"]
+- front: "This is the front of a basic flashcard."
+  back: "This is the back of a basic flashcard."
 
-- front: "Who wrote 'Romeo and Juliet'?"
-  back: "William Shakespeare"
-  tags: ["literature", "shakespeare"]
-
-- front: "What is 2 + 2?"
-  back: "4"
-  tags: ["math", "basic"]
-
-- front: "What is the largest planet in our solar system?"
-  back: "Jupiter"
-  tags: ["astronomy", "science"]
-
-- front: "What year did World War II end?"
-  back: "1945"
-  tags: ["history", "ww2"]
+- front: "Front"
+  back: "Back"

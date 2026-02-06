@@ -7,7 +7,7 @@ from configuration and data.
 import hashlib
 import re
 from pathlib import Path
-from typing import TypedDict
+from typing import TypeAlias, TypedDict
 
 import genanki
 
@@ -53,6 +53,26 @@ class ModelConfigComplete(ModelConfig, total=False):
     css: str
 
 
+# Type aliases for improved type safety
+ModelName: TypeAlias = str
+"""Type alias for model names."""
+
+FieldValue: TypeAlias = str
+"""Type alias for field values."""
+
+FieldValues: TypeAlias = list[FieldValue]
+"""Type alias for a list of field values."""
+
+TagList: TypeAlias = list[str]
+"""Type alias for a list of tags."""
+
+ModelMap: TypeAlias = dict[ModelName, genanki.Model]
+"""Type alias for a dictionary mapping model names to genanki.Model instances."""
+
+MediaFileList: TypeAlias = list[str]
+"""Type alias for a list of media file paths."""
+
+
 class AnkiBuilder:
     """Builder for creating Anki deck packages (.apkg files).
 
@@ -69,13 +89,13 @@ class AnkiBuilder:
     """
 
     def __init__(self, deck_name: str, model_configs: list[ModelConfigComplete]):
-        self.deck_name = deck_name
+        self.deck_name: str = deck_name
         if not model_configs:
             raise DeckBuildError("At least one model configuration is required")
-        self.model_configs = model_configs
-        self.models = self._build_models()
-        self.deck = genanki.Deck(self.stable_id(deck_name), deck_name)
-        self.media_files: list[str] = []
+        self.model_configs: list[ModelConfigComplete] = model_configs
+        self.models: ModelMap = self._build_models()
+        self.deck: genanki.Deck = genanki.Deck(self.stable_id(deck_name), deck_name)
+        self.media_files: MediaFileList = []
 
     @staticmethod
     def stable_id(name: str) -> int:
@@ -112,7 +132,7 @@ class AnkiBuilder:
         text = re.sub(r"\$(.*?)\$", r"\\(\1\\)", text)
         return text
 
-    def _build_models(self) -> dict[str, genanki.Model]:
+    def _build_models(self) -> ModelMap:
         """Build genanki Models from configurations.
 
         Returns:
@@ -121,10 +141,10 @@ class AnkiBuilder:
         Raises:
             DeckBuildError: If any model configuration is invalid.
         """
-        models = {}
+        models: ModelMap = {}
         for config in self.model_configs:
             try:
-                model_name = config["name"]
+                model_name: ModelName = config["name"]
                 models[model_name] = genanki.Model(
                     self.stable_id(model_name),
                     model_name,
@@ -138,9 +158,9 @@ class AnkiBuilder:
 
     def add_note(
         self,
-        field_values: list[str],
-        tags: list[str] | None = None,
-        model_name: str | None = None,
+        field_values: FieldValues,
+        tags: TagList | None = None,
+        model_name: ModelName | None = None,
     ) -> None:
         """Add a note to the deck.
 
@@ -154,17 +174,19 @@ class AnkiBuilder:
         """
         if model_name is None:
             # Default to the first model
-            model = list(self.models.values())[0]
+            model: genanki.Model = list(self.models.values())[0]
         elif model_name in self.models:
             model = self.models[model_name]
         else:
             raise DeckBuildError(f"Model '{model_name}' not found in builder")
 
         # Convert math delimiters in all field values
-        converted_values = [
+        converted_values: FieldValues = [
             self.convert_math_delimiters(value) for value in field_values
         ]
-        note = genanki.Note(model=model, fields=converted_values, tags=tags or [])
+        note: genanki.Note = genanki.Note(
+            model=model, fields=converted_values, tags=tags or []
+        )
         self.deck.add_note(note)
 
     def add_media(self, file_path: Path) -> None:

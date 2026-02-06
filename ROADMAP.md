@@ -51,7 +51,7 @@ Transform the Anki Python Deck Tool into a comprehensive, user-friendly solution
     - [x] Configure `mypy` settings in `pyproject.toml`.
     - [x] Add type hints to all public functions.
     - [x] Eliminate all `Any` types in core modules.
-    - [ ] Add generic type support for Deck definitions.
+    - [x] Add generic type support for Deck definitions.
 
 - [x] **Docstrings & Documentation**
     - [x] Add Google-style docstrings to all public APIs.
@@ -407,7 +407,7 @@ Define the core interaction modes for the GUI application, providing both manual
 - [x] **Basic Package**
     - [x] Published on PyPI as `anki-yaml-tool`
     - [x] Automated releases via GitHub Actions
-    - [ ] Semantic versioning strategy
+    - [x] Semantic versioning strategy
     - [ ] Changelog automation
 
 ### 6.2 Standalone Executables
@@ -478,7 +478,7 @@ Define the core interaction modes for the GUI application, providing both manual
 
 - [x] **Developer Guide**
     - [x] Add `CONTRIBUTING.md` with dev environment setup.
-    - [ ] Add architecture documentation.
+    - [x] Add architecture documentation.
     - [ ] Document plugin development.
 
 - [x] **User Documentation**
@@ -496,11 +496,11 @@ Define the core interaction modes for the GUI application, providing both manual
       - [x] Basic example (simple card model)
       - [x] Language learning (vocabulary, grammar)
       - [x] Technical memorization (programming, math)
-      - [ ] Medical terminology
-      - [ ] Historical dates and events
-      - [ ] Cloze deletion examples
+      - [x] Medical terminology
+      - [x] Historical dates and events
+      - [x] Cloze deletion examples
       - [ ] Image occlusion examples
-      - [ ] Audio pronunciation cards
+      - [x] Audio pronunciation cards
 
 - [ ] **API Documentation**
     - [ ] Auto-generate from docstrings using Sphinx or MkDocs.
@@ -554,7 +554,7 @@ Define the core interaction modes for the GUI application, providing both manual
 - [x] Media file handling (integrate existing `add_media()` functionality)
 - [x] Schema validation (integrate pydantic for type-safe configs)
 - [x] Enhanced CLI features (validate command, multiple configs)
-- [ ] Additional examples (medical terminology, cloze deletion, audio cards)
+- [x] Additional examples (medical terminology, cloze deletion, historical dates, audio cards)
 
 ### Phase 3: Advanced Features (Planned)
 - Directory-based batch processing (recursive deck building)

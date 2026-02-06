@@ -1,0 +1,59 @@
+- term: "Cardiology"
+  definition: "The branch of medicine that deals with diseases and abnormalities of the heart"
+  etymology: "From Greek kardia (heart) + -logia (study of)"
+  example: "The patient was referred to cardiology for chest pain evaluation"
+  tags: ["medical-specialties"]
+
+- term: "Tachycardia"
+  definition: "Abnormally rapid heart rate, typically over 100 beats per minute in adults"
+  etymology: "From Greek tachys (swift) + kardia (heart)"
+  example: "The patient presented with tachycardia and palpitations"
+  tags: ["cardiology", "symptoms"]
+
+- term: "Hypertension"
+  definition: "Persistently high arterial blood pressure"
+  etymology: "From Greek hyper (over, beyond) + Latin tensio (tension)"
+  example: "Untreated hypertension increases the risk of stroke and heart disease"
+  tags: ["cardiology", "conditions"]
+
+- term: "Anemia"
+  definition: "A condition marked by a deficiency of red blood cells or hemoglobin"
+  etymology: "From Greek an- (without) + haima (blood)"
+  example: "Iron deficiency is a common cause of anemia"
+  tags: ["hematology", "conditions"]
+
+- term: "Nephrology"
+  definition: "The branch of medicine concerned with the kidneys"
+  etymology: "From Greek nephros (kidney) + -logia (study of)"
+  example: "Patients with chronic kidney disease are managed by nephrology"
+  tags: ["medical-specialties"]
+
+- term: "Dyspnea"
+  definition: "Difficult or labored breathing; shortness of breath"
+  etymology: "From Greek dys- (difficult) + pnoia (breathing)"
+  example: "The patient complained of dyspnea on exertion"
+  tags: ["respiratory", "symptoms"]
+
+- term: "Antipyretic"
+  definition: "A medication used to prevent or reduce fever"
+  etymology: "From Greek anti- (against) + pyretos (fever)"
+  example: "Acetaminophen is commonly used as an antipyretic"
+  tags: ["pharmacology", "treatment"]
+
+- term: "Gastroenterology"
+  definition: "The branch of medicine focused on the digestive system and its disorders"
+  etymology: "From Greek gaster (stomach) + enteron (intestine) + -logia (study of)"
+  example: "The gastroenterology department performs endoscopic procedures"
+  tags: ["medical-specialties"]
+
+- term: "Osteoporosis"
+  definition: "A medical condition in which bones become brittle and fragile"
+  etymology: "From Greek osteon (bone) + poros (pore) + -osis (condition)"
+  example: "Osteoporosis increases the risk of fractures, especially in elderly patients"
+  tags: ["rheumatology", "conditions"]
+
+- term: "Prophylaxis"
+  definition: "Treatment given or action taken to prevent disease"
+  etymology: "From Greek prophylaxis (advance guard)"
+  example: "Vaccination is an effective prophylaxis against many infectious diseases"
+  tags: ["prevention", "treatment"]

@@ -1,0 +1,88 @@
+name: "Historical Events"
+
+css: |
+  .card {
+    font-family: 'Georgia', serif;
+    font-size: 20px;
+    text-align: center;
+    color: #2c3e50;
+    background-color: #ecf0f1;
+    padding: 20px;
+  }
+
+  .date {
+    font-size: 32px;
+    font-weight: bold;
+    color: #e74c3c;
+    margin-bottom: 15px;
+  }
+
+  .event {
+    font-size: 20px;
+    line-height: 1.6;
+    margin: 15px 0;
+    font-weight: 500;
+  }
+
+  .context {
+    font-size: 16px;
+    color: #555;
+    margin: 10px 0;
+    padding: 10px;
+    background-color: #fff;
+    border-radius: 5px;
+  }
+
+  .significance {
+    font-size: 16px;
+    color: #27ae60;
+    font-style: italic;
+    margin-top: 15px;
+    padding: 10px;
+    background-color: #d5f4e6;
+    border-left: 4px solid #27ae60;
+  }
+
+  .era {
+    font-size: 14px;
+    color: #95a5a6;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 5px;
+  }
+
+fields:
+  - "Date"
+  - "Event"
+  - "Context"
+  - "Significance"
+  - "Era"
+
+templates:
+  - name: "Date to Event"
+    qfmt: |
+      <div class="era">{{Era}}</div>
+      <div class="date">{{Date}}</div>
+    afmt: |
+      <div class="era">{{Era}}</div>
+      <div class="date">{{Date}}</div>
+      <hr id="answer">
+      <div class="event">{{Event}}</div>
+      <div class="context">{{Context}}</div>
+      {{#Significance}}
+      <div class="significance"><strong>Significance:</strong> {{Significance}}</div>
+      {{/Significance}}
+
+  - name: "Event to Date"
+    qfmt: |
+      <div class="event">{{Event}}</div>
+      <div class="context">{{Context}}</div>
+    afmt: |
+      <div class="event">{{Event}}</div>
+      <div class="context">{{Context}}</div>
+      <hr id="answer">
+      <div class="era">{{Era}}</div>
+      <div class="date">{{Date}}</div>
+      {{#Significance}}
+      <div class="significance"><strong>Significance:</strong> {{Significance}}</div>
+      {{/Significance}}

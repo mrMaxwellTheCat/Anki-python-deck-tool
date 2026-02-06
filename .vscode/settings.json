@@ -11,6 +11,7 @@
         "build/": true,
         "**/*cache*": true,
         "**/*tmp*": true,
+        "**/*.apkg": true,
     },
     "python.analysis.typeCheckingMode": "strict"
 }
