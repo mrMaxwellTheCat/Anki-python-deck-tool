@@ -1,0 +1,229 @@
+config:
+  name: Cloze Deletion
+  deck-name: "Examples::Cloze Deletion Practice"
+  css: |
+    .card {
+      font-family: 'Helvetica Neue', Arial, sans-serif;
+      font-size: 20px;
+      text-align: center;
+      color: #333;
+      background-color: #f8f9fa;
+      padding: 30px;
+    }
+
+    .cloze {
+      font-weight: bold;
+      color: #0066cc;
+      background-color: #e3f2fd;
+      padding: 2px 6px;
+      border-radius: 3px;
+    }
+
+    .text {
+      font-size: 22px;
+      line-height: 1.8;
+      margin: 20px 0;
+      text-align: left;
+      max-width: 600px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    .hint {
+      font-size: 16px;
+      color: #666;
+      font-style: italic;
+      margin-top: 10px;
+    }
+
+    .category {
+      font-size: 14px;
+      color: #999;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 20px;
+    }
+
+    .extra {
+      font-size: 16px;
+      color: #555;
+      margin-top: 15px;
+      padding: 15px;
+      background-color: #fff;
+      border-left: 4px solid #0066cc;
+      text-align: left;
+    }
+
+  fields:
+    - "Text"
+    - "Cloze1"
+    - "Cloze2"
+    - "Cloze3"
+    - "Hint"
+    - "Extra"
+    - "Category"
+
+  templates:
+    - name: "Cloze 1"
+      qfmt: |
+        <div class="category">{{Category}}</div>
+        <div class="text">
+          {{Text}}
+        </div>
+        {{#Hint}}
+        <div class="hint">Hint: {{Hint}}</div>
+        {{/Hint}}
+      afmt: |
+        <div class="category">{{Category}}</div>
+        <div class="text">
+          {{Text}}
+        </div>
+        {{#Extra}}
+        <div class="extra">{{Extra}}</div>
+        {{/Extra}}
+
+data:
+  - text: The capital of <span class='cloze'>France</span> is <span class='cloze'>Paris</span>, located on the <span class='cloze'>Seine</span> River.
+    cloze1: France
+    cloze2: Paris
+    cloze3: Seine
+    hint: Major European country and its capital
+    extra: Paris is not only the capital but also the largest city of France, with over 2 million residents in the city proper.
+    category: Geography
+    tags:
+      - geography
+      - europe
+      - capitals
+
+  - text: The <span class='cloze'>mitochondria</span> is the <span class='cloze'>powerhouse</span> of the cell, producing <span class='cloze'>ATP</span> through cellular respiration.
+    cloze1: mitochondria
+    cloze2: powerhouse
+    cloze3: ATP
+    hint: Cellular organelle and energy
+    extra: Mitochondria have their own DNA and are thought to have originated from ancient bacteria through endosymbiosis.
+    category: Biology
+    tags:
+      - biology
+      - cell-biology
+      - energy
+  - text: |
+      The <span class='cloze'>American Civil War</span> lasted from <span class='cloze'>1861</span> to <span class='cloze'>1865</span> and resulted in the abolition of slavery.
+    cloze1: American Civil War
+    cloze2: "1861"
+    cloze3: "1865"
+    hint: 19th century U.S. conflict
+    extra:
+      The war resulted in approximately 620,000 soldier deaths, making it the deadliest
+      conflict in American history.
+    category: History
+    tags:
+      - history
+      - american-history
+      - 19th-century
+  - text:
+      The formula for the area of a circle is <span class='cloze'>πr²</span>, where
+      <span class='cloze'>r</span> represents the <span class='cloze'>radius</span>.
+    cloze1: πr²
+    cloze2: r
+    cloze3: radius
+    hint: Geometric formula
+    extra:
+      This formula can be derived by integrating the circumference formula or by
+      using calculus.
+    category: Mathematics
+    tags:
+      - mathematics
+      - geometry
+      - formulas
+  - text:
+      In Python, the <span class='cloze'>def</span> keyword is used to define a
+      <span class='cloze'>function</span>, and <span class='cloze'>return</span> specifies
+      the output value.
+    cloze1: def
+    cloze2: function
+    cloze3: return
+    hint: Programming syntax
+    extra:
+      Python functions can have default parameters, variable-length arguments (*args),
+      and keyword arguments (**kwargs).
+    category: Programming
+    tags:
+      - programming
+      - python
+      - syntax
+  - text:
+      <span class='cloze'>Photosynthesis</span> converts <span class='cloze'>light
+      energy</span> into <span class='cloze'>chemical energy</span> stored in glucose
+      molecules.
+    cloze1: Photosynthesis
+    cloze2: light energy
+    cloze3: chemical energy
+    hint: Plant process
+    extra: "The overall equation is: 6CO₂ + 6H₂O + light → C₆H₁₂O₆ + 6O₂"
+    category: Biology
+    tags:
+      - biology
+      - plants
+      - energy
+  - text:
+      The <span class='cloze'>Treaty of Versailles</span> was signed in <span class='cloze'>1919</span>,
+      officially ending <span class='cloze'>World War I</span>.
+    cloze1: Treaty of Versailles
+    cloze2: "1919"
+    cloze3: World War I
+    hint: Post-war agreement
+    extra:
+      The harsh terms imposed on Germany are often cited as a contributing factor
+      to World War II.
+    category: History
+    tags:
+      - history
+      - world-war-i
+      - treaties
+  - text:
+      The <span class='cloze'>quadratic formula</span> is <span class='cloze'>x
+      = (-b ± √(b²-4ac)) / 2a</span>, used to solve equations of the form <span class='cloze'>ax²
+      + bx + c = 0</span>.
+    cloze1: quadratic formula
+    cloze2: x = (-b ± √(b²-4ac)) / 2a
+    cloze3: ax² + bx + c = 0
+    hint: Algebra formula
+    extra:
+      "The discriminant (b²-4ac) determines the number and type of solutions: positive
+      gives two real solutions, zero gives one, negative gives complex solutions."
+    category: Mathematics
+    tags:
+      - mathematics
+      - algebra
+      - formulas
+  - text:
+      <span class='cloze'>Shakespeare</span> wrote <span class='cloze'>Hamlet</span>
+      around <span class='cloze'>1600</span>, one of his most famous tragedies.
+    cloze1: Shakespeare
+    cloze2: Hamlet
+    cloze3: "1600"
+    hint: English playwright and tragedy
+    extra:
+      The play contains the famous soliloquy 'To be, or not to be' and explores
+      themes of revenge, madness, and mortality.
+    category: Literature
+    tags:
+      - literature
+      - shakespeare
+      - drama
+  - text:
+      The <span class='cloze'>three laws of thermodynamics</span> govern energy
+      and heat, with the <span class='cloze'>second law</span> stating that <span class='cloze'>entropy</span>
+      always increases in an isolated system.
+    cloze1: three laws of thermodynamics
+    cloze2: second law
+    cloze3: entropy
+    hint: Physics principles
+    extra:
+      This law explains why perpetual motion machines are impossible and why processes
+      have a preferred direction in time.
+    category: Physics
+    tags:
+      - physics
+      - thermodynamics
+      - energy

@@ -1,0 +1,19 @@
+config:
+  name: APDT Examples::Basic Flashcard
+  deck-name: "Examples::Basic Vocabulary"
+  css: ""
+  fields:
+    - Front
+    - Back
+  templates:
+    - name: Basic
+      qfmt: "<div>{{Front}}</div>"
+      afmt: |
+        {{FrontSide}}
+        <hr id=answer>
+        <div>{{Back}}</div>
+data:
+  - front: This is the front of a basic flashcard.
+    back: This is the back of a basic flashcard.
+  - front: Front
+    back: Back

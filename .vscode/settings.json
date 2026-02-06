@@ -13,5 +13,6 @@
         "**/*tmp*": true,
         "**/*.apkg": true,
     },
-    "python.analysis.typeCheckingMode": "strict"
+    "python.analysis.typeCheckingMode": "basic",
+    "editor.insertSpaces": true,
 }

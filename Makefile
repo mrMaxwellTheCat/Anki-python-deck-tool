@@ -5,22 +5,22 @@
 
 # Show this help message
 help:  ## Show this help message
-	@echo Available commands: && \
-	echo     install              - Install dependencies && \
-	echo     dev                  - Install development dependencies && \
-	echo     test                 - Run tests && \
-	echo     lint                 - Run linting checks && \
-	echo     format               - Format code && \
-	echo     type-check           - Run type checking && \
-	echo     clean                - Clean build artifacts && \
-	echo     build                - Build distribution packages && \
-	echo     build-exe            - Build single-file executable && \
-	echo     install-system-wide  - Install executable system-wide && \
-	echo     examples             - Build and push all example decks && \
-	echo     example-basic        - Build and push basic example && \
+	@echo Available commands: 											&& \
+	echo     install              - Install dependencies 				&& \
+	echo     dev                  - Install development dependencies 	&& \
+	echo     test                 - Run tests 							&& \
+	echo     lint                 - Run linting checks 				&& \
+	echo     format               - Format code 						&& \
+	echo     type-check           - Run type checking 				&& \
+	echo     clean                - Clean build artifacts 			&& \
+	echo     build                - Build distribution packages 		&& \
+	echo     build-exe            - Build single-file executable 		&& \
+	echo     install-system-wide  - Install executable system-wide 	&& \
+	echo     examples             - Build and push all example decks 	&& \
+	echo     example-basic        - Build and push basic example 		&& \
 	echo     example-language     - Build and push language learning example && \
-	echo     example-technical    - Build and push technical example && \
-	echo     example-math         - Build and push math example && \
+	echo     example-technical    - Build and push technical example 	&& \
+	echo     example-math         - Build and push math example         && \
 	echo     all                  - Run all checks
 
 
@@ -79,7 +79,7 @@ example-math: ## Build and push math example
 	python -m anki_yaml_tool.cli push --apkg examples/math/deck.apkg
 
 example-audio: ## Build and push audio example
-	python -m anki_yaml_tool.cli build --data examples/audio/data.yaml --config examples/audio/config.yaml --output examples/audio/deck.apkg --deck-name "Testing::Audio Example"
+	python -m anki_yaml_tool.cli build --data examples/audio/data.yaml --config examples/audio/config.yaml --output examples/audio/deck.apkg --deck-name "Testing::Audio Example" --media-dir examples/audio/media
 	python -m anki_yaml_tool.cli push --apkg examples/audio/deck.apkg
 
 examples: example-basic example-language example-technical example-math example-audio ## Build and push all example decks

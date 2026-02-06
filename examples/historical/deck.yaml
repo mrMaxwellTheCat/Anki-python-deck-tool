@@ -1,0 +1,159 @@
+config:
+  name: "Historical Events"
+  deck-name: "Examples::Historical Events"
+  css: |
+    .card {
+      font-family: 'Georgia', serif;
+      font-size: 20px;
+      text-align: center;
+      color: #2c3e50;
+      background-color: #ecf0f1;
+      padding: 20px;
+    }
+
+    .date {
+      font-size: 32px;
+      font-weight: bold;
+      color: #e74c3c;
+      margin-bottom: 15px;
+    }
+
+    .event {
+      font-size: 20px;
+      line-height: 1.6;
+      margin: 15px 0;
+      font-weight: 500;
+    }
+
+    .context {
+      font-size: 16px;
+      color: #555;
+      margin: 10px 0;
+      padding: 10px;
+      background-color: #fff;
+      border-radius: 5px;
+    }
+
+    .significance {
+      font-size: 16px;
+      color: #27ae60;
+      font-style: italic;
+      margin-top: 15px;
+      padding: 10px;
+      background-color: #d5f4e6;
+      border-left: 4px solid #27ae60;
+    }
+
+    .era {
+      font-size: 14px;
+      color: #95a5a6;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 5px;
+    }
+
+  fields:
+    - "Date"
+    - "Event"
+    - "Context"
+    - "Significance"
+    - "Era"
+
+  templates:
+    - name: "Date to Event"
+      qfmt: |
+        <div class="era">{{Era}}</div>
+        <div class="date">{{Date}}</div>
+      afmt: |
+        <div class="era">{{Era}}</div>
+        <div class="date">{{Date}}</div>
+        <hr id="answer">
+        <div class="event">{{Event}}</div>
+        <div class="context">{{Context}}</div>
+        {{#Significance}}
+        <div class="significance"><strong>Significance:</strong> {{Significance}}</div>
+        {{/Significance}}
+
+    - name: "Event to Date"
+      qfmt: |
+        <div class="event">{{Event}}</div>
+        <div class="context">{{Context}}</div>
+      afmt: |
+        <div class="event">{{Event}}</div>
+        <div class="context">{{Context}}</div>
+        <hr id="answer">
+        <div class="era">{{Era}}</div>
+        <div class="date">{{Date}}</div>
+        {{#Significance}}
+        <div class="significance"><strong>Significance:</strong> {{Significance}}</div>
+        {{/Significance}}
+data:
+  - date: "1776"
+    event: "American Declaration of Independence"
+    context: "Thirteen American colonies declared independence from British rule, marking the birth of the United States"
+    significance: "Foundation of democratic principles and inspiration for future independence movements worldwide"
+    era: "Age of Enlightenment"
+    tags: ["american-history", "revolution", "18th-century"]
+
+  - date: "1789"
+    event: "French Revolution begins"
+    context: "The storming of the Bastille marked the beginning of the French Revolution"
+    significance: "Led to the overthrow of monarchy and establishment of republican ideals across Europe"
+    era: "Age of Enlightenment"
+    tags: ["european-history", "revolution", "18th-century"]
+
+  - date: "1492"
+    event: "Columbus reaches the Americas"
+    context: "Christopher Columbus' expedition reached the Caribbean, beginning European exploration of the Americas"
+    significance: "Initiated the Columbian Exchange and European colonization of the Americas"
+    era: "Age of Exploration"
+    tags: ["exploration", "americas", "15th-century"]
+
+  - date: "1945"
+    event: "End of World War II"
+    context: "Nazi Germany surrendered in May, followed by Japan's surrender in August after atomic bombings"
+    significance: "Reshaped global politics, led to UN formation, and began the Cold War era"
+    era: "Modern Era"
+    tags: ["world-war-ii", "20th-century", "global-conflict"]
+
+  - date: "1969"
+    event: "Moon Landing"
+    context: "Apollo 11 mission successfully landed humans on the Moon, with Neil Armstrong and Buzz Aldrin walking on lunar surface"
+    significance: "Marked peak of Space Race and demonstrated human capability for space exploration"
+    era: "Space Age"
+    tags: ["space-exploration", "technology", "20th-century"]
+
+  - date: "1453"
+    event: "Fall of Constantinople"
+    context: "Ottoman Turks conquered Constantinople, ending the Byzantine Empire"
+    significance: "Marked the end of the Middle Ages and prompted European exploration of new trade routes"
+    era: "Late Middle Ages"
+    tags: ["medieval", "ottoman-empire", "15th-century"]
+
+  - date: "1865"
+    event: "Abolition of Slavery in the United States"
+    context: "The 13th Amendment to the U.S. Constitution abolished slavery following the Civil War"
+    significance: "Ended legal slavery in America and began Reconstruction era"
+    era: "Industrial Age"
+    tags: ["american-history", "civil-war", "19th-century"]
+
+  - date: "1989"
+    event: "Fall of the Berlin Wall"
+    context: "The Berlin Wall separating East and West Berlin was opened, symbolizing the end of Cold War divisions"
+    significance: "Led to German reunification and collapse of communist regimes across Eastern Europe"
+    era: "Modern Era"
+    tags: ["cold-war", "germany", "20th-century"]
+
+  - date: "1914-1918"
+    event: "World War I"
+    context: "Global conflict involving major world powers, triggered by assassination of Archduke Franz Ferdinand"
+    significance: "Redrew European borders, led to League of Nations, and set conditions for World War II"
+    era: "Modern Era"
+    tags: ["world-war-i", "20th-century", "global-conflict"]
+
+  - date: "1066"
+    event: "Battle of Hastings"
+    context: "William the Conqueror defeated King Harold II, leading to Norman conquest of England"
+    significance: "Transformed English language, culture, and governance system"
+    era: "Middle Ages"
+    tags: ["medieval", "england", "11th-century"]

@@ -36,15 +36,22 @@ async def main():
     """Generate audio files for all pronunciation examples."""
     # Paths
     project_root = Path(__file__).parent.parent
-    data_file = project_root / "examples" / "audio" / "data.yaml"
+    deck_file = project_root / "examples" / "audio" / "deck.yaml"
     media_dir = project_root / "examples" / "audio" / "media"
 
     # Create media directory
     media_dir.mkdir(exist_ok=True)
 
-    # Load data
-    with open(data_file, encoding="utf-8") as f:
-        data = yaml.safe_load(f)
+    # Load deck file
+    with open(deck_file, encoding="utf-8") as f:
+        deck = yaml.safe_load(f)
+
+    # Extract data section
+    if "data" not in deck:
+        print("Error: No data section found in deck file")
+        return
+
+    data = deck["data"]
 
     print(f"Generating audio files for {len(data)} words...")
     print(f"Output directory: {media_dir}")
@@ -80,11 +87,8 @@ async def main():
     print()
     print("To build the deck with audio:")
     print("  anki-yaml-tool build \\")
-    print("    --data examples/audio/data.yaml \\")
-    print("    --config examples/audio/config.yaml \\")
-    print("    --media-dir examples/audio/media \\")
-    print("    --output pronunciation_practice.apkg \\")
-    print("    --deck-name 'Pronunciation Practice'")
+    print("    --file examples/audio/deck.yaml \\")
+    print("    --output pronunciation_practice.apkg")
 
 
 if __name__ == "__main__":

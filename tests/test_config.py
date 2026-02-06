@@ -3,7 +3,7 @@
 from pathlib import Path
 
 import pytest
-from anki_yaml_tool.core.config import load_deck_data, load_model_config
+from anki_yaml_tool.core.config import load_deck_data, load_deck_file, load_model_config
 from anki_yaml_tool.core.exceptions import ConfigValidationError, DataValidationError
 
 
@@ -184,3 +184,230 @@ def test_load_deck_data_with_string_path(tmp_path):
 
     assert len(items) == 1
     assert items[0]["front"] == "Question 1"
+
+
+def test_load_deck_file_success(tmp_path):
+    """Test loading a valid single-file deck."""
+    deck_file = tmp_path / "deck.yaml"
+    deck_file.write_text(
+        """
+config:
+  name: "Test Model"
+  deck-name: "Test Deck"
+  fields:
+    - "Front"
+    - "Back"
+  templates:
+    - name: "Card 1"
+      qfmt: "{{Front}}"
+      afmt: "{{FrontSide}}<hr>{{Back}}"
+  css: ".card { font-size: 20px; }"
+
+data:
+  - front: "Question 1"
+    back: "Answer 1"
+    tags: ["tag1"]
+  - front: "Question 2"
+    back: "Answer 2"
+"""
+    )
+
+    model_config, items, deck_name, media_folder = load_deck_file(deck_file)
+
+    assert model_config["name"] == "Test Model"
+    assert model_config["fields"] == ["Front", "Back"]
+    assert len(model_config["templates"]) == 1
+    assert deck_name == "Test Deck"
+    assert media_folder is None
+    assert len(items) == 2
+    assert items[0]["front"] == "Question 1"
+
+
+def test_load_deck_file_with_media_folder(tmp_path):
+    """Test loading a deck file with media folder."""
+    # Create media directory
+    media_dir = tmp_path / "media"
+    media_dir.mkdir()
+
+    deck_file = tmp_path / "deck.yaml"
+    deck_file.write_text(
+        """
+config:
+  name: "Test Model"
+  deck-name: "Test Deck"
+  media-folder: "./media/"
+  fields:
+    - "Front"
+  templates:
+    - name: "Card 1"
+      qfmt: "{{Front}}"
+      afmt: "{{Front}}"
+
+data:
+  - front: "Question 1"
+"""
+    )
+
+    model_config, items, deck_name, media_folder = load_deck_file(deck_file)
+
+    assert media_folder is not None
+    assert media_folder == media_dir
+    assert media_folder.exists()
+
+
+def test_load_deck_file_media_folder_not_exists(tmp_path):
+    """Test loading a deck file with media folder that doesn't exist."""
+    deck_file = tmp_path / "deck.yaml"
+    deck_file.write_text(
+        """
+config:
+  name: "Test Model"
+  deck-name: "Test Deck"
+  media-folder: "./media/"
+  fields:
+    - "Front"
+  templates:
+    - name: "Card 1"
+      qfmt: "{{Front}}"
+      afmt: "{{Front}}"
+
+data:
+  - front: "Question 1"
+"""
+    )
+
+    model_config, items, deck_name, media_folder = load_deck_file(deck_file)
+
+    # Media folder should be None if it doesn't exist
+    assert media_folder is None
+
+
+def test_load_deck_file_nonexistent_file():
+    """Test loading a deck file that doesn't exist."""
+    with pytest.raises(FileNotFoundError):
+        load_deck_file(Path("/nonexistent/deck.yaml"))
+
+
+def test_load_deck_file_empty_file(tmp_path):
+    """Test loading an empty deck file."""
+    deck_file = tmp_path / "empty_deck.yaml"
+    deck_file.write_text("")
+
+    with pytest.raises(ConfigValidationError) as exc_info:
+        load_deck_file(deck_file)
+
+    assert "empty" in str(exc_info.value).lower()
+
+
+def test_load_deck_file_missing_config_section(tmp_path):
+    """Test loading a deck file without config section."""
+    deck_file = tmp_path / "deck.yaml"
+    deck_file.write_text(
+        """
+data:
+  - front: "Question 1"
+"""
+    )
+
+    with pytest.raises(ConfigValidationError) as exc_info:
+        load_deck_file(deck_file)
+
+    assert "config" in str(exc_info.value).lower()
+
+
+def test_load_deck_file_missing_data_section(tmp_path):
+    """Test loading a deck file without data section."""
+    deck_file = tmp_path / "deck.yaml"
+    deck_file.write_text(
+        """
+config:
+  name: "Test Model"
+  deck-name: "Test Deck"
+  fields:
+    - "Front"
+  templates:
+    - name: "Card 1"
+      qfmt: "{{Front}}"
+      afmt: "{{Front}}"
+"""
+    )
+
+    with pytest.raises(DataValidationError) as exc_info:
+        load_deck_file(deck_file)
+
+    assert "data" in str(exc_info.value).lower()
+
+
+def test_load_deck_file_empty_data_section(tmp_path):
+    """Test loading a deck file with empty data section."""
+    deck_file = tmp_path / "deck.yaml"
+    deck_file.write_text(
+        """
+config:
+  name: "Test Model"
+  deck-name: "Test Deck"
+  fields:
+    - "Front"
+  templates:
+    - name: "Card 1"
+      qfmt: "{{Front}}"
+      afmt: "{{Front}}"
+
+data: []
+"""
+    )
+
+    with pytest.raises(DataValidationError) as exc_info:
+        load_deck_file(deck_file)
+
+    assert "empty" in str(exc_info.value).lower()
+
+
+def test_load_deck_file_invalid_data_section(tmp_path):
+    """Test loading a deck file with invalid data section (not a list)."""
+    deck_file = tmp_path / "deck.yaml"
+    deck_file.write_text(
+        """
+config:
+  name: "Test Model"
+  deck-name: "Test Deck"
+  fields:
+    - "Front"
+  templates:
+    - name: "Card 1"
+      qfmt: "{{Front}}"
+      afmt: "{{Front}}"
+
+data:
+  front: "Question 1"
+"""
+    )
+
+    with pytest.raises(DataValidationError) as exc_info:
+        load_deck_file(deck_file)
+
+    assert "list" in str(exc_info.value).lower()
+
+
+def test_load_deck_file_default_deck_name(tmp_path):
+    """Test loading a deck file without explicit deck-name."""
+    deck_file = tmp_path / "deck.yaml"
+    deck_file.write_text(
+        """
+config:
+  name: "Test Model"
+  fields:
+    - "Front"
+  templates:
+    - name: "Card 1"
+      qfmt: "{{Front}}"
+      afmt: "{{Front}}"
+
+data:
+  - front: "Question 1"
+"""
+    )
+
+    model_config, items, deck_name, media_folder = load_deck_file(deck_file)
+
+    assert deck_name == "Generated Deck"

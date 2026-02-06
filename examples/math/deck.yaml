@@ -1,0 +1,36 @@
+config:
+  name: APDT-Examples::Math
+  deck-name: "Examples::Mathematics"
+  css: |
+    .card {
+      font-family: "Helvetica Neue", Arial, sans-serif;
+      font-size: 24px;
+      text-align: center;
+      color: #333;
+      background-color: #f9f9f9;
+      padding: 40px;
+    }
+
+    hr {
+      border: 0;
+      border-top: 2px solid #ddd;
+      margin: 30px 0;
+    }
+  fields:
+  - Front
+  - Back
+  templates:
+  - name: Card 1
+    qfmt: |
+      <div class="front">{{Front}}</div>
+    afmt: |
+      {{FrontSide}}
+      <hr id=answer>
+      <div class="back">{{Back}}</div>
+data:
+- Front: $\text{Can you see this?}$
+  Back: Yes, I can see it!
+- Front: $\text{And this? } e=mc^2\text{?}$
+  Back: Yes, I can see the equation!
+- Front: $$\text{What about this? } e=mc^2 $$
+  Back: Yes, I can see the equation in display mode!

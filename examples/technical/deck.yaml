@@ -1,0 +1,195 @@
+config:
+  name: APDT Examples::Code Snippet
+  deck-name: "Examples::Technical Terms"
+  css: |
+    .card {
+      font-family: "SF Mono", "Monaco", "Inconsolata", "Fira Mono", monospace;
+      font-size: 18px;
+      text-align: left;
+      color: #f8f8f2;
+      background-color: #282a36;
+      padding: 30px;
+      max-width: 800px;
+      margin: 0 auto;
+    }
+
+    .concept {
+      font-size: 26px;
+      font-weight: bold;
+      color: #50fa7b;
+      margin-bottom: 15px;
+      font-family: "Helvetica Neue", Arial, sans-serif;
+    }
+
+    .language-badge {
+      display: inline-block;
+      background-color: #6272a4;
+      color: #f8f8f2;
+      padding: 5px 15px;
+      border-radius: 5px;
+      font-size: 14px;
+      margin-bottom: 20px;
+      font-family: "Helvetica Neue", Arial, sans-serif;
+    }
+
+    pre {
+      background-color: #1e1f29;
+      border-radius: 8px;
+      padding: 20px;
+      overflow-x: auto;
+      border: 1px solid #44475a;
+    }
+
+    code {
+      font-family: "SF Mono", "Monaco", "Inconsolata", monospace;
+      font-size: 16px;
+      line-height: 1.6;
+      color: #f8f8f2;
+    }
+
+    .explanation {
+      margin-top: 20px;
+      padding: 15px;
+      background-color: #44475a;
+      border-radius: 8px;
+      color: #f8f8f2;
+      line-height: 1.6;
+      font-family: "Helvetica Neue", Arial, sans-serif;
+    }
+
+    hr {
+      border: 0;
+      border-top: 2px solid #44475a;
+      margin: 25px 0;
+    }
+  fields:
+    - Concept
+    - Code
+    - Language
+    - Explanation
+  templates:
+    - name: Concept → Code
+      qfmt: |
+        <div class="concept">{{Concept}}</div>
+        <div class="language-badge">{{Language}}</div>
+      afmt: |
+        {{FrontSide}}
+        <hr id=answer>
+        <pre><code class="{{Language}}">{{Code}}</code></pre>
+        {{#Explanation}}
+        <div class="explanation">{{Explanation}}</div>
+        {{/Explanation}}
+data:
+  - Concept: List Comprehension
+    Language: python
+    Code: |
+      numbers = [1, 2, 3, 4, 5]
+      squares = [x**2 for x in numbers]
+      # Result: [1, 4, 9, 16, 25]
+    Explanation: List comprehensions provide a concise way to create lists based on existing lists. More readable and often faster than using loops.
+    tags:
+      - python
+      - basics
+      - syntax
+    id: py_001
+  - Concept: Dictionary Comprehension
+    Language: python
+    Code: |
+      words = ['hello', 'world']
+      lengths = {word: len(word) for word in words}
+      # Result: {'hello': 5, 'world': 5}
+    Explanation: Similar to list comprehensions but creates dictionaries. Useful for transforming data structures.
+    tags:
+      - python
+      - basics
+      - syntax
+    id: py_002
+  - Concept: Lambda Function
+    Language: python
+    Code: |
+      square = lambda x: x**2
+      result = square(5)  # Returns 25
+
+      # Common with map/filter
+      numbers = [1, 2, 3, 4]
+      doubled = list(map(lambda x: x*2, numbers))
+    Explanation: Anonymous functions defined with lambda. Useful for simple operations, especially with map(), filter(), and sorted().
+    tags:
+      - python
+      - functions
+      - advanced
+    id: py_003
+  - Concept: Context Manager (with statement)
+    Language: python
+    Code: |
+      with open('file.txt', 'r') as f:
+          content = f.read()
+      # File automatically closed
+    Explanation: Context managers ensure resources are properly managed. The file is automatically closed even if an exception occurs.
+    tags:
+      - python
+      - best-practices
+      - files
+    id: py_004
+  - Concept: Destructuring Assignment
+    Language: javascript
+    Code: |
+      const person = { name: 'John', age: 30 };
+      const { name, age } = person;
+
+      const colors = ['red', 'green', 'blue'];
+      const [first, second] = colors;
+    Explanation: Destructuring allows unpacking values from arrays or properties from objects into distinct variables.
+    tags:
+      - javascript
+      - es6
+      - syntax
+    id: js_001
+  - Concept: Arrow Functions
+    Language: javascript
+    Code: |
+      // Traditional function
+      function add(a, b) { return a + b; }
+
+      // Arrow function
+      const add = (a, b) => a + b;
+
+      // With block body
+      const multiply = (a, b) => {
+        return a * b;
+      };
+    Explanation: Arrow functions provide a shorter syntax and lexically bind 'this'. Ideal for callbacks and functional programming.
+    tags:
+      - javascript
+      - es6
+      - functions
+    id: js_002
+  - Concept: Slice Operation
+    Language: go
+    Code: |
+      // Create a slice
+      nums := []int{1, 2, 3, 4, 5}
+
+      // Slice operations
+      subset := nums[1:4]  // [2, 3, 4]
+      first3 := nums[:3]   // [1, 2, 3]
+      last2 := nums[3:]    // [4, 5]
+    Explanation: Slices are dynamic arrays in Go. The syntax [low:high] creates a slice including low but excluding high.
+    tags:
+      - go
+      - basics
+      - slices
+    id: go_001
+  - Concept: SQL JOIN
+    Language: sql
+    Code: |
+      SELECT users.name, orders.total
+      FROM users
+      INNER JOIN orders ON users.id = orders.user_id
+      WHERE orders.total > 100;
+    Explanation: INNER JOIN returns records that have matching values in both tables. Essential for relational database queries.
+    tags:
+      - sql
+      - joins
+      - queries
+    id: sql_001

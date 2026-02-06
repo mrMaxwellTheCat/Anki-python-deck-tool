@@ -93,39 +93,40 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) for detailed development setup instructio
 
 Here's a minimal example to get you started:
 
-1. **Create a configuration file** (\`my_model.yaml\`):
+1. **Create a single YAML file** (\`my_deck.yaml\`) with both configuration and data:
    ```yaml
-   name: "Basic Model"
-   fields:
-     - "Front"
-     - "Back"
-   templates:
-     - name: "Card 1"
-       qfmt: "{{Front}}"
-       afmt: "{{FrontSide}}<hr id=answer>{{Back}}"
-   css: ".card { font-family: arial; font-size: 20px; text-align: center; }"
+   config:
+     name: "Basic Model"
+     deck-name: "French Basics"
+     css: ".card { font-family: arial; font-size: 20px; text-align: center; }"
+     fields:
+       - "Front"
+       - "Back"
+     templates:
+       - name: "Card 1"
+         qfmt: "{{Front}}"
+         afmt: "{{FrontSide}}<hr id=answer>{{Back}}"
+
+   data:
+     - front: "Hello"
+       back: "Bonjour"
+       tags: ["basics", "greetings"]
+
+     - front: "Goodbye"
+       back: "Au revoir"
+       tags: ["basics"]
    ```
 
-2. **Create a data file** (\`my_cards.yaml\`):
-   ```yaml
-   - front: "Hello"
-     back: "Bonjour"
-     tags: ["basics", "greetings"]
-
-   - front: "Goodbye"
-     back: "Au revoir"
-     tags: ["basics"]
-   ```
-
-3. **Build the deck**:
+2. **Build the deck**:
    ```bash
-   anki-yaml-tool build --data my_cards.yaml --config my_model.yaml --output french.apkg --deck-name "French Basics"
+   anki-yaml-tool build --file my_deck.yaml --output french.apkg
    ```
 
-4. **Push to Anki** (optional, requires AnkiConnect):
+3. **Push to Anki** (optional, requires AnkiConnect):
    ```bash
    anki-yaml-tool push --apkg french.apkg --sync
    ```
+
 
 ## Building Executable
 
@@ -196,22 +197,21 @@ The tool provides a CLI entry point `anki-yaml-tool` with two main commands: `bu
 Generates an `.apkg` file from your YAML data and configuration.
 
 ```bash
-anki-yaml-tool build --data data/my_deck.yaml --config configs/japanese_num.yaml --output "My Deck.apkg" --deck-name "Japanese Numbers"
+anki-yaml-tool build --file my_deck.yaml --output "My Deck.apkg"
 ```
 
 **Options:**
-- `--data PATH` (Required): Path to the YAML file containing note data.
-- `--config PATH` (Required): Path to the YAML file defining the Note Type (Model).
+- `--file PATH` (Required): Path to a YAML file containing both `config` and `data` sections.
 - `--output PATH`: Path where the `.apkg` will be saved (Default: `deck.apkg`).
-- `--deck-name TEXT`: Name of the deck inside Anki (Default: `"Generated Deck"`).
 
-**Example with all options:**
+**Examples:**
 ```bash
-anki-yaml-tool build \
-  --data data/vocabulary.yaml \
-  --config configs/basic_model.yaml \
-  --output builds/vocabulary_v1.apkg \
-  --deck-name "Spanish Vocabulary"
+# Basic usage
+anki-yaml-tool build --file my_deck.yaml --output "My Deck.apkg"
+
+# Building multiple decks
+anki-yaml-tool build --file decks/vocabulary.yaml --output builds/vocabulary_v1.apkg
+anki-yaml-tool build --file decks/grammar.yaml --output builds/grammar_v1.apkg
 ```
 
 ### 2. Push to Anki (`push`)
@@ -230,77 +230,73 @@ anki-yaml-tool push --apkg "My Deck.apkg" --sync
 
 ## File Formats
 
-### Configuration File (Model)
+The tool uses a single YAML file format containing both `config` and `data` sections. This provides a simple, organized structure for managing your Anki decks.
 
-This YAML file defines how your cards look. It specifies the note type structure including fields, card templates, and styling.
-
-**Example: \`configs/japanese_num.yaml\`**
+**Example: \`my_deck.yaml\`**
 
 ```yaml
-name: "Japanese Numbers Model"  # Name of the Note Type in Anki
+config:
+  name: "Japanese Numbers Model"      # Name of the Note Type in Anki
+  deck-name: "Japanese Numbers"       # Name of the deck in Anki
+  media-folder: "./media/"            # Optional: Path to media files
 
-css: |
-  .card {
-   font-family: arial;
-   font-size: 20px;
-   text-align: center;
-   color: black;
-   background-color: white;
-  }
-  .highlight { color: red; }
+  css: |
+    .card {
+     font-family: arial;
+     font-size: 20px;
+     text-align: center;
+     color: black;
+     background-color: white;
+    }
+    .highlight { color: red; }
 
-fields:
-  - "Numeral"
-  - "Kanji"
-  - "Reading"
+  fields:
+    - "Numeral"
+    - "Kanji"
+    - "Reading"
 
-templates:
-  - name: "Card 1: Numeral -> Kanji"
-    qfmt: "{{Numeral}}"         # Front side HTML
-    afmt: |                     # Back side HTML
-      {{FrontSide}}
-      <hr id=answer>
-      {{Kanji}}<br>
-      <span class="highlight">{{Reading}}</span>
+  templates:
+    - name: "Card 1: Numeral -> Kanji"
+      qfmt: "{{Numeral}}"              # Front side HTML
+      afmt: |                          # Back side HTML
+        {{FrontSide}}
+        <hr id=answer>
+        {{Kanji}}<br>
+        <span class="highlight">{{Reading}}</span>
+
+data:
+  - numeral: "1"
+    kanji: "一"
+    reading: "ichi"
+    tags:
+      - "basic"
+      - "numbers"
+    id: "num_001"  # Optional: Adds an 'id::num_001' tag
+
+  - numeral: "2"
+    kanji: "二"
+    reading: "ni"
+    tags: ["basic"]
+
+  - numeral: "3"
+    kanji: "三"
+    reading: "san"
+    tags: ["basic", "numbers"]
 ```
 
-**Configuration Structure:**
-- \`name\` (required): Name of the note type/model in Anki
-- \`fields\` (required): List of field names for the note type
-- \`templates\` (required): List of card templates with \`name\`, \`qfmt\` (front), and \`afmt\` (back)
-- \`css\` (optional): CSS styling for the cards
+**Config Section Fields:**
+- `name` (required): Name of the note type/model in Anki
+- `deck-name` (required): Name of the deck in Anki
+- `fields` (required): List of field names for the note type
+- `templates` (required): List of card templates with `name`, `qfmt` (front), and `afmt` (back)
+- `css` (optional): CSS styling for the cards
+- `media-folder` (optional): Path to folder containing media files (images, audio, etc.)
 
-### Data File (Notes)
-
-This YAML file defines the content of your cards. Field names must match the \`fields\` in your config (case-insensitive).
-
-**Example: \`data/my_deck.yaml\`**
-
-```yaml
-- numeral: "1"
-  kanji: "一"
-  reading: "ichi"
-  tags:
-    - "basic"
-    - "numbers"
-  id: "num_001" # Optional: Adds an 'id::num_001' tag
-
-- numeral: "2"
-  kanji: "二"
-  reading: "ni"
-  tags: ["basic"]
-
-- numeral: "3"
-  kanji: "三"
-  reading: "san"
-  tags: ["basic", "numbers"]
-```
-
-**Data Structure:**
+**Data Section Structure:**
 - Each item in the list represents one note/card
 - Keys should match field names from the config (case-insensitive)
-- \`tags\` (optional): List of tags to apply to the note
-- \`id\` (optional): Unique identifier that gets added as a special tag (\`id::value\`)
+- `tags` (optional): List of tags to apply to the note
+- `id` (optional): Unique identifier that gets added as a special tag (`id::value`)
 
 **Tips:**
 - Field values can contain HTML for formatting

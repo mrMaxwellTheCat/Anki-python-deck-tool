@@ -24,44 +24,38 @@ def runner():
 
 
 @pytest.fixture
-def sample_config():
-    """Provide sample configuration data."""
+def sample_deck():
+    """Provide sample deck data with config and data sections."""
     return {
-        "name": "Test Model",
-        "fields": ["Front", "Back"],
-        "templates": [
-            {
-                "name": "Card 1",
-                "qfmt": "{{Front}}",
-                "afmt": "{{FrontSide}}<hr id=answer>{{Back}}",
-            }
+        "config": {
+            "name": "Test Model",
+            "fields": ["Front", "Back"],
+            "templates": [
+                {
+                    "name": "Card 1",
+                    "qfmt": "{{Front}}",
+                    "afmt": "{{FrontSide}}<hr id=answer>{{Back}}",
+                }
+            ],
+            "css": ".card { font-family: arial; }",
+        },
+        "data": [
+            {"front": "Question 1", "back": "Answer 1", "tags": ["test"]},
+            {"front": "Question 2", "back": "Answer 2", "tags": ["test", "basic"]},
         ],
-        "css": ".card { font-family: arial; }",
     }
 
 
 @pytest.fixture
-def sample_data():
-    """Provide sample note data."""
-    return [
-        {"front": "Question 1", "back": "Answer 1", "tags": ["test"]},
-        {"front": "Question 2", "back": "Answer 2", "tags": ["test", "basic"]},
-    ]
-
-
-@pytest.fixture
-def temp_files(tmp_path, sample_config, sample_data):
-    """Create temporary config and data files."""
-    config_file = tmp_path / "config.yaml"
-    data_file = tmp_path / "data.yaml"
+def temp_files(tmp_path, sample_deck):
+    """Create temporary deck file."""
+    deck_file = tmp_path / "deck.yaml"
     output_file = tmp_path / "output.apkg"
 
-    config_file.write_text(yaml.dump(sample_config), encoding="utf-8")
-    data_file.write_text(yaml.dump(sample_data), encoding="utf-8")
+    deck_file.write_text(yaml.dump(sample_deck), encoding="utf-8")
 
     return {
-        "config": str(config_file),
-        "data": str(data_file),
+        "file": str(deck_file),
         "output": str(output_file),
         "dir": tmp_path,
     }
@@ -90,16 +84,11 @@ class TestBuildCommand:
         """Test that build command help is accessible."""
         result = runner.invoke(build, ["--help"])
         assert result.exit_code == 0
-        assert "Build an .apkg file from YAML data" in result.output
+        assert "Build an .apkg file from YAML deck file" in result.output
 
-    def test_build_requires_data_option(self, runner):
-        """Test that build command requires --data option."""
-        result = runner.invoke(build, ["--config", "config.yaml"])
-        assert result.exit_code != 0
-
-    def test_build_requires_config_option(self, runner):
-        """Test that build command requires --config option."""
-        result = runner.invoke(build, ["--data", "data.yaml"])
+    def test_build_requires_file_option(self, runner):
+        """Test that build command requires --file option."""
+        result = runner.invoke(build, [])
         assert result.exit_code != 0
 
     @patch("anki_yaml_tool.cli.AnkiBuilder")
@@ -111,10 +100,8 @@ class TestBuildCommand:
         result = runner.invoke(
             build,
             [
-                "--data",
-                temp_files["data"],
-                "--config",
-                temp_files["config"],
+                "--file",
+                temp_files["file"],
                 "--output",
                 temp_files["output"],
                 "--deck-name",
@@ -136,60 +123,6 @@ class TestBuildCommand:
         mock_instance.write_to_file.assert_called_once()
 
     @patch("anki_yaml_tool.cli.AnkiBuilder")
-    def test_build_multiple_configs(self, mock_builder, runner, tmp_path):
-        """Test building with multiple config files."""
-        config1 = {
-            "name": "Model 1",
-            "fields": ["F1"],
-            "templates": [{"name": "T1", "qfmt": "{{F1}}", "afmt": "{{F1}}"}],
-        }
-        config2 = {
-            "name": "Model 2",
-            "fields": ["F2"],
-            "templates": [{"name": "T2", "qfmt": "{{F2}}", "afmt": "{{F2}}"}],
-        }
-        data = [
-            {"f1": "val1", "model": "Model 1"},
-            {"f2": "val2", "model": "Model 2"},
-        ]
-
-        cfg1_path = tmp_path / "cfg1.yaml"
-        cfg2_path = tmp_path / "cfg2.yaml"
-        data_path = tmp_path / "data.yaml"
-
-        cfg1_path.write_text(yaml.dump(config1))
-        cfg2_path.write_text(yaml.dump(config2))
-        data_path.write_text(yaml.dump(data))
-
-        mock_instance = Mock()
-        mock_builder.return_value = mock_instance
-
-        result = runner.invoke(
-            build,
-            [
-                "--data",
-                str(data_path),
-                "--config",
-                str(cfg1_path),
-                "--config",
-                str(cfg2_path),
-            ],
-        )
-
-        assert result.exit_code == 0
-        assert mock_builder.call_count == 1
-        model_configs = mock_builder.call_args[0][1]
-        assert len(model_configs) == 2
-        assert model_configs[0]["name"] == "Model 1"
-        assert model_configs[1]["name"] == "Model 2"
-
-        # Check add_note calls with correct models
-        calls = mock_instance.add_note.call_args_list
-        assert len(calls) == 2
-        assert calls[0][1]["model_name"] == "Model 1"
-        assert calls[1][1]["model_name"] == "Model 2"
-
-    @patch("anki_yaml_tool.cli.AnkiBuilder")
     def test_build_with_tags(self, mock_builder, runner, temp_files):
         """Test that tags are properly passed to notes."""
         mock_instance = Mock()
@@ -198,10 +131,8 @@ class TestBuildCommand:
         result = runner.invoke(
             build,
             [
-                "--data",
-                temp_files["data"],
-                "--config",
-                temp_files["config"],
+                "--file",
+                temp_files["file"],
                 "--output",
                 temp_files["output"],
             ],
@@ -220,25 +151,25 @@ class TestBuildCommand:
         mock_instance = Mock()
         mock_builder.return_value = mock_instance
 
-        config = {
-            "name": "Test Model",
-            "fields": ["Front", "Back"],
-            "templates": [{"name": "Card 1", "qfmt": "{{Front}}", "afmt": "{{Back}}"}],
+        deck_data = {
+            "config": {
+                "name": "Test Model",
+                "fields": ["Front", "Back"],
+                "templates": [
+                    {"name": "Card 1", "qfmt": "{{Front}}", "afmt": "{{Back}}"}
+                ],
+            },
+            "data": [{"front": "Q", "back": "A", "id": "test_123", "tags": ["basic"]}],
         }
-        data = [{"front": "Q", "back": "A", "id": "test_123", "tags": ["basic"]}]
 
-        config_file = tmp_path / "config.yaml"
-        data_file = tmp_path / "data.yaml"
-        config_file.write_text(yaml.dump(config), encoding="utf-8")
-        data_file.write_text(yaml.dump(data), encoding="utf-8")
+        deck_file = tmp_path / "deck.yaml"
+        deck_file.write_text(yaml.dump(deck_data), encoding="utf-8")
 
         result = runner.invoke(
             build,
             [
-                "--data",
-                str(data_file),
-                "--config",
-                str(config_file),
+                "--file",
+                str(deck_file),
                 "--output",
                 str(tmp_path / "out.apkg"),
             ],
@@ -250,19 +181,19 @@ class TestBuildCommand:
         assert "basic" in calls[0][1]["tags"]
 
     def test_build_empty_config(self, runner, tmp_path):
-        """Test that empty config file raises ConfigValidationError."""
-        empty_config = tmp_path / "empty.yaml"
-        data_file = tmp_path / "data.yaml"
-        empty_config.write_text("", encoding="utf-8")
-        data_file.write_text(yaml.dump([{"front": "Q", "back": "A"}]), encoding="utf-8")
+        """Test that empty config section raises ConfigValidationError."""
+        deck_data = {
+            "config": None,
+            "data": [{"front": "Q", "back": "A"}],
+        }
+        deck_file = tmp_path / "deck.yaml"
+        deck_file.write_text(yaml.dump(deck_data), encoding="utf-8")
 
         result = runner.invoke(
             build,
             [
-                "--data",
-                str(data_file),
-                "--config",
-                str(empty_config),
+                "--file",
+                str(deck_file),
                 "--output",
                 str(tmp_path / "out.apkg"),
             ],
@@ -272,24 +203,25 @@ class TestBuildCommand:
         assert "Error:" in result.output
 
     def test_build_empty_data(self, runner, tmp_path):
-        """Test that empty data file raises DataValidationError."""
-        config = {
-            "name": "Test",
-            "fields": ["Front"],
-            "templates": [{"name": "Card 1", "qfmt": "{{Front}}", "afmt": "{{Front}}"}],
+        """Test that empty data section raises DataValidationError."""
+        deck_data = {
+            "config": {
+                "name": "Test",
+                "fields": ["Front"],
+                "templates": [
+                    {"name": "Card 1", "qfmt": "{{Front}}", "afmt": "{{Front}}"}
+                ],
+            },
+            "data": None,
         }
-        config_file = tmp_path / "config.yaml"
-        empty_data = tmp_path / "empty.yaml"
-        config_file.write_text(yaml.dump(config), encoding="utf-8")
-        empty_data.write_text("", encoding="utf-8")
+        deck_file = tmp_path / "deck.yaml"
+        deck_file.write_text(yaml.dump(deck_data), encoding="utf-8")
 
         result = runner.invoke(
             build,
             [
-                "--data",
-                str(empty_data),
-                "--config",
-                str(config_file),
+                "--file",
+                str(deck_file),
                 "--output",
                 str(tmp_path / "out.apkg"),
             ],
@@ -298,33 +230,15 @@ class TestBuildCommand:
         assert result.exit_code == 1
         assert "Error:" in result.output
 
-    def test_build_nonexistent_data_file(self, runner, temp_files):
-        """Test that nonexistent data file is handled."""
+    def test_build_nonexistent_file(self, runner):
+        """Test that nonexistent deck file is handled."""
         result = runner.invoke(
             build,
             [
-                "--data",
-                "nonexistent.yaml",
-                "--config",
-                temp_files["config"],
-                "--output",
-                temp_files["output"],
-            ],
-        )
-
-        assert result.exit_code != 0
-
-    def test_build_nonexistent_config_file(self, runner, temp_files):
-        """Test that nonexistent config file is handled."""
-        result = runner.invoke(
-            build,
-            [
-                "--data",
-                temp_files["data"],
-                "--config",
+                "--file",
                 "nonexistent.yaml",
                 "--output",
-                temp_files["output"],
+                "output.apkg",
             ],
         )
 
@@ -339,10 +253,8 @@ class TestBuildCommand:
             result = runner.invoke(
                 build,
                 [
-                    "--data",
-                    temp_files["data"],
-                    "--config",
-                    temp_files["config"],
+                    "--file",
+                    temp_files["file"],
                 ],
             )
 
@@ -360,10 +272,8 @@ class TestBuildCommand:
             result = runner.invoke(
                 build,
                 [
-                    "--data",
-                    temp_files["data"],
-                    "--config",
-                    temp_files["config"],
+                    "--file",
+                    temp_files["file"],
                 ],
             )
 
@@ -380,10 +290,8 @@ class TestBuildCommand:
         result = runner.invoke(
             build,
             [
-                "--data",
-                temp_files["data"],
-                "--config",
-                temp_files["config"],
+                "--file",
+                temp_files["file"],
             ],
         )
 
@@ -398,10 +306,8 @@ class TestBuildCommand:
             result = runner.invoke(
                 build,
                 [
-                    "--data",
-                    temp_files["data"],
-                    "--config",
-                    temp_files["config"],
+                    "--file",
+                    temp_files["file"],
                 ],
             )
 
@@ -416,29 +322,28 @@ class TestValidateCommand:
         """Test successful validation."""
         result = runner.invoke(
             validate,
-            ["--data", temp_files["data"], "--config", temp_files["config"]],
+            ["--file", temp_files["file"]],
         )
         assert result.exit_code == 0
         assert "Validation passed successfully!" in result.output
 
     def test_validate_with_warnings(self, runner, tmp_path):
         """Test validation with warnings (missing fields)."""
-        config = {
-            "name": "Model",
-            "fields": ["Front", "Back"],
-            "templates": [{"name": "T", "qfmt": "{{Front}}", "afmt": "{{Back}}"}],
+        deck_data = {
+            "config": {
+                "name": "Model",
+                "fields": ["Front", "Back"],
+                "templates": [{"name": "T", "qfmt": "{{Front}}", "afmt": "{{Back}}"}],
+            },
+            "data": [{"front": "Q1"}],  # Missing 'back' field
         }
-        # Note missing 'back' field
-        data = [{"front": "Q1"}]
 
-        cfg_path = tmp_path / "config.yaml"
-        data_path = tmp_path / "data.yaml"
-        cfg_path.write_text(yaml.dump(config))
-        data_path.write_text(yaml.dump(data))
+        deck_path = tmp_path / "deck.yaml"
+        deck_path.write_text(yaml.dump(deck_data))
 
         result = runner.invoke(
             validate,
-            ["--data", str(data_path), "--config", str(cfg_path)],
+            ["--file", str(deck_path)],
         )
         assert result.exit_code == 0
         assert "Validation passed with warnings." in result.output
@@ -446,66 +351,66 @@ class TestValidateCommand:
 
     def test_validate_strict_mode(self, runner, tmp_path):
         """Test validation strict mode failing on warnings."""
-        config = {
-            "name": "Model",
-            "fields": ["Front", "Back"],
-            "templates": [{"name": "T", "qfmt": "{{Front}}", "afmt": "{{Back}}"}],
+        deck_data = {
+            "config": {
+                "name": "Model",
+                "fields": ["Front", "Back"],
+                "templates": [{"name": "T", "qfmt": "{{Front}}", "afmt": "{{Back}}"}],
+            },
+            "data": [{"front": "Q1"}],
         }
-        data = [{"front": "Q1"}]
 
-        cfg_path = tmp_path / "config.yaml"
-        data_path = tmp_path / "data.yaml"
-        cfg_path.write_text(yaml.dump(config))
-        data_path.write_text(yaml.dump(data))
+        deck_path = tmp_path / "deck.yaml"
+        deck_path.write_text(yaml.dump(deck_data))
 
         result = runner.invoke(
             validate,
-            ["--data", str(data_path), "--config", str(cfg_path), "--strict"],
+            ["--file", str(deck_path), "--strict"],
         )
         assert result.exit_code != 0
         assert "Validation failed due to warnings in strict mode." in result.output
 
     def test_validate_unclosed_html(self, runner, tmp_path):
         """Test validation warning for unclosed HTML tags."""
-        config = {
-            "name": "Model",
-            "fields": ["F"],
-            "templates": [{"name": "T", "qfmt": "{{F}}", "afmt": "{{F}}"}],
+        deck_data = {
+            "config": {
+                "name": "Model",
+                "fields": ["F"],
+                "templates": [{"name": "T", "qfmt": "{{F}}", "afmt": "{{F}}"}],
+            },
+            "data": [{"f": "<b>Bold text"}],  # Unclosed <b>
         }
-        data = [{"f": "<b>Bold text"}]  # Unclosed <b>
 
-        cfg_path = tmp_path / "config.yaml"
-        data_path = tmp_path / "data.yaml"
-        cfg_path.write_text(yaml.dump(config))
-        data_path.write_text(yaml.dump(data))
+        deck_path = tmp_path / "deck.yaml"
+        deck_path.write_text(yaml.dump(deck_data))
 
         result = runner.invoke(
             validate,
-            ["--data", str(data_path), "--config", str(cfg_path)],
+            ["--file", str(deck_path)],
         )
         assert result.exit_code == 0
         assert "Unclosed tag: <b>" in result.output
 
     def test_validate_duplicate_ids(self, runner, tmp_path):
         """Test validation warning for duplicate IDs."""
-        config = {
-            "name": "Model",
-            "fields": ["F"],
-            "templates": [{"name": "T", "qfmt": "{{F}}", "afmt": "{{F}}"}],
+        deck_data = {
+            "config": {
+                "name": "Model",
+                "fields": ["F"],
+                "templates": [{"name": "T", "qfmt": "{{F}}", "afmt": "{{F}}"}],
+            },
+            "data": [
+                {"f": "1", "id": "dup"},
+                {"f": "2", "id": "dup"},
+            ],
         }
-        data = [
-            {"f": "1", "id": "dup"},
-            {"f": "2", "id": "dup"},
-        ]
 
-        cfg_path = tmp_path / "config.yaml"
-        data_path = tmp_path / "data.yaml"
-        cfg_path.write_text(yaml.dump(config))
-        data_path.write_text(yaml.dump(data))
+        deck_path = tmp_path / "deck.yaml"
+        deck_path.write_text(yaml.dump(deck_data))
 
         result = runner.invoke(
             validate,
-            ["--data", str(data_path), "--config", str(cfg_path)],
+            ["--file", str(deck_path)],
         )
         assert result.exit_code == 0
         assert "Duplicate note IDs found:" in result.output

@@ -1,6 +1,0 @@
-- front: '$\text{Can you see this?}$'
-  back: "Yes, I can see it!"
-- front: '$\text{And this? } e=mc^2\text{?}$'
-  back: "Yes, I can see the equation!"
-- front: '$$\text{What about this? } e=mc^2 $$'
-  back: "Yes, I can see the equation in display mode!"

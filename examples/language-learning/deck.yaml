@@ -1,0 +1,167 @@
+config:
+  name: APDT Examples::Vocabulary Card
+  deck-name: "Examples::Vocabulary"
+  css: |
+    .card {
+      font-family: "Helvetica Neue", Arial, sans-serif;
+      font-size: 22px;
+      text-align: center;
+      color: #2c3e50;
+      background-color: #fff;
+      padding: 30px;
+      max-width: 600px;
+      margin: 0 auto;
+    }
+
+    .word {
+      font-size: 32px;
+      font-weight: bold;
+      color: #2980b9;
+      margin-bottom: 10px;
+    }
+
+    .pronunciation {
+      font-size: 18px;
+      color: #7f8c8d;
+      font-style: italic;
+      margin-bottom: 20px;
+    }
+
+    .translation {
+      font-size: 28px;
+      color: #27ae60;
+      font-weight: 500;
+      margin: 20px 0;
+    }
+
+    .example {
+      font-size: 18px;
+      color: #555;
+      background-color: #f8f9fa;
+      padding: 15px;
+      border-radius: 8px;
+      margin-top: 20px;
+      text-align: left;
+    }
+
+    .example em {
+      color: #7f8c8d;
+      font-weight: bold;
+    }
+
+    hr {
+      border: 0;
+      border-top: 2px solid #ecf0f1;
+      margin: 25px 0;
+    }
+  fields:
+    - Word
+    - Translation
+    - Example
+    - Pronunciation
+  templates:
+    - name: Recognition (Word → Translation)
+      qfmt: |
+        <div class="word">{{Word}}</div>
+        {{#Pronunciation}}
+        <div class="pronunciation">{{Pronunciation}}</div>
+        {{/Pronunciation}}
+      afmt: |
+        {{FrontSide}}
+        <hr id=answer>
+        <div class="translation">{{Translation}}</div>
+        {{#Example}}
+        <div class="example">
+          <em>Example:</em><br>
+          {{Example}}
+        </div>
+        {{/Example}}
+    - name: Recall (Translation → Word)
+      qfmt: |
+        <div class="translation">{{Translation}}</div>
+      afmt: |
+        {{FrontSide}}
+        <hr id=answer>
+        <div class="word">{{Word}}</div>
+        {{#Pronunciation}}
+        <div class="pronunciation">{{Pronunciation}}</div>
+        {{/Pronunciation}}
+        {{#Example}}
+        <div class="example">
+          <em>Example:</em><br>
+          {{Example}}
+        </div>
+        {{/Example}}
+data:
+  - Word: Bonjour
+    Translation: Hello
+    Pronunciation: bon-ZHOOR
+    Example: Bonjour, comment allez-vous?
+    tags:
+      - french
+      - greetings
+      - a1
+    id: fr_001
+  - Word: Merci
+    Translation: Thank you
+    Pronunciation: mehr-SEE
+    Example: Merci beaucoup pour votre aide.
+    tags:
+      - french
+      - courtesy
+      - a1
+    id: fr_002
+  - Word: Au revoir
+    Translation: Goodbye
+    Pronunciation: oh ruh-VWAH
+    Example: Au revoir, à bientôt!
+    tags:
+      - french
+      - greetings
+      - a1
+    id: fr_003
+  - Word: S'il vous plaît
+    Translation: Please
+    Pronunciation: seel voo PLEH
+    Example: Un café, s'il vous plaît.
+    tags:
+      - french
+      - courtesy
+      - a1
+    id: fr_004
+  - Word: Excusez-moi
+    Translation: Excuse me
+    Pronunciation: ex-kew-zay-MWAH
+    Example: Excusez-moi, où sont les toilettes?
+    tags:
+      - french
+      - courtesy
+      - a1
+    id: fr_005
+  - Word: Oui
+    Translation: "Yes"
+    Pronunciation: wee
+    Example: Oui, je comprends.
+    tags:
+      - french
+      - basics
+      - a1
+    id: fr_006
+  - Word: Non
+    Translation: "No"
+    Pronunciation: nohn
+    Example: Non, je ne sais pas.
+    tags:
+      - french
+      - basics
+      - a1
+    id: fr_007
+  - Word: Je ne comprends pas
+    Translation: I don't understand
+    Pronunciation: zhuh nuh kom-prahn pah
+    Example: Désolé, je ne comprends pas.
+    tags:
+      - french
+      - basics
+      - a1
+    id: fr_008

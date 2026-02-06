@@ -9,7 +9,7 @@ from pathlib import Path
 import click
 
 from anki_yaml_tool.core.builder import AnkiBuilder
-from anki_yaml_tool.core.config import load_deck_data, load_model_config
+from anki_yaml_tool.core.config import load_deck_file
 from anki_yaml_tool.core.connector import AnkiConnector
 from anki_yaml_tool.core.exceptions import (
     AnkiConnectError,
@@ -39,17 +39,10 @@ def cli():
 
 @cli.command()
 @click.option(
-    "--data",
+    "--file",
     type=click.Path(exists=True),
     required=True,
-    help="Path to data YAML file",
-)
-@click.option(
-    "--config",
-    type=click.Path(exists=True),
-    required=True,
-    multiple=True,
-    help="Path to model config YAML (can be used multiple times)",
+    help="Path to deck YAML file (contains both config and data)",
 )
 @click.option(
     "--output",
@@ -57,22 +50,30 @@ def cli():
     default="deck.apkg",
     help="Output .apkg path",
 )
-@click.option("--deck-name", default="Generated Deck", help="Name of the Anki deck")
+@click.option(
+    "--deck-name",
+    help="Name of the Anki deck (overrides deck file setting)",
+)
 @click.option(
     "--media-dir",
     type=click.Path(exists=True),
-    help="Directory containing media files to include",
+    help="Directory containing media files (overrides deck file setting)",
 )
-def build(data, config, output, deck_name, media_dir):
-    """Build an .apkg file from YAML data."""
-    click.echo(f"Building deck '{deck_name}'...")
-
+def build(file, output, deck_name, media_dir):
+    """Build an .apkg file from YAML deck file."""
     try:
-        # Load all configurations
-        model_configs = [load_model_config(cfg) for cfg in config]
-        items = load_deck_data(data)
+        # Load deck file
+        model_config, items, file_deck_name, file_media_dir = load_deck_file(file)
+        model_configs = [model_config]
 
-        builder = AnkiBuilder(deck_name, model_configs)
+        # Use provided deck-name or fall back to file deck-name
+        final_deck_name = deck_name if deck_name is not None else file_deck_name
+
+        # Use provided media-dir or fall back to file media-dir
+        final_media_dir = media_dir if media_dir is not None else file_media_dir
+
+        click.echo(f"Building deck '{final_deck_name}'...")
+        builder = AnkiBuilder(final_deck_name, model_configs)
 
         # Map model names to their field lists for easy lookup
         model_fields_map = {cfg["name"]: cfg["fields"] for cfg in model_configs}
@@ -119,8 +120,8 @@ def build(data, config, output, deck_name, media_dir):
             builder.add_note(field_values, tags=tags, model_name=target_model_name)
 
         # Add media files if media directory is provided
-        if media_dir:
-            media_path = Path(media_dir)
+        if final_media_dir:
+            media_path = Path(final_media_dir)
             click.echo(f"Discovering media files in {media_path}...")
 
             # Discover all media files in the directory
@@ -177,48 +178,30 @@ def build(data, config, output, deck_name, media_dir):
 
 @cli.command()
 @click.option(
-    "--data",
+    "--file",
     type=click.Path(exists=True),
     required=True,
-    help="Path to data YAML file",
-)
-@click.option(
-    "--config",
-    type=click.Path(exists=True),
-    required=True,
-    multiple=True,
-    help="Path to model config YAML",
+    help="Path to deck YAML file (contains both config and data)",
 )
 @click.option(
     "--strict",
     is_flag=True,
     help="Fail on warnings (e.g., missing fields or invalid HTML)",
 )
-def validate(data, config, strict):
-    """Validate YAML data and configuration without building."""
+def validate(file, strict):
+    """Validate YAML deck file without building."""
     click.echo("Validating configuration and data...")
     has_errors = False
     has_warnings = False
 
     try:
-        # 1. Load and validate configurations
-        model_configs = []
-        for cfg_path in config:
-            try:
-                model_configs.append(load_model_config(cfg_path))
-            except ConfigValidationError as e:
-                click.echo(f"Config Error ({cfg_path}): {e}", err=True)
-                has_errors = True
-
-        if has_errors:
-            click.echo("Validation failed due to configuration errors.", err=True)
-            raise click.Abort()
-
-        # 2. Load data
+        # Load deck file
         try:
-            items = load_deck_data(data)
-        except DataValidationError as e:
-            click.echo(f"Data Error: {e}", err=True)
+            model_config, items, _, _ = load_deck_file(file)
+            model_configs = [model_config]
+        except (ConfigValidationError, DataValidationError) as e:
+            click.echo(f"Error ({file}): {e}", err=True)
+            has_errors = True
             raise click.Abort() from e
 
         # 3. Perform consistency checks

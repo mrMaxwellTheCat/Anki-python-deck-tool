@@ -1,0 +1,99 @@
+# EditorConfig is awesome: https://EditorConfig.org
+
+# Top-most EditorConfig file
+root = true
+
+# Unix-style newlines with a newline ending every file
+[*]
+charset = utf-8
+end_of_line = lf
+insert_final_newline = true
+trim_trailing_whitespace = true
+indent_style = space
+indent_size = 4
+
+# Python files - align with ruff configuration (88 char line length)
+[*.py]
+indent_style = space
+indent_size = 4
+max_line_length = 88
+
+# YAML files - 2 spaces is standard for YAML
+[*.{yaml,yml}]
+indent_style = space
+indent_size = 2
+
+# JSON files - 2 spaces for readability (Prettier default)
+[*.json]
+indent_style = space
+indent_size = 2
+
+# Markdown files - 2 spaces (Prettier default)
+[*.md]
+indent_style = space
+indent_size = 2
+trim_trailing_whitespace = false  # Preserve trailing spaces for line breaks
+
+# TOML files (pyproject.toml, etc.)
+[*.toml]
+indent_style = space
+indent_size = 2
+
+# JavaScript/TypeScript (if added in the future)
+[*.{js,jsx,ts,tsx}]
+indent_style = space
+indent_size = 2
+
+# CSS/SCSS/LESS
+[*.{css,scss,sass,less}]
+indent_style = space
+indent_size = 2
+
+# HTML/XML
+[*.{html,htm,xml}]
+indent_style = space
+indent_size = 2
+
+# Shell scripts
+[*.sh]
+indent_style = space
+indent_size = 2
+
+# Windows batch/PowerShell files
+[*.{bat,cmd,ps1}]
+indent_style = space
+indent_size = 2
+end_of_line = crlf
+
+# Makefiles require tabs
+[Makefile]
+indent_style = tab
+indent_size = 4
+
+[*.mk]
+indent_style = tab
+indent_size = 4
+
+# Configuration files
+[*.{ini,cfg,conf}]
+indent_style = space
+indent_size = 2
+
+# GitHub Actions workflows
+[.github/workflows/*.{yml,yaml}]
+indent_style = space
+indent_size = 2
+
+# Documentation
+[*.{rst,txt}]
+indent_style = space
+indent_size = 4
+
+# Git configuration files
+[.gitignore]
+indent_style = space
+indent_size = 2
+
+[.gitattributes]
+indent_style = space
+indent_size = 2
