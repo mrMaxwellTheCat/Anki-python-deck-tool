@@ -33,7 +33,7 @@ def clean_dir(dir_path):
                 break
             except PermissionError:
                 if i < 2:
-                    print(f"  Access denied. Retrying in 1s... ({i+1}/3)")
+                    print(f"  Access denied. Retrying in 1s... ({i + 1}/3)")
                     time.sleep(1)
                 else:
                     print(
