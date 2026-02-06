@@ -1,5 +1,6 @@
 # Anki Python Deck Tool - Just Commands
 # Use PowerShell on Windows for better compatibility
+set shell := ["powershell.exe", "-Command"]
 
 [private]
 default: help

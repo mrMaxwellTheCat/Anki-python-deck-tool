@@ -3,6 +3,9 @@
 This module provides the CLI entry points for building and pushing Anki decks.
 """
 
+import sys
+import threading
+from concurrent.futures import Future, ThreadPoolExecutor
 from importlib.metadata import version
 from pathlib import Path
 from typing import cast
@@ -10,6 +13,7 @@ from typing import cast
 import click
 import yaml
 
+from anki_yaml_tool.core.batch import get_deck_name_from_path
 from anki_yaml_tool.core.builder import AnkiBuilder, ModelConfigComplete
 
 # ... existing code ...
@@ -766,11 +770,6 @@ def _batch_build_separate(
         push: Push built decks to Anki
         delete_after: Delete .apkg files after pushing
     """
-    import sys
-    import threading
-    from concurrent.futures import Future, ThreadPoolExecutor
-
-    from anki_yaml_tool.core.batch import get_deck_name_from_path
 
     success_count = 0
     error_count = 0

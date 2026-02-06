@@ -94,7 +94,7 @@ class TestBatchBuildCommand:
 
             assert result.exit_code == 0
             assert "Found 2 deck files" in result.output
-            assert "Successfully built: 2/2" in result.output
+            assert "Successfully built 2/2" in result.output
 
     def test_batch_build_merge(self, runner, tmp_path, sample_deck_content):
         """Test batch-build with --merge flag."""

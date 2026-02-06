@@ -4,18 +4,18 @@ This module contains tests for the command-line interface, including
 build and push commands.
 """
 
+import zipfile
 from pathlib import Path
 from unittest.mock import Mock, patch
 
 import pytest
 import yaml
-from click.testing import CliRunner
-
 from anki_yaml_tool.cli import build, cli, push, validate
 from anki_yaml_tool.core.exceptions import (
     AnkiConnectError,
     DeckBuildError,
 )
+from click.testing import CliRunner
 
 
 @pytest.fixture
@@ -497,7 +497,8 @@ class TestPushCommand:
         mock_connector.return_value = mock_instance
 
         apkg_file = tmp_path / "test.apkg"
-        apkg_file.write_text("fake apkg", encoding="utf-8")
+        with zipfile.ZipFile(apkg_file, "w") as zf:
+            zf.writestr("dummy", "data")
 
         result = runner.invoke(push, ["--apkg", str(apkg_file)])
 
@@ -514,7 +515,8 @@ class TestPushCommand:
         mock_connector.return_value = mock_instance
 
         apkg_file = tmp_path / "test.apkg"
-        apkg_file.write_text("fake apkg", encoding="utf-8")
+        with zipfile.ZipFile(apkg_file, "w") as zf:
+            zf.writestr("dummy", "data")
 
         result = runner.invoke(push, ["--apkg", str(apkg_file), "--sync"])
 
@@ -536,7 +538,8 @@ class TestPushCommand:
         mock_connector.return_value = mock_instance
 
         apkg_file = tmp_path / "test.apkg"
-        apkg_file.write_text("fake apkg", encoding="utf-8")
+        with zipfile.ZipFile(apkg_file, "w") as zf:
+            zf.writestr("dummy", "data")
 
         result = runner.invoke(push, ["--apkg", str(apkg_file)])
 
@@ -551,7 +554,8 @@ class TestPushCommand:
         mock_connector.return_value = mock_instance
 
         apkg_file = tmp_path / "test.apkg"
-        apkg_file.write_text("fake apkg", encoding="utf-8")
+        with zipfile.ZipFile(apkg_file, "w") as zf:
+            zf.writestr("dummy", "data")
 
         result = runner.invoke(push, ["--apkg", str(apkg_file), "--sync"])
 
@@ -566,7 +570,8 @@ class TestPushCommand:
         mock_connector.return_value = mock_instance
 
         apkg_file = tmp_path / "test.apkg"
-        apkg_file.write_text("fake apkg", encoding="utf-8")
+        with zipfile.ZipFile(apkg_file, "w") as zf:
+            zf.writestr("dummy", "data")
 
         result = runner.invoke(push, ["--apkg", str(apkg_file)])
 
