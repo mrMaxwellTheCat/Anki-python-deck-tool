@@ -64,12 +64,11 @@ all: format lint-fix lint type-check test
 
 # Build and push a specific example deck
 _build-push-example NAME:
-    @python scripts/print_color.py "36" "🔨 Building {{ NAME }} example..."
+    @echo {{BLUE}}🔨 Building {{BOLD}}{{NAME}}{{NORMAL}}{{BLUE}} example...{{NORMAL}}
     @python -m anki_yaml_tool.cli build --file examples/{{ NAME }}/deck.yaml --output examples/{{ NAME }}/deck.apkg
-    @python scripts/print_color.py "33" "📤 Pushing to Anki..."
+    @echo {{YELLOW}}📤 Pushing {{BOLD}}{{NAME}}{{NORMAL}}{{YELLOW}} example to Anki...{{NORMAL}}
     @python -m anki_yaml_tool.cli push --apkg examples/{{ NAME }}/deck.apkg
-    @python scripts/print_color.py "32" "✅ Done!"
-    @python -c "print()"
+    @echo {{GREEN}}✅ {{BOLD}}{{NAME}}{{NORMAL}}{{GREEN}} example built and pushed successfully!{{NORMAL}}
 
 # Build and push audio example
 example-audio:
