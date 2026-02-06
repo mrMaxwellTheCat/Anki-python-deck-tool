@@ -72,7 +72,7 @@ config:
   fields:
     - "Word"
     - "IPA"
-    - "Audio"
+    - "Media"
     - "Meaning"
     - "Example"
     - "Language"
@@ -82,11 +82,11 @@ config:
       qfmt: |
         <div class="language">{{Language}}</div>
         <div class="audio-prompt">🔊 Listen to the pronunciation:</div>
-        <div>[sound:{{Audio}}]</div>
+        <div>{{Media}}</div>
         <div class="difficulty">{{Difficulty}}</div>
       afmt: |
         <div class="language">{{Language}}</div>
-        <div>[sound:{{Audio}}]</div>
+        <div>{{Media}}</div>
         <hr id="answer">
         <div class="word">{{Word}}</div>
         <div class="ipa">[{{IPA}}]</div>
@@ -104,7 +104,7 @@ config:
         <div class="language">{{Language}}</div>
         <div class="word">{{Word}}</div>
         <div class="ipa">[{{IPA}}]</div>
-        <div>[sound:{{Audio}}]</div>
+        <div>{{Media}}</div>
         <hr id="answer">
         <div class="meaning">{{Meaning}}</div>
         {{#Example}}
@@ -113,7 +113,7 @@ config:
 data:
   - word: "Entrepreneur"
     ipa: "ˌɑːntrəprəˈnɜːr"
-    audio: "entrepreneur.mp3"
+    media: "[sound:entrepreneur.mp3]"
     meaning: "A person who organizes and operates a business, taking on financial risks"
     example: "She became a successful entrepreneur by starting her own tech company"
     language: "English"
@@ -122,7 +122,7 @@ data:
 
   - word: "Croissant"
     ipa: "kwɑːˈsɑ̃ː"
-    audio: "croissant.mp3"
+    media: "[sound:croissant.mp3]"
     meaning: "A buttery, flaky, crescent-shaped pastry"
     example: "I had a fresh croissant for breakfast at the French café"
     language: "French"
@@ -131,7 +131,7 @@ data:
 
   - word: "Schedule"
     ipa: "ˈskedʒuːl (US) / ˈʃedjuːl (UK)"
-    audio: "schedule.mp3"
+    media: "[sound:schedule.mp3]"
     meaning: "A plan for carrying out a process or procedure, giving lists of intended events and times"
     example: "Please check the schedule for tomorrow's meetings"
     language: "English"
@@ -140,7 +140,7 @@ data:
 
   - word: "Quinoa"
     ipa: "ˈkiːnwɑː"
-    audio: "quinoa.mp3"
+    media: "[sound:quinoa.mp3]"
     meaning: "A grain crop grown primarily for its edible seeds, high in protein"
     example: "Quinoa salad is a healthy and nutritious meal option"
     language: "Spanish"
@@ -149,7 +149,7 @@ data:
 
   - word: "Colonel"
     ipa: "ˈkɜːrnəl"
-    audio: "colonel.mp3"
+    media: "[sound:colonel.mp3]"
     meaning: "A military rank above lieutenant colonel and below brigadier general"
     example: "Colonel Smith commanded the regiment during the operation"
     language: "English"
@@ -158,7 +158,7 @@ data:
 
   - word: "Schadenfreude"
     ipa: "ˈʃɑːdənfrɔɪdə"
-    audio: "schadenfreude.mp3"
+    media: "[sound:schadenfreude.mp3]"
     meaning: "Pleasure derived from another person's misfortune"
     example: "He felt a twinge of schadenfreude when his rival failed"
     language: "German"
@@ -167,7 +167,7 @@ data:
 
   - word: "Massachusetts"
     ipa: "ˌmæsəˈtʃuːsɪts"
-    audio: "massachusetts.mp3"
+    media: "[sound:massachusetts.mp3]"
     meaning: "A state in the northeastern United States"
     example: "Boston is the capital city of Massachusetts"
     language: "English"
@@ -176,7 +176,7 @@ data:
 
   - word: "Acai"
     ipa: "əˈsaɪiː"
-    audio: "acai.mp3"
+    media: "[sound:acai.mp3]"
     meaning: "A small, dark purple berry from the acai palm tree, known for its nutritional value"
     example: "The smoothie bowl was topped with fresh acai berries"
     language: "Portuguese"
@@ -185,7 +185,7 @@ data:
 
   - word: "Worcestershire"
     ipa: "ˈwʊstərʃər"
-    audio: "worcestershire.mp3"
+    media: "[sound:worcestershire.mp3]"
     meaning: "A county in England; also refers to a savory sauce used in cooking"
     example: "Add a splash of Worcestershire sauce to enhance the flavor"
     language: "English"
@@ -194,7 +194,7 @@ data:
 
   - word: "Cacophony"
     ipa: "kəˈkɑːfəni"
-    audio: "cacophony.mp3"
+    media: "[sound:cacophony.mp3]"
     meaning: "A harsh, discordant mixture of sounds"
     example: "The construction site created a cacophony of noise throughout the day"
     language: "English"

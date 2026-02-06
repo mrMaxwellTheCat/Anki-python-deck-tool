@@ -42,11 +42,11 @@ A professional, modular command-line tool to generate Anki decks (`.apkg`) from 
 Before using this tool, ensure you have the following:
 
 1.  **Python 3.10+** installed.
-2.  **Anki Desktop** installed and running (only required for the \`push\` command).
-3.  **AnkiConnect** add-on installed in Anki (only required for the \`push\` command).
-    *   Open Anki → Tools → Add-ons → Get Add-ons...
-    *   Code: \`2055492159\`
-    *   Restart Anki to enable the API (listens on \`127.0.0.1:8765\`).
+2.  **Anki Desktop** installed and running (only required for the `push` command).
+3.  **AnkiConnect** add-on installed in Anki (only required for the `push` command).
+    - Open Anki → Tools → Add-ons → Get Add-ons...
+    - Code: `2055492159`
+    - Restart Anki to enable the API (listens on `127.0.0.1:8765`).
 
 ## Installation
 
@@ -93,7 +93,8 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) for detailed development setup instructio
 
 Here's a minimal example to get you started:
 
-1. **Create a single YAML file** (\`my_deck.yaml\`) with both configuration and data:
+1. **Create a single YAML file** (`my_deck.yaml`) with both configuration and data:
+
    ```yaml
    config:
      name: "Basic Model"
@@ -118,6 +119,7 @@ Here's a minimal example to get you started:
    ```
 
 2. **Build the deck**:
+
    ```bash
    anki-yaml-tool build --file my_deck.yaml --output french.apkg
    ```
@@ -126,7 +128,6 @@ Here's a minimal example to get you started:
    ```bash
    anki-yaml-tool push --apkg french.apkg --sync
    ```
-
 
 ## Building Executable
 
@@ -162,6 +163,7 @@ This will build the executable and install it automatically.
 #### Manual Installation
 
 **Windows (PowerShell):**
+
 ```powershell
 # Build the executable first
 make build-exe
@@ -171,6 +173,7 @@ powershell -ExecutionPolicy Bypass -File scripts/install-system-wide.ps1
 ```
 
 **Linux/macOS (Bash):**
+
 ```bash
 # Build the executable first
 make build-exe
@@ -180,8 +183,9 @@ bash scripts/install-system-wide.sh
 ```
 
 The installation script will:
+
 - Copy the executable to a standard location:
-  - **Windows**: `%LOCALAPPDATA%\Programs\anki-yaml-tool\`
+  - **Windows**: `%LOCALAPPDATA%\Programs\anki-yaml-tool`
   - **Linux/macOS**: `~/.local/bin/`
 - Add the installation directory to your PATH if needed
 - Guide you through any required terminal restarts
@@ -201,10 +205,12 @@ anki-yaml-tool build --file my_deck.yaml --output "My Deck.apkg"
 ```
 
 **Options:**
+
 - `--file PATH` (Required): Path to a YAML file containing both `config` and `data` sections.
 - `--output PATH`: Path where the `.apkg` will be saved (Default: `deck.apkg`).
 
 **Examples:**
+
 ```bash
 # Basic usage
 anki-yaml-tool build --file my_deck.yaml --output "My Deck.apkg"
@@ -223,22 +229,23 @@ anki-yaml-tool push --apkg "My Deck.apkg" --sync
 ```
 
 **Options:**
-- \`--apkg PATH\` (Required): Path to the \`.apkg\` file.
-- \`--sync\`: Force a synchronization with AnkiWeb after importing.
 
-**Note**: Ensure Anki is running with the AnkiConnect add-on enabled before using the \`push\` command.
+- `--apkg PATH` (Required): Path to the `.apkg` file.
+- `--sync`: Force a synchronization with AnkiWeb after importing.
+
+**Note**: Ensure Anki is running with the AnkiConnect add-on enabled before using the `push` command.
 
 ## File Formats
 
 The tool uses a single YAML file format containing both `config` and `data` sections. This provides a simple, organized structure for managing your Anki decks.
 
-**Example: \`my_deck.yaml\`**
+**Example: `my_deck.yaml`**
 
 ```yaml
 config:
-  name: "Japanese Numbers Model"      # Name of the Note Type in Anki
-  deck-name: "Japanese Numbers"       # Name of the deck in Anki
-  media-folder: "./media/"            # Optional: Path to media files
+  name: "Japanese Numbers Model" # Name of the Note Type in Anki
+  deck-name: "Japanese Numbers" # Name of the deck in Anki
+  media-folder: "./media/" # Optional: Path to media files
 
   css: |
     .card {
@@ -257,8 +264,8 @@ config:
 
   templates:
     - name: "Card 1: Numeral -> Kanji"
-      qfmt: "{{Numeral}}"              # Front side HTML
-      afmt: |                          # Back side HTML
+      qfmt: "{{Numeral}}" # Front side HTML
+      afmt: | # Back side HTML
         {{FrontSide}}
         <hr id=answer>
         {{Kanji}}<br>
@@ -271,7 +278,7 @@ data:
     tags:
       - "basic"
       - "numbers"
-    id: "num_001"  # Optional: Adds an 'id::num_001' tag
+    id: "num_001" # Optional: Adds an 'id::num_001' tag
 
   - numeral: "2"
     kanji: "二"
@@ -285,6 +292,7 @@ data:
 ```
 
 **Config Section Fields:**
+
 - `name` (required): Name of the note type/model in Anki
 - `deck-name` (required): Name of the deck in Anki
 - `fields` (required): List of field names for the note type
@@ -293,12 +301,14 @@ data:
 - `media-folder` (optional): Path to folder containing media files (images, audio, etc.)
 
 **Data Section Structure:**
+
 - Each item in the list represents one note/card
 - Keys should match field names from the config (case-insensitive)
 - `tags` (optional): List of tags to apply to the note
 - `id` (optional): Unique identifier that gets added as a special tag (`id::value`)
 
 **Tips:**
+
 - Field values can contain HTML for formatting
 - Missing fields will be filled with empty strings
 - Tags help organize and filter cards in Anki
@@ -395,6 +405,7 @@ See [ROADMAP.md](ROADMAP.md) for the complete development roadmap.
 ## Contributing
 
 We welcome contributions! Please see [CONTRIBUTING.md](CONTRIBUTING.md) for:
+
 - Development environment setup
 - Code style guidelines
 - Testing requirements

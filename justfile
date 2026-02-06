@@ -37,6 +37,9 @@ format:
 type-check:
     python -m mypy src --ignore-missing-imports
 
+# Run all checks
+all: format lint-fix lint type-check test
+
 # Clean build artifacts
 clean:
     python -c "import shutil, pathlib; [shutil.rmtree(p, ignore_errors=True) for p in ['build', 'dist', *pathlib.Path('.').rglob('*.egg-info'), *pathlib.Path('.').rglob('__pycache__')]]; [p.unlink() for p in pathlib.Path('.').rglob('*.pyc')]"
@@ -59,53 +62,9 @@ install-system-wide:
 install-system-wide:
     bash scripts/install-system-wide.sh
 
-# Run all checks
-all: format lint-fix lint type-check test
+# Build and install executable
+build-install: build-exe install-system-wide
 
-
-# Build and push a specific example deck
-_build-push-example NAME:
-    @echo {{BLUE}}🔨 Building {{BOLD}}{{NAME}}{{NORMAL}}{{BLUE}} example...{{NORMAL}}
-    @python -m anki_yaml_tool.cli build --file examples/{{ NAME }}/deck.yaml --output examples/{{ NAME }}/deck.apkg
-    @echo {{YELLOW}}📤 Pushing {{BOLD}}{{NAME}}{{NORMAL}}{{YELLOW}} example to Anki...{{NORMAL}}
-    @python -m anki_yaml_tool.cli push --apkg examples/{{ NAME }}/deck.apkg
-    @echo {{GREEN}}✅ {{BOLD}}{{NAME}}{{NORMAL}}{{GREEN}} example built and pushed successfully!{{NORMAL}}
-
-# Build and push audio example
-example-audio:
-    @just _build-push-example audio
-
-# Build and push basic example
-example-basic:
-    @just _build-push-example basic
-
-# Build and push cloze example
-example-cloze:
-    @just _build-push-example cloze
-
-# Build and push historical example
-example-historical:
-    @just _build-push-example historical
-
-# Build and push language learning example
-example-language-learning:
-    @just _build-push-example language-learning
-
-# Build and push math example
-example-math:
-    @just _build-push-example math
-
-# Build and push medical example
-example-medical:
-    @just _build-push-example medical
-
-# Build and push technical example
-example-technical:
-    @just _build-push-example technical
-
-# Build and push test example
-example-test:
-    @just _build-push-example test
-
-# Build and push all example decks
-examples: example-audio example-basic example-cloze example-historical example-language-learning example-math example-medical example-technical example-test
+# Build, push, and clean example decks
+examples:
+    python -m anki_yaml_tool.cli batch-build --input-dir examples --output-dir examples --push --delete-after

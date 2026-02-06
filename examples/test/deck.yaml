@@ -5,7 +5,7 @@ config:
   fields:
     - "Word"
     - "IPA"
-    - "Audio"
+    - "Media"
     - "Meaning"
     - "Example"
     - "Language"

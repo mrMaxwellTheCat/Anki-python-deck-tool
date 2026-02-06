@@ -88,7 +88,12 @@ class AnkiBuilder:
         media_files: List of media file paths to include in the package.
     """
 
-    def __init__(self, deck_name: str, model_configs: list[ModelConfigComplete]):
+    def __init__(
+        self,
+        deck_name: str,
+        model_configs: list[ModelConfigComplete],
+        media_folder: Path | None = None,
+    ):
         self.deck_name: str = deck_name
         if not model_configs:
             raise DeckBuildError("At least one model configuration is required")
@@ -96,6 +101,8 @@ class AnkiBuilder:
         self.models: ModelMap = self._build_models()
         self.deck: genanki.Deck = genanki.Deck(self.stable_id(deck_name), deck_name)
         self.media_files: MediaFileList = []
+        self.media_folder: Path | None = media_folder
+        self.media_files_set: set[str] = set()
 
     @staticmethod
     def stable_id(name: str) -> int:
@@ -180,10 +187,22 @@ class AnkiBuilder:
         else:
             raise DeckBuildError(f"Model '{model_name}' not found in builder")
 
-        # Convert math delimiters in all field values
-        converted_values: FieldValues = [
-            self.convert_math_delimiters(value) for value in field_values
-        ]
+        # Convert math delimiters and scan for media in all field values
+        converted_values: FieldValues = []
+        for value in field_values:
+            converted = self.convert_math_delimiters(value)
+            converted_values.append(converted)
+
+            # Scan for media if media_folder is set
+            if self.media_folder:
+                # Matches [sound:file.mp3] or [img:image.png]
+                # format: [type:filename]
+                media_matches = re.findall(r"\[(sound|img):(.+?)\]", converted)
+                for _, filename in media_matches:
+                    media_path = self.media_folder / filename
+                    if media_path.exists():
+                        self.add_media(media_path)
+
         note: genanki.Note = genanki.Note(
             model=model, fields=converted_values, tags=tags or []
         )
@@ -196,7 +215,10 @@ class AnkiBuilder:
             file_path: Path to the media file to include.
         """
         if file_path.exists():
-            self.media_files.append(str(file_path.absolute()))
+            abs_path = str(file_path.absolute())
+            if abs_path not in self.media_files_set:
+                self.media_files.append(abs_path)
+                self.media_files_set.add(abs_path)
 
     def write_to_file(self, output_path: Path) -> None:
         """Write the deck package to an .apkg file.
