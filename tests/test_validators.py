@@ -1,6 +1,8 @@
 """Tests for the validation module."""
 
 import pytest
+from pydantic import ValidationError
+
 from anki_yaml_tool.core.validators import (
     ModelConfigSchema,
     ModelTemplate,
@@ -9,7 +11,6 @@ from anki_yaml_tool.core.validators import (
     validate_html_tags,
     validate_note_fields,
 )
-from pydantic import ValidationError
 
 
 def test_model_template_valid():

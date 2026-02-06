@@ -3,6 +3,7 @@
 from pathlib import Path
 
 import pytest
+
 from anki_yaml_tool.core.exceptions import MediaMissingError
 from anki_yaml_tool.core.media import (
     discover_media_files,

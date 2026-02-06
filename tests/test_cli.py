@@ -9,12 +9,13 @@ from unittest.mock import Mock, patch
 
 import pytest
 import yaml
+from click.testing import CliRunner
+
 from anki_yaml_tool.cli import build, cli, push, validate
 from anki_yaml_tool.core.exceptions import (
     AnkiConnectError,
     DeckBuildError,
 )
-from click.testing import CliRunner
 
 
 @pytest.fixture
