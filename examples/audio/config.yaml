@@ -82,11 +82,11 @@ templates:
     qfmt: |
       <div class="language">{{Language}}</div>
       <div class="audio-prompt">🔊 Listen to the pronunciation:</div>
-      <div>{{Audio}}</div>
+      <div>[sound:{{Audio}}]</div>
       <div class="difficulty">{{Difficulty}}</div>
     afmt: |
       <div class="language">{{Language}}</div>
-      <div>{{Audio}}</div>
+      <div>[sound:{{Audio}}]</div>
       <hr id="answer">
       <div class="word">{{Word}}</div>
       <div class="ipa">[{{IPA}}]</div>
@@ -104,7 +104,7 @@ templates:
       <div class="language">{{Language}}</div>
       <div class="word">{{Word}}</div>
       <div class="ipa">[{{IPA}}]</div>
-      <div>{{Audio}}</div>
+      <div>[sound:{{Audio}}]</div>
       <hr id="answer">
       <div class="meaning">{{Meaning}}</div>
       {{#Example}}

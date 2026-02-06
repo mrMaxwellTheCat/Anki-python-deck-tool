@@ -21,16 +21,33 @@ This example demonstrates a deck for learning pronunciation with audio support, 
 
 ### With audio files
 
-If you have audio files:
+The example includes pre-generated audio files for all pronunciation samples:
 
 ```bash
 anki-yaml-tool build \
   --data examples/audio/data.yaml \
   --config examples/audio/config.yaml \
-  --media-dir /path/to/audio/files \
+  --media-dir examples/audio/media \
   --output pronunciation.apkg \
   --deck-name "Pronunciation Practice"
 ```
+
+#### Regenerating Audio Files
+
+To regenerate audio files with updated pronunciations:
+
+```bash
+# From project root
+python scripts/generate_audio.py
+```
+
+This will:
+- Use Microsoft Edge TTS (free, high-quality)
+- Generate native pronunciations for each language
+- Save audio files to `examples/audio/media/`
+- Use appropriate voices: English (US), French, Spanish, German, Portuguese
+
+The script requires: `pip install edge-tts pyyaml`
 
 ### Without audio files (IPA only)
 
@@ -46,19 +63,36 @@ anki-yaml-tool build \
 
 The example uses Anki's audio format: `[sound:filename.mp3]`
 
-Expected audio files:
-- `entrepreneur.mp3`
-- `croissant.mp3`
-- `schedule.mp3`
-- `quinoa.mp3`
-- `colonel.mp3`
-- `schadenfreude.mp3`
-- `massachusetts.mp3`
-- `acai.mp3`
-- `worcestershire.mp3`
-- `cacophony.mp3`
+**Included audio files (pre-generated):**
+- `entrepreneur.mp3` - American English pronunciation
+- `croissant.mp3` - French pronunciation
+- `schedule.mp3` - American English pronunciation
+- `quinoa.mp3` - Spanish pronunciation
+- `colonel.mp3` - American English pronunciation
+- `schadenfreude.mp3` - German pronunciation
+- `massachusetts.mp3` - American English pronunciation
+- `acai.mp3` - Brazilian Portuguese pronunciation
+- `worcestershire.mp3` - American English pronunciation
+- `cacophony.mp3` - American English pronunciation
+
+All audio files are located in `examples/audio/media/` and are automatically included when building with `--media-dir`.
 
 ## Creating Audio Files
+
+### Automated Generation (Recommended)
+
+Use the provided script to generate audio for all words:
+
+```bash
+python scripts/generate_audio.py
+```
+
+This uses Microsoft Edge TTS with native speakers for each language:
+- **English**: American English (Aria Neural)
+- **French**: French (Denise Neural)
+- **Spanish**: Spanish (Elvira Neural)
+- **German**: German (Katja Neural)
+- **Portuguese**: Brazilian Portuguese (Francisca Neural)
 
 ### Option 1: Text-to-Speech (TTS)
 
