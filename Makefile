@@ -5,22 +5,22 @@
 
 # Show this help message
 help:  ## Show this help message
-	@echo Available commands: 											&& \
-	echo     install              - Install dependencies 				&& \
-	echo     dev                  - Install development dependencies 	&& \
-	echo     test                 - Run tests 							&& \
-	echo     lint                 - Run linting checks 				&& \
-	echo     format               - Format code 						&& \
-	echo     type-check           - Run type checking 				&& \
-	echo     clean                - Clean build artifacts 			&& \
-	echo     build                - Build distribution packages 		&& \
-	echo     build-exe            - Build single-file executable 		&& \
-	echo     install-system-wide  - Install executable system-wide 	&& \
-	echo     examples             - Build and push all example decks 	&& \
-	echo     example-basic        - Build and push basic example 		&& \
+	@echo Available commands:                                                && \
+	echo     install              - Install dependencies                     && \
+	echo     dev                  - Install development dependencies         && \
+	echo     test                 - Run tests                                && \
+	echo     lint                 - Run linting checks                       && \
+	echo     format               - Format code                              && \
+	echo     type-check           - Run type checking                        && \
+	echo     clean                - Clean build artifacts                    && \
+	echo     build                - Build distribution packages              && \
+	echo     build-exe            - Build single-file executable             && \
+	echo     install-system-wide  - Install executable system-wide           && \
+	echo     examples             - Build and push all example decks         && \
+	echo     example-basic        - Build and push basic example             && \
 	echo     example-language     - Build and push language learning example && \
-	echo     example-technical    - Build and push technical example 	&& \
-	echo     example-math         - Build and push math example         && \
+	echo     example-technical    - Build and push technical example         && \
+	echo     example-math         - Build and push math example              && \
 	echo     all                  - Run all checks
 
 
@@ -63,23 +63,23 @@ all: format lint type-check test  ## Run all checks
 
 # Example deck targets
 example-basic:  ## Build and push basic example
-	python -m anki_yaml_tool.cli build --data examples/basic/data.yaml --config examples/basic/config.yaml --output examples/basic/deck.apkg --deck-name "Testing::Basic Example"
+	python -m anki_yaml_tool.cli build --file examples/basic/deck.yaml --output examples/basic/deck.apkg
 	python -m anki_yaml_tool.cli push --apkg examples/basic/deck.apkg
 
 example-language:  ## Build and push language learning example
-	python -m anki_yaml_tool.cli build --data examples/language-learning/data.yaml --config examples/language-learning/config.yaml --output examples/language-learning/deck.apkg --deck-name "Testing::Language Learning"
+	python -m anki_yaml_tool.cli build --file examples/language-learning/deck.yaml --output examples/language-learning/deck.apkg
 	python -m anki_yaml_tool.cli push --apkg examples/language-learning/deck.apkg
 
 example-technical:  ## Build and push technical example
-	python -m anki_yaml_tool.cli build --data examples/technical/data.yaml --config examples/technical/config.yaml --output examples/technical/deck.apkg --deck-name "Testing::Technical Example"
+	python -m anki_yaml_tool.cli build --file examples/technical/deck.yaml --output examples/technical/deck.apkg
 	python -m anki_yaml_tool.cli push --apkg examples/technical/deck.apkg
 
 example-math: ## Build and push math example
-	python -m anki_yaml_tool.cli build --data examples/math/data.yaml --config examples/math/config.yaml --output examples/math/deck.apkg --deck-name "Testing::Math Example"
+	python -m anki_yaml_tool.cli build --file examples/math/deck.yaml --output examples/math/deck.apkg
 	python -m anki_yaml_tool.cli push --apkg examples/math/deck.apkg
 
 example-audio: ## Build and push audio example
-	python -m anki_yaml_tool.cli build --data examples/audio/data.yaml --config examples/audio/config.yaml --output examples/audio/deck.apkg --deck-name "Testing::Audio Example" --media-dir examples/audio/media
+	python -m anki_yaml_tool.cli build --file examples/audio/deck.yaml --output examples/audio/deck.apkg
 	python -m anki_yaml_tool.cli push --apkg examples/audio/deck.apkg
 
 examples: example-basic example-language example-technical example-math example-audio ## Build and push all example decks
