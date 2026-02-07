@@ -1,12 +1,20 @@
-"""Custom exceptions for the Anki Tool.
+"""Custom exceptions for the `anki_yaml_tool` package.
 
-This module defines domain-specific exceptions to provide clearer error
-handling throughout the application.
+This module defines domain-specific exceptions used across `anki_yaml_tool` to provide clearer error handling throughout the application.
 """
+
+__all__ = [
+    "AnkiToolError",
+    "ConfigValidationError",
+    "DataValidationError",
+    "MediaMissingError",
+    "AnkiConnectError",
+    "DeckBuildError",
+]
 
 
 class AnkiToolError(Exception):
-    """Base exception for all Anki Tool errors."""
+    """Base exception for all `anki_yaml_tool` errors."""
 
     pass
 

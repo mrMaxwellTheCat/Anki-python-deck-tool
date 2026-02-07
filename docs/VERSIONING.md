@@ -359,10 +359,10 @@ anki-yaml-tool 0.1.0
 
 Before each release:
 
-- [ ] All tests pass (`make test`)
+- [ ] All tests pass (`just test`)
 - [ ] Coverage meets threshold (>90%)
-- [ ] Linting passes (`make lint`)
-- [ ] Type checking passes (`make type-check`)
+- [ ] Linting passes (`just lint`)
+- [ ] Type checking passes (`just type-check`)
 - [ ] Documentation updated
 - [ ] CHANGELOG.md updated
 - [ ] Version bumped in `pyproject.toml`

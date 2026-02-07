@@ -136,6 +136,165 @@ class TestBatchBuildCommand:
             assert result.exit_code != 0
             assert "No files matched" in result.output
 
+    def test_batch_build_push_and_delete(
+        self, runner, tmp_path, sample_deck_content, monkeypatch
+    ):
+        """Test batch-build with --push and --delete-after (mock AnkiConnector)."""
+        deck_file = tmp_path / "vocab.yaml"
+        deck_file.write_text(yaml.dump(sample_deck_content), encoding="utf-8")
+
+        # Track calls to import_package
+        calls: dict[str, int] = {"imported": 0}
+
+        def fake_import_package(self, apkg_path):
+            calls["imported"] += 1
+
+        monkeypatch.setattr(
+            "anki_yaml_tool.core.connector.AnkiConnector.import_package",
+            fake_import_package,
+        )
+
+        with runner.isolated_filesystem(temp_dir=tmp_path):
+            result = runner.invoke(
+                cli,
+                [
+                    "batch-build",
+                    "-f",
+                    str(deck_file),
+                    "-o",
+                    str(tmp_path),
+                    "--push",
+                    "--delete-after",
+                ],
+            )
+
+            assert result.exit_code == 0
+            # Verify push summary and that push step ran
+            assert (
+                "built and pushed" in result.output
+                or "built and pushed" in result.output.lower()
+            )
+            assert calls["imported"] == 1
+
+            # Ensure output apkg was deleted after push
+            apkg = tmp_path / f"{deck_file.stem}.apkg"
+            assert not apkg.exists()
+
+    def test_batch_build_push_with_media(self, runner, tmp_path, monkeypatch):
+        """Test that media files are uploaded during batch push (storeMediaFile invoked)."""
+        # Create deck content with media reference and media folder
+        deck_content = {
+            "config": {
+                "name": "Test Model",
+                "fields": ["Front", "Back"],
+                "templates": [
+                    {"name": "Card 1", "qfmt": "{{Front}}", "afmt": "{{Back}}"}
+                ],
+                "media-folder": "./media/",
+            },
+            "data": [{"front": "[img:image.jpg]", "back": "Answer"}],
+        }
+
+        deck_file = tmp_path / "deck.yaml"
+        media_dir = tmp_path / "media"
+        media_dir.mkdir()
+        # Create a dummy media file
+        (media_dir / "image.jpg").write_bytes(b"fake-image-data")
+        deck_file.write_text(yaml.dump(deck_content), encoding="utf-8")
+
+        calls: dict[str, int] = {"store": 0, "imported": 0}
+
+        def fake_invoke(self, action, **params):
+            if action == "storeMediaFile":
+                calls["store"] += 1
+                return None
+            return None
+
+        def fake_import_package(self, apkg_path):
+            calls["imported"] += 1
+
+        monkeypatch.setattr(
+            "anki_yaml_tool.core.connector.AnkiConnector.invoke",
+            fake_invoke,
+        )
+        monkeypatch.setattr(
+            "anki_yaml_tool.core.connector.AnkiConnector.import_package",
+            fake_import_package,
+        )
+
+        with runner.isolated_filesystem(temp_dir=tmp_path):
+            result = runner.invoke(
+                cli,
+                [
+                    "batch-build",
+                    "-f",
+                    str(deck_file),
+                    "-o",
+                    str(tmp_path),
+                    "--push",
+                    "--delete-after",
+                ],
+            )
+
+            assert result.exit_code == 0
+            assert calls["store"] >= 1
+            assert calls["imported"] == 1
+
+            # The output filename for input named 'deck.yaml' uses the parent
+            # directory name. Verify that the generated .apkg (named after the
+            # parent directory) has been deleted or remains based on push success.
+            expected_name = f"{deck_file.parent.name}.apkg"
+            apkg = tmp_path / expected_name
+            assert not apkg.exists()
+
+    def test_batch_build_push_failure(self, runner, tmp_path, monkeypatch):
+        """Test behavior when Anki import fails during push (apkg should remain)."""
+        deck_file = tmp_path / "deck.yaml"
+        deck_file.write_text(
+            yaml.dump(
+                {
+                    "config": {
+                        "name": "Test Model",
+                        "fields": ["Front", "Back"],
+                        "templates": [
+                            {"name": "Card 1", "qfmt": "{{Front}}", "afmt": "{{Back}}"}
+                        ],
+                    },
+                    "data": [{"front": "Q", "back": "A"}],
+                }
+            ),
+            encoding="utf-8",
+        )
+
+        def fake_import_package(self, apkg_path):
+            raise Exception("import failed")
+
+        monkeypatch.setattr(
+            "anki_yaml_tool.core.connector.AnkiConnector.import_package",
+            fake_import_package,
+        )
+
+        with runner.isolated_filesystem(temp_dir=tmp_path):
+            result = runner.invoke(
+                cli,
+                [
+                    "batch-build",
+                    "-f",
+                    str(deck_file),
+                    "-o",
+                    str(tmp_path),
+                    "--push",
+                    "--delete-after",
+                ],
+            )
+
+            assert result.exit_code == 0
+            assert "failed" in result.output.lower() or "failed" in result.output
+            expected_name = f"{deck_file.parent.name}.apkg"
+            apkg = tmp_path / expected_name
+            # Ensure apkg remains because push failed
+            assert apkg.exists()
+
 
 class TestBatchUtilities:
     """Tests for batch processing utilities."""

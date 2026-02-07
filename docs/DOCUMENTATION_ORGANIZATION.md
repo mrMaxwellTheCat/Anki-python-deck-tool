@@ -240,7 +240,7 @@ Ctrl+Shift+P → "Tasks: Run Task" → "CI: Test - pytest with Coverage"
 ## Git Workflow
 
 ### Before Committing
-1. Run `make all` or VSCode task "CI Workflow: Full Pipeline"
+1. Run `just all` or VSCode task "CI Workflow: Full Pipeline"
 2. Ensure all tests pass
 3. Verify coverage remains above 80%
 4. Check no linting errors
