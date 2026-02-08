@@ -1,4 +1,5 @@
 """Tests for pushing YAML decks back to Anki."""
+
 from pathlib import Path
 
 import yaml

@@ -134,7 +134,11 @@ class AnkiConnector:
         Uses AnkiConnect's findNotes followed by notesInfo to obtain
         complete note data.
         """
-        note_ids = self.invoke("findNotes", query=f"deck:{deck_name}")
+        # Quote and escape the deck name so Anki's search parser handles
+        # spaces, subdeck separators, and embedded quotes correctly.
+        escaped_deck_name = deck_name.replace('"', r"\"")
+        query = f'deck:"{escaped_deck_name}"'
+        note_ids = self.invoke("findNotes", query=query)
         if not isinstance(note_ids, list):
             raise AnkiConnectError(
                 "Unexpected response from findNotes", action="findNotes"

@@ -24,8 +24,10 @@ class _ReadableDumper(yaml.SafeDumper):
 
 
 def _str_representer(dumper, data):
-    # Use block style for multiline strings
-    if "\n" in data or "\\" in data:
+    # Use block style only for multiline strings to preserve single-line
+    # values (e.g., LaTeX, Windows paths) and avoid altering round-trip
+    # semantics.
+    if "\n" in data:
         return dumper.represent_scalar("tag:yaml.org,2002:str", data, style="|")
     return dumper.represent_scalar("tag:yaml.org,2002:str", data)
 
@@ -55,21 +57,41 @@ def export_deck(connector: AnkiConnector, deck_name: str, output_dir: Path) -> P
         AnkiConnectError: If any AnkiConnect call fails or responses are
             unexpected.
     """
-    deck_dir_name = deck_name.replace("::", "_").replace(" ", "_")
-    deck_path = Path(output_dir) / deck_dir_name
+    # 0. Sanitize deck name into a safe directory name and ensure it
+    # remains within the intended output directory to prevent path
+    # traversal or accidental writes outside the target.
+    safe_name = re.sub(r"[^A-Za-z0-9._-]", "_", deck_name)
+    deck_path = Path(output_dir) / safe_name
     deck_path.mkdir(parents=True, exist_ok=True)
+    try:
+        if not str(deck_path.resolve()).startswith(str(Path(output_dir).resolve())):
+            raise AnkiConnectError(
+                f"Invalid deck name leads to unsafe path: {deck_name}"
+            )
+    except Exception as e:
+        raise AnkiConnectError(f"Failed to create deck output directory: {e}") from e
 
     # 1. Get notes
     notes = connector.get_notes(deck_name)
 
-    # 2. Determine models used and fetch model definition for the first model
-    model_name = None
-    if notes:
-        model_name = notes[0].get("modelName") or notes[0].get("model_name")
+    # 2. Determine models used and fetch model definition
+    model_names: set[str] = set()
+    for note in notes:
+        note_model_name = note.get("modelName") or note.get("model_name")
+        if note_model_name:
+            model_names.add(str(note_model_name))
 
-    model_config = None
-    if model_name:
-        model_config = connector.get_model(model_name)
+    if len(model_names) > 1:
+        raise AnkiConnectError(
+            "Exporting decks with multiple note models is not supported. "
+            f"Found models: {', '.join(sorted(model_names))} in deck '{deck_name}'."
+        )
+
+    model_name: str | None = None
+    if model_names:
+        model_name = next(iter(model_names))
+
+    model_config = connector.get_model(model_name) if model_name else None
 
     # 3. Build config.yaml
     if model_config:
@@ -88,6 +110,26 @@ def export_deck(connector: AnkiConnector, deck_name: str, output_dir: Path) -> P
             }
             config_yaml["templates"].append(cfg_tpl)
 
+        with open(deck_path / "config.yaml", "w", encoding="utf-8") as f:
+            yaml.dump(
+                config_yaml,
+                f,
+                Dumper=_ReadableDumper,
+                default_flow_style=False,
+                sort_keys=False,
+                allow_unicode=True,
+                width=4096,
+            )
+    else:
+        # Minimal fallback config when no model information is available.
+        # This ensures a consistent exported structure even for empty decks
+        # or when model lookup fails.
+        config_yaml = {
+            "name": model_name or deck_name,
+            "fields": [],
+            "templates": [],
+            "css": "",
+        }
         with open(deck_path / "config.yaml", "w", encoding="utf-8") as f:
             yaml.dump(
                 config_yaml,
@@ -144,10 +186,23 @@ def export_deck(connector: AnkiConnector, deck_name: str, output_dir: Path) -> P
         media_dir.mkdir(exist_ok=True)
         for ref in all_media_refs:
             try:
+                # Normalize and validate media reference to prevent path
+                # traversal (reject absolute paths or references containing
+                # parent segments).
+                ref_path = Path(ref)
+                if ref_path.is_absolute() or ".." in ref_path.parts:
+                    # Skip suspicious media refs
+                    continue
+
                 content = connector.retrieve_media_file(ref)
-                target = media_dir / ref
+                target = media_dir / ref_path
                 # Ensure parent exists (filenames may include path)
                 target.parent.mkdir(parents=True, exist_ok=True)
+
+                # Enforce that the resolved target remains within media_dir
+                if not str(target.resolve()).startswith(str(media_dir.resolve())):
+                    continue
+
                 with open(target, "wb") as mf:
                     mf.write(content)
             except AnkiConnectError:

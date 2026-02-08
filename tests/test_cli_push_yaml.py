@@ -1,4 +1,5 @@
 """Tests for the `push-yaml` CLI command."""
+
 from unittest.mock import patch
 
 from anki_yaml_tool.cli import cli

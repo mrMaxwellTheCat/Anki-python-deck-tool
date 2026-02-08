@@ -469,19 +469,27 @@ def pull(list_decks: bool, deck: str | None, all_decks: bool, output: str) -> No
     connector = AnkiConnector()
 
     try:
+        # Validate mutually exclusive options: --list-decks, --deck, --all-decks
+        provided = int(list_decks) + int(bool(deck)) + int(all_decks)
+        if provided == 0:
+            click.echo(
+                "Error: Must specify --deck or --all-decks or use --list-decks",
+                err=True,
+            )
+            raise click.Abort()
+        if provided > 1:
+            click.echo(
+                "Error: Options --list-decks, --deck, and --all-decks are mutually exclusive",
+                err=True,
+            )
+            raise click.Abort()
+
         # List available decks
         if list_decks:
             click.echo("Available decks:")
             for name in connector.get_deck_names():
                 click.echo(f"  - {name}")
             return
-
-        if not deck and not all_decks:
-            click.echo(
-                "Error: Must specify --deck or --all-decks or use --list-decks",
-                err=True,
-            )
-            raise click.Abort()
 
         out_path = Path(output)
         out_path.mkdir(parents=True, exist_ok=True)
@@ -491,12 +499,7 @@ def pull(list_decks: bool, deck: str | None, all_decks: bool, output: str) -> No
                 click.echo(f"Exporting deck: {name}")
                 export_deck(connector, name, out_path)
         else:
-            if deck is None:
-                click.echo(
-                    "Error: Must specify --deck or --all-decks or use --list-decks",
-                    err=True,
-                )
-                raise click.Abort()
+            # At this point --deck must be provided
             click.echo(f"Exporting deck: {deck}")
             export_deck(connector, deck, out_path)
 

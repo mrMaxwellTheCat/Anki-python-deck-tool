@@ -1,4 +1,5 @@
 """Tests for AnkiConnector update/add wrappers."""
+
 from unittest.mock import Mock, patch
 
 from anki_yaml_tool.core.connector import AnkiConnector
