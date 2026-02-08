@@ -42,7 +42,7 @@ from anki_yaml_tool.core.validators import (
 log = get_logger("cli")
 
 
-@click.group()
+@click.group(invoke_without_command=True)
 @click.version_option(version=version("anki-yaml-tool"), prog_name="anki-yaml-tool")
 @click.option(
     "-v",
@@ -63,8 +63,13 @@ log = get_logger("cli")
 )
 @click.pass_context
 def cli(ctx: click.Context, verbose: int, quiet: bool, profile: str | None) -> None:
-    """Anki Python Deck Tool - Build and push decks from YAML."""
+    """Anki Python Deck Tool - Build and push decks from YAML.
+
+    When invoked without a subcommand this will launch a terminal-based
+    interactive UI to guide the user.
+    """
     from anki_yaml_tool.core.config_file import load_config
+    from anki_yaml_tool.core.interactive import run_interactive
 
     ctx.ensure_object(dict)
 
@@ -87,6 +92,13 @@ def cli(ctx: click.Context, verbose: int, quiet: bool, profile: str | None) -> N
     ctx.obj["verbose"] = verbose
     ctx.obj["quiet"] = quiet
     setup_logging(verbosity=verbose, quiet=quiet)
+
+    # If invoked without a subcommand, enter interactive mode
+    if ctx.invoked_subcommand is None:
+        # run_interactive will perform its own error handling and return
+        run_interactive()
+        # Exit after interactive finishes
+        ctx.exit()
 
 
 @cli.command()
@@ -425,6 +437,71 @@ def push(apkg, sync):
             log.debug("Sync completed")
 
         click.echo("Successfully imported into Anki")
+    except AnkiConnectError as e:
+        click.echo(f"Error: {e}", err=True)
+        raise click.Abort() from e
+    except Exception as e:
+        click.echo(f"Unexpected error: {e}", err=True)
+        raise click.Abort() from e
+
+
+@cli.command()
+@click.option("--list-decks", is_flag=True, help="List available decks in Anki")
+@click.option("--deck", help="Name of the deck to pull")
+@click.option("--all-decks", is_flag=True, help="Pull all available decks")
+@click.option(
+    "--output",
+    type=click.Path(),
+    default=".",
+    help="Output directory for exported decks",
+)
+def pull(list_decks: bool, deck: str | None, all_decks: bool, output: str) -> None:
+    """Pull decks and model definitions from a running Anki instance.
+
+    Examples:
+      - List decks: `anki-yaml-tool pull --list-decks`
+      - Export a deck: `anki-yaml-tool pull --deck "Spanish" --output ./decks/spanish`
+      - Export all decks: `anki-yaml-tool pull --all-decks --output ./decks`
+    """
+    from anki_yaml_tool.core.exporter import export_deck
+
+    click.echo("Connecting to Anki...")
+    connector = AnkiConnector()
+
+    try:
+        # List available decks
+        if list_decks:
+            click.echo("Available decks:")
+            for name in connector.get_deck_names():
+                click.echo(f"  - {name}")
+            return
+
+        if not deck and not all_decks:
+            click.echo(
+                "Error: Must specify --deck or --all-decks or use --list-decks",
+                err=True,
+            )
+            raise click.Abort()
+
+        out_path = Path(output)
+        out_path.mkdir(parents=True, exist_ok=True)
+
+        if all_decks:
+            for name in connector.get_deck_names():
+                click.echo(f"Exporting deck: {name}")
+                export_deck(connector, name, out_path)
+        else:
+            if deck is None:
+                click.echo(
+                    "Error: Must specify --deck or --all-decks or use --list-decks",
+                    err=True,
+                )
+                raise click.Abort()
+            click.echo(f"Exporting deck: {deck}")
+            export_deck(connector, deck, out_path)
+
+        click.echo("Pull completed successfully")
+
     except AnkiConnectError as e:
         click.echo(f"Error: {e}", err=True)
         raise click.Abort() from e
