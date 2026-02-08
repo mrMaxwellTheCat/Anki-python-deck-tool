@@ -87,7 +87,10 @@ def push_deck_from_dir(
             else:
                 # Create a new note
                 connector.add_note(
-                    target_deck, model_config["name"], mapped_fields, tags
+                    str(target_deck),
+                    str(model_config.get("name", "")),
+                    mapped_fields,
+                    tags,
                 )
         except AnkiConnectError:
             # Surface the error but continue with other notes

@@ -500,6 +500,7 @@ def pull(list_decks: bool, deck: str | None, all_decks: bool, output: str) -> No
                 export_deck(connector, name, out_path)
         else:
             # At this point --deck must be provided
+            assert deck is not None
             click.echo(f"Exporting deck: {deck}")
             export_deck(connector, deck, out_path)
 
