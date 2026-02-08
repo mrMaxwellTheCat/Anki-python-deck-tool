@@ -34,8 +34,8 @@ Thank you for your interest in contributing to the Anki Python Deck Tool! This d
    # Install the package in editable mode with dev dependencies
    pip install -e ".[dev]"
 
-   # Or use the Makefile
-   make dev
+   # Or use the Justfile
+   just dev
    ```
 
 4. **Set up pre-commit hooks** (optional but recommended):
@@ -57,8 +57,8 @@ pytest --cov=anki_yaml_tool
 # Run specific test file
 pytest tests/test_builder.py
 
-# Or use the Makefile
-make test
+# Or use the Justfile
+just test
 ```
 
 ### Code Formatting and Linting
@@ -75,9 +75,9 @@ ruff check .
 # Fix linting issues automatically
 ruff check --fix .
 
-# Or use the Makefile
-make format
-make lint
+# Or use the Justfile
+just format
+just lint
 ```
 
 ### Type Checking
@@ -88,8 +88,8 @@ We use `mypy` for static type checking:
 # Run type checking
 mypy src
 
-# Or use the Makefile
-make type-check
+# Or use the Justfile
+just type-check
 ```
 
 ### Running All Checks
@@ -97,7 +97,7 @@ make type-check
 To run all checks before committing:
 
 ```bash
-make all
+just all
 ```
 
 ## Code Style Guidelines

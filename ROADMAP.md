@@ -43,7 +43,6 @@ Transform the Anki Python Deck Tool into a comprehensive, user-friendly solution
   - [x] Configure `ruff` and `mypy` in `pyproject.toml` with strict rules.
   - [x] Add `.pre-commit-config.yaml` to enforce linting before commit.
   - [x] Add `Makefile` for common tasks (`make test`, `make lint`, `make build-exe`, etc.).
-  - [x] Add VSCode tasks configuration (`.vscode/tasks.json`) for local workflows.
 
 ## 2. Code Quality & Standards
 
@@ -527,7 +526,6 @@ Define the core interaction modes for the GUI application, providing both manual
 - ✅ Security scanning (bandit, pip-audit)
 - ✅ Automated releases to PyPI
 - ✅ Executable building capability (PyInstaller)
-- ✅ Development tooling (VSCode tasks, Makefile, pre-commit hooks)
 - ✅ Basic examples directory (basic, language-learning, technical)
 - ✅ Codecov integration
 
