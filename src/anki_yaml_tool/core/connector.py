@@ -109,3 +109,113 @@ class AnkiConnector:
         content = file_path.read_bytes()
         encoded = base64.b64encode(content).decode("utf-8")
         self.invoke("storeMediaFile", filename=filename, data=encoded)
+
+    def get_deck_names(self) -> list[str]:
+        """Return a sorted list of deck names available in Anki."""
+        result = self.invoke("deckNames")
+        if not isinstance(result, list):
+            raise AnkiConnectError(
+                "Unexpected response for deckNames", action="deckNames"
+            )
+        return sorted([str(x) for x in result])
+
+    def get_model_names(self) -> list[str]:
+        """Return a sorted list of model names available in Anki."""
+        result = self.invoke("modelNames")
+        if not isinstance(result, list):
+            raise AnkiConnectError(
+                "Unexpected response for modelNames", action="modelNames"
+            )
+        return sorted([str(x) for x in result])
+
+    def get_notes(self, deck_name: str) -> list[dict]:
+        """Retrieve full note information for all notes in a deck.
+
+        Uses AnkiConnect's findNotes followed by notesInfo to obtain
+        complete note data.
+        """
+        # Quote and escape the deck name so Anki's search parser handles
+        # spaces, subdeck separators, and embedded quotes correctly.
+        escaped_deck_name = deck_name.replace('"', r"\"")
+        query = f'deck:"{escaped_deck_name}"'
+        note_ids = self.invoke("findNotes", query=query)
+        if not isinstance(note_ids, list):
+            raise AnkiConnectError(
+                "Unexpected response from findNotes", action="findNotes"
+            )
+        if not note_ids:
+            return []
+        notes = self.invoke("notesInfo", notes=note_ids)
+        if not isinstance(notes, list):
+            raise AnkiConnectError(
+                "Unexpected response from notesInfo", action="notesInfo"
+            )
+        return [cast(dict, n) for n in notes]
+
+    def get_model(self, model_name: str) -> dict:
+        """Retrieve model definition (fields and templates) for a given model name."""
+        fields = self.invoke("modelFieldNames", modelName=model_name)
+        templates = self.invoke("modelTemplates", modelName=model_name)
+
+        if not isinstance(fields, list):
+            raise AnkiConnectError(
+                "Unexpected response from modelFieldNames", action="modelFieldNames"
+            )
+
+        # templates is expected to be a list of dicts; fall back to empty
+        templates_list = templates if isinstance(templates, list) else []
+
+        return {
+            "name": model_name,
+            "fields": [str(f) for f in fields],
+            "templates": templates_list,
+            "css": "",
+        }
+
+    def retrieve_media_file(self, filename: str) -> bytes:
+        """Retrieve a media file's raw bytes from Anki via AnkiConnect.
+
+        Returns the file bytes. Expects AnkiConnect's `retrieveMediaFile`
+        action to return base64-encoded string content.
+        """
+        data_b64 = self.invoke("retrieveMediaFile", filename=filename)
+        if not isinstance(data_b64, str):
+            raise AnkiConnectError(
+                "Unexpected response from retrieveMediaFile", action="retrieveMediaFile"
+            )
+        try:
+            return base64.b64decode(data_b64)
+        except Exception as e:
+            raise AnkiConnectError(
+                f"Failed to decode media file {filename}: {e}"
+            ) from e
+
+    def update_note_fields(self, note_id: int, fields: dict[str, str]) -> None:
+        """Update the fields of an existing note.
+
+        This uses AnkiConnect's `updateNoteFields` action and expects a note
+        id and a dict mapping model field names to values.
+        """
+        if not isinstance(note_id, int):
+            raise ValueError("note_id must be an integer")
+        self.invoke("updateNoteFields", note={"id": note_id, "fields": fields})
+
+    def add_note(
+        self,
+        deck_name: str,
+        model_name: str,
+        fields: dict[str, str],
+        tags: list[str] | None = None,
+    ) -> int:
+        """Add a note to Anki and return the created note id.
+
+        Uses AnkiConnect's `addNote` action.
+        """
+        note = {"deckName": deck_name, "modelName": model_name, "fields": fields}
+        if tags:
+            note["tags"] = tags
+
+        result = self.invoke("addNote", note=note)
+        if not isinstance(result, int):
+            raise AnkiConnectError("Unexpected response from addNote", action="addNote")
+        return result

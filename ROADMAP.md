@@ -74,6 +74,7 @@ Transform the Anki Python Deck Tool into a comprehensive, user-friendly solution
   - [x] `cli.py`: Comprehensive CLI command tests.
   - [x] Add tests for config loading and validation.
   - [x] Add tests for media file handling.
+  - [x] Add tests for interactive terminal UI (`tests/test_interactive.py`) ✅
 
 - [ ] **Integration Tests**
   - [ ] Test the full pipeline: YAML Input → Builder → `.apkg` file creation.
@@ -152,6 +153,7 @@ Transform the Anki Python Deck Tool into a comprehensive, user-friendly solution
   - [x] Add `anki-yaml-tool init [project-name]` to scaffold new projects.
   - [x] Generate example config, data files, and directory structure.
   - [x] Support different templates (basic, language-learning, technical).
+  - [x] **Interactive terminal UI**: provide a guided menu when invoked without arguments (tests added)
 
 - [x] **Batch Processing**
   - [x] Support wildcard patterns for processing multiple files (e.g., `--data data/*.yaml`).
@@ -201,44 +203,56 @@ Transform the Anki Python Deck Tool into a comprehensive, user-friendly solution
 
 Enable pulling existing decks and note types from Anki Desktop into YAML format for editing, then pushing changes back. This creates a full round-trip workflow for Anki deck management.
 
-- [ ] **Architecture & Design**
-  - [ ] Design YAML serialization format for pulled decks
-  - [ ] Define mapping from Anki model structure to config YAML
-  - [ ] Specify field mapping and template extraction
-  - [ ] Handle media file export and organization
-  - [ ] Design conflict resolution strategy for round-trip edits
+- [x] **Architecture & Design**
+  - [x] Design YAML serialization format for pulled decks (initial format: `config.yaml`, `data.yaml`, `media/`)
+  - [x] Define mapping from Anki model structure to config YAML
+  - [x] Specify field mapping and template extraction
+  - [x] Handle media file export and organization (media saved via `retrieveMediaFile`)
+  - [ ] Design conflict resolution strategy for round-trip edits (planned)
 
-- [ ] **AnkiConnect Integration**
-  - [ ] Implement `get_deck_names()` method (uses `deckNames` action)
-  - [ ] Implement `get_model_names()` method (uses `modelNames` action)
-  - [ ] Implement `export_deck()` method (uses `exportPackage` or manual extraction)
-  - [ ] Implement `get_notes()` method for deck content extraction
-  - [ ] Implement `get_model()` method for note type definitions
-  - [ ] Add comprehensive error handling for read operations
+- [x] **AnkiConnect Integration**
+  - [x] Implement `get_deck_names()` method (uses `deckNames` action)
+  - [x] Implement `get_model_names()` method (uses `modelNames` action)
+  - [x] Implement `export_deck()` method (manual extraction using `findNotes` + `notesInfo`)
+  - [x] Implement `get_notes()` method for deck content extraction
+  - [x] Implement `get_model()` method for note type definitions
+  - [x] Add comprehensive error handling for read operations
 
-- [ ] **YAML Export Format**
-  - [ ] Design data file structure (match current format)
-  - [ ] Design config file structure (fields, templates, CSS)
-  - [ ] Handle special characters and escaping
-  - [ ] Preserve note IDs for update tracking
-  - [ ] Export media file references
+- [x] **YAML Export Format**
+  - [x] Design data file structure (match current format)
+  - [x] Design config file structure (fields, templates, CSS)
+  - [x] Handle special characters and escaping (use readable YAML dumper; preserves Unicode and multiline strings)
+  - [x] Preserve note IDs for update tracking
+  - [x] Export media file references (saved under `media/`)
 
-- [ ] **CLI Commands**
-  - [ ] `anki-yaml-tool pull --deck "Spanish Vocabulary" --output ./decks/spanish`
-  - [ ] `anki-yaml-tool pull --all-decks --output ./decks`
-  - [ ] `anki-yaml-tool pull --list-decks` (shows available decks)
-  - [ ] `anki-yaml-tool pull --model "Basic" --output ./configs`
+- [x] **CLI Commands**
+  - [x] `anki-yaml-tool pull --deck "Spanish Vocabulary" --output ./decks/spanish`
+  - [x] `anki-yaml-tool pull --all-decks --output ./decks`
+  - [x] `anki-yaml-tool pull --list-decks` (shows available decks)
+  - [ ] `anki-yaml-tool pull --model "Basic" --output ./configs` (pending: model-only export)
 
 - [ ] **Round-Trip Workflow**
-  - [ ] Pull deck from Anki → Edit YAML files → Build → Push back
-  - [ ] Preserve note IDs to update existing notes instead of duplicating
+  - [ ] Pull deck from Anki → Edit YAML files → Build → Push back (push-by-id/update not yet implemented)
+  - [x] Preserve note IDs to update existing notes instead of duplicating
   - [ ] Handle deleted notes (mark as deleted in YAML or skip)
   - [ ] Support incremental updates (only push changed notes)
 
-- [ ] **Implementation Considerations**
+- [x] **Implementation Considerations**
   - **Feasibility**: HIGH (AnkiConnect supports required read operations)
-  - **Existing Infrastructure**: Generic `invoke()` method available in `AnkiConnector`
-  - **Testing**: Follow existing patterns in `test_connector.py`
+  - **Existing Infrastructure**: Generic `invoke()` method available in `AnkiConnector` (read wrappers implemented)
+  - **Testing**: Unit tests added for connector/extractor/exporter/CLI (`tests/test_connector_pull.py`, `tests/test_exporter.py`, `tests/test_cli_pull.py`)
+
+**Status note:** Initial pull/export implementation complete (connector read wrappers, `src/anki_yaml_tool/core/exporter.py`, `pull` CLI, tests). YAML output uses a human-readable dumper to preserve Unicode and multiline content. See `src/anki_yaml_tool/core/connector.py`, `src/anki_yaml_tool/core/exporter.py`, and `tests/` for details.
+
+**Next steps (recommended):**
+1. Implement push-by-id/update logic so edited YAML can be pushed back without duplicating notes (high priority for round-trip).
+2. Add integration tests that simulate a pull → edit → build → push round-trip.
+3. Implement `--model` export and richer model serialization (fields, templates, CSS examples).
+4. Add conflict resolution strategy (e.g., keep remote ID, detect changed fields, provide an interactive merge tool).
+5. Document the pull workflow and add examples to `examples/` and README.
+
+
+
 
 ### 4.7 File Watching Mode
 
