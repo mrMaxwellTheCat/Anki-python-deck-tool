@@ -77,8 +77,6 @@ pytest tests/
 
 # With coverage
 pytest tests/ --cov=anki_yaml_tool --cov-report=term-missing
-
-# Or use VSCode tasks (Ctrl+Shift+P → "Tasks: Run Task")
 ```
 
 ## Build, Test, and Lint Commands
@@ -97,23 +95,6 @@ make test        # Run pytest test suite
 ```
 
 **Always run `make all` before finalizing changes** to ensure code meets quality standards.
-
-### VSCode Tasks (Recommended)
-
-Use VSCode tasks for running checks and workflows locally:
-
-```
-Ctrl+Shift+P → "Tasks: Run Task" → [Select available task]
-```
-
-Available tasks include:
-
-- GitHub Actions workflows (CI, Security)
-- Code formatting (Ruff)
-- Coverage reports
-- Dependency installation
-
-See `.vscode/tasks.json` for all available tasks and their commands.
 
 ## Project Structure Awareness
 
@@ -308,7 +289,6 @@ docs/
 ### CI/CD and Quality
 
 - **Workflows**: `.github/workflows/` - GitHub Actions for CI, security scanning, and releases
-- **VSCode tasks**: `.vscode/tasks.json` - Tasks for local development and testing
 - **Pre-commit**: `.pre-commit-config.yaml` - Git hooks for code quality
 
 ## Git Workflow
@@ -326,7 +306,7 @@ docs/
 
 ### Before Committing
 
-1. Run `make all` or a VSCode task for full CI checks
+1. Run `make all` for full CI checks
 2. Ensure all tests pass
 3. Verify coverage remains above 80%
 4. Check no linting errors
@@ -397,7 +377,7 @@ When reviewing (or having code reviewed):
 | Fix linting    | `ruff check --fix .`                |
 | Type check     | `mypy src --ignore-missing-imports` |
 | Run tests      | `pytest tests/`                     |
-| Coverage       | `pytest --cov=anki_yaml_tool`            |
+| Coverage       | `pytest --cov=anki_yaml_tool`       |
 | Security scan  | `pip-audit && bandit -r src/`       |
 | Install deps   | `pip install -e ".[dev]"`           |
 
