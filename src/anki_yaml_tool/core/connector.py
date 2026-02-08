@@ -185,3 +185,33 @@ class AnkiConnector:
             raise AnkiConnectError(
                 f"Failed to decode media file {filename}: {e}"
             ) from e
+
+    def update_note_fields(self, note_id: int, fields: dict[str, str]) -> None:
+        """Update the fields of an existing note.
+
+        This uses AnkiConnect's `updateNoteFields` action and expects a note
+        id and a dict mapping model field names to values.
+        """
+        if not isinstance(note_id, int):
+            raise ValueError("note_id must be an integer")
+        self.invoke("updateNoteFields", note={"id": note_id, "fields": fields})
+
+    def add_note(
+        self,
+        deck_name: str,
+        model_name: str,
+        fields: dict[str, str],
+        tags: list[str] | None = None,
+    ) -> int:
+        """Add a note to Anki and return the created note id.
+
+        Uses AnkiConnect's `addNote` action.
+        """
+        note = {"deckName": deck_name, "modelName": model_name, "fields": fields}
+        if tags:
+            note["tags"] = tags
+
+        result = self.invoke("addNote", note=note)
+        if not isinstance(result, int):
+            raise AnkiConnectError("Unexpected response from addNote", action="addNote")
+        return result

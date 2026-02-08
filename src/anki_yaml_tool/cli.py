@@ -510,6 +510,37 @@ def pull(list_decks: bool, deck: str | None, all_decks: bool, output: str) -> No
         raise click.Abort() from e
 
 
+@cli.command("push-yaml")
+@click.option(
+    "--dir",
+    "deck_dir",
+    type=click.Path(exists=True),
+    required=True,
+    help="Directory containing exported deck (config.yaml + data.yaml)",
+)
+@click.option("--deck-name", help="Optional override for target deck name")
+@click.option("--sync", is_flag=True, help="Sync with AnkiWeb after pushing")
+def push_yaml(deck_dir: str, deck_name: str | None, sync: bool) -> None:
+    """Push notes from an exported deck directory back to Anki."""
+    from anki_yaml_tool.core.pusher import push_deck_from_dir
+
+    click.echo(f"Pushing YAML from {deck_dir} to Anki...")
+    connector = AnkiConnector()
+
+    try:
+        push_deck_from_dir(connector, Path(deck_dir), deck_name=deck_name, sync=sync)
+        click.echo("Push completed successfully")
+    except AnkiConnectError as e:
+        click.echo(f"Error: {e}", err=True)
+        raise click.Abort() from e
+    except FileNotFoundError as e:
+        click.echo(f"Error: {e}", err=True)
+        raise click.Abort() from e
+    except Exception as e:
+        click.echo(f"Unexpected error: {e}", err=True)
+        raise click.Abort() from e
+
+
 @cli.command()
 @click.argument("project_name", required=False, default="my-anki-deck")
 @click.option(
