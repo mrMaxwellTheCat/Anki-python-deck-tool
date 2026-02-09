@@ -279,9 +279,11 @@ class TestBuildCommand:
             )
 
             assert result.exit_code == 0
-            assert "Building deck 'Generated Deck'" in result.output
+            # Since deck_file is named "deck.yaml", it uses the parent directory name
+            expected_name = Path(temp_files["file"]).parent.name
+            assert f"Building deck '{expected_name}'" in result.output
             mock_builder.assert_called_once()
-            assert mock_builder.call_args[0][0] == "Generated Deck"
+            assert mock_builder.call_args[0][0] == expected_name
 
     @patch("anki_yaml_tool.cli.AnkiBuilder")
     def test_build_handles_deck_build_error(self, mock_builder, runner, temp_files):

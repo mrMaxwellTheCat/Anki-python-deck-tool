@@ -67,7 +67,7 @@ class TestInitCommand:
 
             assert "config" in data
             assert "data" in data
-            assert "deck-name" in data
+            assert "deck-name" in data["config"]
             assert isinstance(data["config"]["fields"], list)
             assert len(data["data"]) > 0
 

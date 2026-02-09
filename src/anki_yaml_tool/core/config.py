@@ -93,7 +93,9 @@ def load_deck_data(data_path: Path | str) -> list[dict[str, str | list[str]]]:
 
 def load_deck_file(
     deck_path: Path | str,
-) -> tuple[ModelConfigComplete, list[dict[str, str | list[str]]], str, Path | None]:
+) -> tuple[
+    ModelConfigComplete, list[dict[str, str | list[str]]], str | None, Path | None
+]:
     """Load a single deck file containing both configuration and data.
 
     Args:
@@ -141,8 +143,8 @@ def load_deck_file(
         )
 
     # Extract deck-name from config section
-    deck_name = config_section.get("deck-name", "Generated Deck")
-    if not isinstance(deck_name, str):
+    deck_name = config_section.get("deck-name")
+    if deck_name is not None and not isinstance(deck_name, str):
         deck_name = str(deck_name)
 
     # Extract media-folder from config section

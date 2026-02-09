@@ -3,7 +3,6 @@
 from pathlib import Path
 
 import pytest
-
 from anki_yaml_tool.core.config import load_deck_data, load_deck_file, load_model_config
 from anki_yaml_tool.core.exceptions import ConfigValidationError, DataValidationError
 
@@ -411,4 +410,4 @@ data:
 
     model_config, items, deck_name, media_folder = load_deck_file(deck_file)
 
-    assert deck_name == "Generated Deck"
+    assert deck_name is None

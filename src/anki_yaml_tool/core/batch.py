@@ -100,5 +100,5 @@ def get_deck_name_from_path(file_path: Path, base_dir: Path | None = None) -> st
         except ValueError:
             pass
 
-    # Fall back to parent directory name
-    return file_path.parent.name or "Generated Deck"
+    # Fall back to parent directory name or file stem
+    return file_path.parent.name or file_path.stem or "Deck"

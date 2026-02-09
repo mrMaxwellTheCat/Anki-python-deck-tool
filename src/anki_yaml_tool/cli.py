@@ -136,6 +136,14 @@ def build(file, output, deck_name, media_dir):
         # Use provided deck-name or fall back to file deck-name
         final_deck_name = deck_name if deck_name is not None else file_deck_name
 
+        # Final fallback to filename if no name provided anywhere
+        if final_deck_name is None:
+            file_path = Path(file)
+            if file_path.stem == "deck":
+                final_deck_name = file_path.parent.name or "Deck"
+            else:
+                final_deck_name = file_path.stem
+
         # Use provided media-dir or fall back to file media-dir
         final_media_dir = media_dir if media_dir is not None else file_media_dir
 
@@ -594,9 +602,11 @@ def init(project_name: str, template: str, force: bool) -> None:
         log.debug("Created directories: %s, %s", project_path, media_path)
 
         # Generate deck.yaml
+        config = template_data["config"].copy()
+        config["deck-name"] = template_data["deck_name"]
+
         deck_data = {
-            "config": template_data["config"],
-            "deck-name": template_data["deck_name"],
+            "config": config,
             "data": template_data["data"],
         }
 
@@ -896,7 +906,7 @@ def _batch_build_separate(
             name = get_deck_name_from_path(file_path, base_dir)
         elif file_path.stem == "deck":
             # Use parent directory name for deck.yaml files
-            name = file_path.parent.name
+            name = file_path.parent.name or "Deck"
         else:
             name = file_path.stem
         deck_names.append(name)
@@ -998,7 +1008,13 @@ def _batch_build_separate(
                 if base_dir:
                     final_deck_name = get_deck_name_from_path(file_path, base_dir)
                 else:
-                    final_deck_name = file_deck_name or file_path.stem
+                    # Priority: YAML deck-name > special deck.yaml handling > file stem
+                    if file_deck_name:
+                        final_deck_name = file_deck_name
+                    elif file_path.stem == "deck":
+                        final_deck_name = file_path.parent.name or "Deck"
+                    else:
+                        final_deck_name = file_path.stem
 
                 # Pass media_folder to builder for automatic media discovery
                 builder = AnkiBuilder(
