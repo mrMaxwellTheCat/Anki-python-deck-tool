@@ -1,6 +1,6 @@
 # Anki Python Deck Tool - Just Commands
 
-python := "uv run"
+python := "uv run --link-mode=copy"
 
 [private]
 default: help
@@ -47,7 +47,7 @@ clean:
 
 # Build distribution packages
 build:
-    {{ python }} -m build
+    {{ python }} -m build # FIX
 
 # Build single-file executable
 build-exe:

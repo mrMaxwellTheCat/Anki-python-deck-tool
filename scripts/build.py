@@ -7,6 +7,8 @@ import sys
 import tempfile
 import time
 
+LOG_LEVEL = "WARN"  # Available: TRACE, DEBUG, INFO, WARN, ERROR, CRITICAL
+
 
 def on_rm_error(func, path, exc_info):
     """
@@ -71,6 +73,7 @@ def build():
             f"--workpath={temp_build_dir}",  # Use temp dir for build artifacts
             f"--distpath={dist_dir}",  # Output exe to dist folder
             f"--specpath={temp_build_dir}",  # Put spec file in temp dir too
+            f"--log-level={LOG_LEVEL}",
         ]
 
         # Detect OS and Icon
