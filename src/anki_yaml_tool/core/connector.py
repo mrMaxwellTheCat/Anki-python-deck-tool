@@ -80,7 +80,24 @@ class AnkiConnector:
         if not apkg_path.exists():
             raise FileNotFoundError(f"Package not found: {apkg_path}")
 
-        self.invoke("importPackage", path=str(apkg_path.absolute()))
+        path_str = str(apkg_path.absolute())
+
+        # If we're in WSL and the path is on a Windows mount, convert it to a Windows path
+        # so that Anki (running on Windows) can find it.
+        if path_str.startswith("/mnt/") and Path("/usr/bin/wslpath").exists():
+            try:
+                import subprocess
+
+                path_str = (
+                    subprocess.check_output(["wslpath", "-w", path_str])
+                    .decode("utf-8")
+                    .strip()
+                )
+            except Exception:
+                # Fallback to original path if conversion fails
+                pass
+
+        self.invoke("importPackage", path=path_str)
         self.invoke("reloadCollection")
 
     def sync(self) -> None:
