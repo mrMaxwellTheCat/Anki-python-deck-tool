@@ -30,7 +30,7 @@ class ConfigValidationError(AnkiToolError):
     def __init__(self, message: str, config_path: str | None = None):
         self.config_path = config_path
         if config_path:
-            message = f"{message} (config: '{config_path}')"
+            message = f'{message} (config: "{config_path}")'
         super().__init__(message)
 
 
