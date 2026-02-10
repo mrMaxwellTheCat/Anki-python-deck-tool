@@ -295,6 +295,109 @@ class TestBatchBuildCommand:
             # Ensure apkg remains because push failed
             assert apkg.exists()
 
+    def test_batch_build_push_and_sync(self, runner, tmp_path, monkeypatch):
+        """Test batch build with push and sync options."""
+        deck_content = {
+            "config": {
+                "name": "Test Model",
+                "fields": ["Front", "Back"],
+                "templates": [
+                    {"name": "Card 1", "qfmt": "{{Front}}", "afmt": "{{Back}}"}
+                ],
+            },
+            "data": [{"front": "Q", "back": "A"}],
+        }
+        deck_file = tmp_path / "test_sync.yaml"
+        deck_file.write_text(yaml.dump(deck_content), encoding="utf-8")
+
+        calls = {"imported": 0, "sync": 0}
+
+        def fake_import_package(self, apkg_path):
+            calls["imported"] += 1
+
+        def fake_sync(self):
+            calls["sync"] += 1
+
+        monkeypatch.setattr(
+            "anki_yaml_tool.core.connector.AnkiConnector.import_package",
+            fake_import_package,
+        )
+        monkeypatch.setattr(
+            "anki_yaml_tool.core.connector.AnkiConnector.sync",
+            fake_sync,
+        )
+
+        result = runner.invoke(
+            cli,
+            [
+                "batch-build",
+                "-f",
+                str(deck_file),
+                "-o",
+                str(tmp_path),
+                "--push",
+                "--sync",
+            ],
+        )
+
+        assert result.exit_code == 0
+        assert calls["imported"] == 1
+        assert calls["sync"] == 1
+        assert "Syncing with AnkiWeb" in result.output
+        assert "Sync complete" in result.output
+
+    def test_batch_build_merge_and_sync(self, runner, tmp_path, monkeypatch):
+        """Test batch build merge with push and sync options."""
+        deck_content = {
+            "config": {
+                "name": "Test Model",
+                "fields": ["Front", "Back"],
+                "templates": [
+                    {"name": "Card 1", "qfmt": "{{Front}}", "afmt": "{{Back}}"}
+                ],
+            },
+            "data": [{"front": "Q", "back": "A"}],
+        }
+        deck_file = tmp_path / "test_merge_sync.yaml"
+        deck_file.write_text(yaml.dump(deck_content), encoding="utf-8")
+
+        calls = {"imported": 0, "sync": 0}
+
+        def fake_import_package(self, apkg_path):
+            calls["imported"] += 1
+
+        def fake_sync(self):
+            calls["sync"] += 1
+
+        monkeypatch.setattr(
+            "anki_yaml_tool.core.connector.AnkiConnector.import_package",
+            fake_import_package,
+        )
+        monkeypatch.setattr(
+            "anki_yaml_tool.core.connector.AnkiConnector.sync",
+            fake_sync,
+        )
+
+        result = runner.invoke(
+            cli,
+            [
+                "batch-build",
+                "-f",
+                str(deck_file),
+                "-o",
+                str(tmp_path),
+                "--merge",
+                "--push",
+                "--sync",
+            ],
+        )
+
+        assert result.exit_code == 0
+        assert calls["imported"] == 1
+        assert calls["sync"] == 1
+        assert "Syncing with AnkiWeb" in result.output
+        assert "Sync complete" in result.output
+
 
 class TestBatchUtilities:
     """Tests for batch processing utilities."""

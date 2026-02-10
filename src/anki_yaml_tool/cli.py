@@ -704,6 +704,11 @@ def init(project_name: str, template: str, force: bool) -> None:
     is_flag=True,
     help="Delete .apkg files after successfully pushing to Anki (requires --push)",
 )
+@click.option(
+    "--sync",
+    is_flag=True,
+    help="Sync with AnkiWeb after pushing (requires --push)",
+)
 def batch_build(
     files: tuple[str, ...],
     input_dir: str | None,
@@ -715,6 +720,7 @@ def batch_build(
     hierarchical: bool,
     push: bool,
     delete_after: bool,
+    sync: bool,
 ) -> None:
     """Build multiple decks from YAML files.
 
@@ -791,7 +797,7 @@ def batch_build(
 
     if merge:
         # Merge mode: combine all files into one deck
-        _batch_build_merged(file_list, output_path, deck_name, push, delete_after)
+        _batch_build_merged(file_list, output_path, deck_name, push, delete_after, sync)
     else:
         # Separate mode: build each file individually
         _batch_build_separate(
@@ -800,6 +806,7 @@ def batch_build(
             base_dir if hierarchical else None,
             push,
             delete_after,
+            sync,
         )
 
 
@@ -809,6 +816,7 @@ def _batch_build_merged(
     deck_name: str | None,
     push: bool = False,
     delete_after: bool = False,
+    sync: bool = False,
 ) -> None:
     """Build a merged deck from multiple files."""
     all_items: list[dict] = []
@@ -875,6 +883,48 @@ def _batch_build_merged(
     builder.write_to_file(output_file)
     click.echo(f"Successfully created {output_file}")
 
+    if push:
+        import base64
+        import json
+        import zipfile
+
+        from anki_yaml_tool.core.connector import AnkiConnector
+
+        click.echo(f"Pushing merged deck '{final_deck_name}' to Anki...")
+        connector = AnkiConnector()
+
+        try:
+            # Extract and store media files
+            with zipfile.ZipFile(output_file, "r") as zf:
+                if "media" in zf.namelist():
+                    media_map = json.loads(zf.read("media").decode("utf-8"))
+                    if media_map:
+                        click.echo(f"Storing {len(media_map)} media files...")
+                        for idx, filename in media_map.items():
+                            try:
+                                content = zf.read(idx)
+                                encoded = base64.b64encode(content).decode("utf-8")
+                                connector.invoke(
+                                    "storeMediaFile", filename=filename, data=encoded
+                                )
+                            except Exception:
+                                pass  # Skip media errors
+
+            connector.import_package(output_file)
+            click.echo("✅ Pushed successfully")
+
+            if delete_after:
+                output_file.unlink()
+                log.info("Deleted: %s", output_file.name)
+
+            if sync:
+                click.echo("Syncing with AnkiWeb...")
+                connector.sync()
+                click.echo("✅ Sync complete")
+
+        except Exception as e:
+            click.echo(f"❌ Push failed: {e}", err=True)
+
 
 def _batch_build_separate(
     file_list: list[Path],
@@ -882,6 +932,7 @@ def _batch_build_separate(
     base_dir: Path | None = None,
     push: bool = False,
     delete_after: bool = False,
+    sync: bool = False,
 ) -> None:
     """Build each file as a separate deck.
 
@@ -891,6 +942,7 @@ def _batch_build_separate(
         base_dir: Optional base directory for hierarchical deck naming
         push: Push built decks to Anki
         delete_after: Delete .apkg files after pushing
+        sync: Sync with AnkiWeb after pushing
     """
 
     success_count = 0
@@ -1004,17 +1056,15 @@ def _batch_build_separate(
                     str(file_path)
                 )
 
-                # Use hierarchical name if base_dir provided
-                if base_dir:
+                # Priority: YAML deck-name > Hierarchical Name (if base_dir) > special deck.yaml handling > file stem
+                if file_deck_name:
+                    final_deck_name = file_deck_name
+                elif base_dir:
                     final_deck_name = get_deck_name_from_path(file_path, base_dir)
+                elif file_path.stem == "deck":
+                    final_deck_name = file_path.parent.name or "Deck"
                 else:
-                    # Priority: YAML deck-name > special deck.yaml handling > file stem
-                    if file_deck_name:
-                        final_deck_name = file_deck_name
-                    elif file_path.stem == "deck":
-                        final_deck_name = file_path.parent.name or "Deck"
-                    else:
-                        final_deck_name = file_path.stem
+                    final_deck_name = file_path.stem
 
                 # Pass media_folder to builder for automatic media discovery
                 builder = AnkiBuilder(
@@ -1037,11 +1087,16 @@ def _batch_build_separate(
                     builder.add_note(field_values, tags=tags)
 
                 # Determine output filename
-                # If input is named "deck.yaml", use parent folder name to avoid collisions
-                if file_path.stem == "deck":
-                    output_name = f"{file_path.parent.name}.apkg"
+                # Use sanitized deck name if possible, otherwise fallback to stem/parent
+                safe_name = final_deck_name.replace("::", "_").replace(" ", "_")
+                # Keep it somewhat descriptive of the original file if no deck-name was found
+                if not file_deck_name:
+                    if file_path.stem == "deck":
+                        output_name = f"{file_path.parent.name}.apkg"
+                    else:
+                        output_name = f"{file_path.stem}.apkg"
                 else:
-                    output_name = f"{file_path.stem}.apkg"
+                    output_name = f"{safe_name}.apkg"
 
                 output_file = output_path / output_name
                 builder.write_to_file(output_file)
@@ -1088,6 +1143,17 @@ def _batch_build_separate(
         )
         for filename, error in errors:
             click.echo(f"  ❌ {filename}: {error}", err=True)
+
+    if push and sync and success_count > 0:
+        click.echo("\nSyncing with AnkiWeb...")
+        try:
+            from anki_yaml_tool.core.connector import AnkiConnector
+
+            connector = AnkiConnector()
+            connector.sync()
+            click.echo("✅ Sync complete")
+        except Exception as e:
+            click.echo(f"❌ Sync failed: {e}", err=True)
 
 
 def main():

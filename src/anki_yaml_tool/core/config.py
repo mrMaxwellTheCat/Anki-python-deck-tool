@@ -142,13 +142,13 @@ def load_deck_file(
             "'config' section must be a dictionary", str(deck_path)
         )
 
-    # Extract deck-name from config section
-    deck_name = config_section.get("deck-name")
+    # Extract deck-name from top-level or config section
+    deck_name = raw_deck.get("deck-name") or config_section.get("deck-name")
     if deck_name is not None and not isinstance(deck_name, str):
         deck_name = str(deck_name)
 
-    # Extract media-folder from config section
-    media_folder = config_section.get("media-folder")
+    # Extract media-folder from top-level or config section
+    media_folder = raw_deck.get("media-folder") or config_section.get("media-folder")
     media_folder_path = None
     if media_folder:
         if not isinstance(media_folder, str):
