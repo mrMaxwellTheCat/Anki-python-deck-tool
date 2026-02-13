@@ -108,10 +108,11 @@ Priority fixes identified from code analysis. These issues cause functional fail
   - Add warning when path conversion fails instead of silent fallback
   - Location: `src/anki_yaml_tool/core/connector.py`
 
-- [ ] **Fix: Pass media_folder to AnkiBuilder in build command** (`cli.py:152`)
+- [x] **Fix: Pass media_folder to AnkiBuilder in build command** (`cli.py:152`)
   - Pass `media_folder` parameter to `AnkiBuilder` constructor in simple build command
   - Enable automatic media discovery for non-batch builds
   - Location: `src/anki_yaml_tool/cli.py`
+  - **Status: Completed** - Fixed by converting CLI string path to Path object and passing it to AnkiBuilder
 
 ### High Priority
 
