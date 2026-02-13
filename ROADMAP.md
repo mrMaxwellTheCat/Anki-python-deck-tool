@@ -97,10 +97,11 @@ Priority fixes identified from code analysis. These issues cause functional fail
 
 ### Critical (Fix Immediately)
 
-- [ ] **Fix: Silent Media Errors** (`cli.py:910-911`, `cli.py:1013-1014`)
-  - Add proper logging for media file processing errors instead of silently ignoring them
-  - Provide clear error messages when media files fail to process
-  - Location: `src/anki_yaml_tool/cli.py`
+- [x] **Fix: Silent Media Errors** (`cli.py:910-911`, `cli.py:1013-1014`)
+  - [x] Add proper logging for media file processing errors instead of silently ignoring them
+  - [x] Provide clear error messages when media files fail to process
+  - [x] Implemented: Added specific exception handling (KeyError, AnkiConnectError, generic Exception)
+  - [x] Logging with WARNING level and user-facing messages via click.echo
 
 - [ ] **Fix: WSL Path Conversion Silent Fallback** (`connector.py:96-98`)
   - Improve error handling for WSL path conversion

@@ -907,8 +907,32 @@ def _batch_build_merged(
                                 connector.invoke(
                                     "storeMediaFile", filename=filename, data=encoded
                                 )
-                            except Exception:
-                                pass  # Skip media errors
+                            except KeyError as e:
+                                log.warning(
+                                    "Media file %s not found in package: %s", idx, e
+                                )
+                                click.echo(
+                                    f"Warning: Media file '{idx}' not found in package",
+                                    err=True,
+                                )
+                            except AnkiConnectError as e:
+                                log.warning(
+                                    "Failed to store media file '%s': %s", filename, e
+                                )
+                                click.echo(
+                                    f"Warning: Failed to store media file: {filename}",
+                                    err=True,
+                                )
+                            except Exception as e:
+                                log.warning(
+                                    "Unexpected error storing media file '%s': %s",
+                                    filename,
+                                    e,
+                                )
+                                click.echo(
+                                    f"Warning: Unexpected error with media file: {filename}",
+                                    err=True,
+                                )
 
             connector.import_package(output_file)
             click.echo("✅ Pushed successfully")
@@ -1010,8 +1034,20 @@ def _batch_build_separate(
                             connector.invoke(
                                 "storeMediaFile", filename=media_filename, data=encoded
                             )
-                        except Exception:
-                            pass  # Skip media errors
+                        except KeyError as e:
+                            log.warning(
+                                "Media file %s not found in package: %s", media_idx, e
+                            )
+                        except AnkiConnectError as e:
+                            log.warning(
+                                "Failed to store media file '%s': %s", media_filename, e
+                            )
+                        except Exception as e:
+                            log.warning(
+                                "Unexpected error storing media file '%s': %s",
+                                media_filename,
+                                e,
+                            )
 
             connector.import_package(output_file)
             log.info("Pushed: %s", output_file.name)
