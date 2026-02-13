@@ -145,11 +145,12 @@ def build(file, output, deck_name, media_dir):
                 final_deck_name = file_path.stem
 
         # Use provided media-dir or fall back to file media-dir
-        final_media_dir = media_dir if media_dir is not None else file_media_dir
+        # Convert CLI string path to Path object for AnkiBuilder
+        media_folder: Path | None = Path(media_dir) if media_dir else file_media_dir
 
         click.echo(f"Building deck '{final_deck_name}'...")
         log.info("Output file: %s", output)
-        builder = AnkiBuilder(final_deck_name, model_configs)
+        builder = AnkiBuilder(final_deck_name, model_configs, media_folder)
 
         # Map model names to their field lists for easy lookup
         model_fields_map = {cfg["name"]: cfg["fields"] for cfg in model_configs}
@@ -205,8 +206,8 @@ def build(file, output, deck_name, media_dir):
         log.info("Processed %d notes", len(items))
 
         # Add media files if media directory is provided
-        if final_media_dir:
-            media_path = Path(final_media_dir)
+        if media_folder:
+            media_path = media_folder
             click.echo(f"Discovering media files in {media_path}...")
 
             # Discover all media files in the directory
