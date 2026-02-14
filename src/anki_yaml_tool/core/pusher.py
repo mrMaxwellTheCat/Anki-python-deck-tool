@@ -109,7 +109,7 @@ def push_deck_from_dir(
     existing_notes: dict[int, dict] = {}
     if replace or incremental:
         try:
-            anki_notes = connector.get_notes(target_deck)
+            anki_notes = connector.get_notes(str(target_deck))
             for note in anki_notes:
                 nid = note.get("noteId") or note.get("note_id") or note.get("id")
                 if nid is not None:

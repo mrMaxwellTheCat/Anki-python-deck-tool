@@ -27,7 +27,7 @@ try:
     JINJA2_AVAILABLE: bool = True
 except ImportError:
     JINJA2_AVAILABLE = False
-    JinjaTemplate = None
+    JinjaTemplate = None  # type: ignore[misc,assignment]
 
 
 class YAMLIncludeError(Exception):
@@ -315,14 +315,14 @@ def filter_conditional_content(
         return result
 
     elif isinstance(data, list):
-        result = []
+        filtered_items: list[Any] = []
         for item in data:
             filtered = filter_conditional_content(
                 item, enabled_flag, tags_flag, include_tags
             )
             if filtered is not None:
-                result.append(filtered)
-        return result
+                filtered_items.append(filtered)
+        return filtered_items
 
     return data
 

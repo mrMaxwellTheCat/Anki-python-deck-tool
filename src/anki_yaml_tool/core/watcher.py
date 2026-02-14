@@ -112,7 +112,6 @@ class FileWatcher:
         self.ignore_patterns = ignore_patterns or DEFAULT_IGNORE_PATTERNS
         self.debounce_seconds = debounce_seconds
 
-        self._observer = None
         self._debounced_callback: DebouncedCallback | None = None
         self._running = False
         self._stop_event = threading.Event()
@@ -221,10 +220,12 @@ class FileWatcher:
             def on_created(self, event):
                 self.watcher._on_file_changed(event)
 
-        self._observer = Observer()
+        self._observer: Observer | None = None  # type: ignore[valid-type]
         handler = WatchHandler(self)
-        self._observer.schedule(handler, str(watch_dir), recursive=False)
-        self._observer.start()
+        observer = Observer()
+        observer.schedule(handler, str(watch_dir), recursive=False)
+        observer.start()
+        self._observer = observer
         self._running = True
 
         log.info("Watching %s for changes...", self.watch_path)
@@ -232,8 +233,8 @@ class FileWatcher:
     def stop(self) -> None:
         """Stop watching for file changes."""
         if self._observer:
-            self._observer.stop()
-            self._observer.join()
+            self._observer.stop()  # type: ignore[attr-defined]
+            self._observer.join()  # type: ignore[attr-defined]
             self._observer = None
 
         if self._debounced_callback:
