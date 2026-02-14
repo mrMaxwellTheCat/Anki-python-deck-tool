@@ -88,7 +88,7 @@ class AnkiConnector:
             raise AnkiConnectError(f"AnkiConnect Error: {data['error']}", action=action)
         return cast(JSONValue, data.get("result"))
 
-    def import_package(self, apkg_path: Path) -> None:
+    def import_package(self, apkg_path: Path) -> bool | None:
         """Import an .apkg file into Anki.
 
         Args:
@@ -122,6 +122,7 @@ class AnkiConnector:
 
         self.invoke("importPackage", path=path_str, _timeout=self.timeout_long)
         self.invoke("reloadCollection")
+        return True
 
     def sync(self) -> None:
         """Trigger a sync with AnkiWeb.
@@ -258,7 +259,8 @@ class AnkiConnector:
         """
         if not isinstance(note_id, int):
             raise ValueError("note_id must be an integer")
-        self.invoke("updateNoteFields", note={"id": note_id, "fields": fields})
+        note: dict[str, int | dict[str, str]] = {"id": note_id, "fields": fields}
+        self.invoke("updateNoteFields", note=cast(JSONValue, note))
 
     def add_note(
         self,
@@ -275,7 +277,7 @@ class AnkiConnector:
         if tags:
             note["tags"] = tags
 
-        result = self.invoke("addNote", note=note)
+        result = self.invoke("addNote", note=note)  # type: ignore[arg-type]
         if not isinstance(result, int):
             raise AnkiConnectError("Unexpected response from addNote", action="addNote")
         return result
@@ -293,7 +295,7 @@ class AnkiConnector:
         """
         if not note_ids:
             return
-        self.invoke("deleteNotes", notes=note_ids)
+        self.invoke("deleteNotes", notes=note_ids)  # type: ignore[arg-type]
 
     def get_note_tags(self, note_id: int) -> list[str]:
         """Get the tags for a specific note.
