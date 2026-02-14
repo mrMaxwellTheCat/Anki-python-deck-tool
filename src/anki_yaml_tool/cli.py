@@ -62,13 +62,26 @@ log = get_logger("cli")
     "-p",
     help="Configuration profile to use (e.g., dev, prod).",
 )
+@click.option(
+    "--gui",
+    "-g",
+    is_flag=True,
+    help="Launch the graphical user interface (GUI).",
+)
 @click.pass_context
-def cli(ctx: click.Context, verbose: int, quiet: bool, profile: str | None) -> None:
+def cli(
+    ctx: click.Context, verbose: int, quiet: bool, profile: str | None, gui: bool
+) -> None:
     """Anki Python Deck Tool - Build and push decks from YAML.
 
     When invoked without a subcommand this will launch a terminal-based
-    interactive UI to guide the user.
+    interactive UI to guide the user. Use --gui to launch the graphical UI.
     """
+    # Launch GUI if requested
+    if gui:
+        from anki_yaml_tool.gui.main import main as gui_main
+
+        sys.exit(gui_main())
     from anki_yaml_tool.core.config_file import load_config
     from anki_yaml_tool.core.interactive import run_interactive
 
