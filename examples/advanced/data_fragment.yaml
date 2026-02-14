@@ -1,0 +1,7 @@
+# Fragmento de datos de ejemplo para demostrar YAML Includes
+- front: 'Hola'
+  back: 'Hello'
+  tags: [basic, spanish]
+- front: 'Gracias'
+  back: 'Thank you'
+  tags: [basic, spanish]
