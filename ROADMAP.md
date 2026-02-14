@@ -425,18 +425,33 @@ Automatically rebuild and push decks when input files change, enabling real-time
 
 ### 5.1 Technology Selection
 
-- [ ] **Evaluate Frameworks**
-  - [ ] PySide6/PyQt6 (native desktop applications)
-  - [ ] Tkinter (built-in, simple but limited)
-  - [ ] Electron + Python backend (web technologies)
-  - [ ] Streamlit/NiceGUI (web-based local UI)
-  - [ ] Tauri + Python (modern, lightweight)
+- [x] **Evaluate Frameworks**
+  - [x] PySide6/PyQt6 (native desktop applications)
+  - [x] Tkinter (built-in, simple but limited)
+  - [x] Electron + Python backend (web technologies)
+  - [x] Streamlit/NiceGUI (web-based local UI)
+  - [x] Tauri + Python (modern, lightweight)
 
-- [ ] **Decision Criteria**
-  - Cross-platform support (Windows, macOS, Linux)
-  - Ease of development and maintenance
-  - Package size and distribution complexity
-  - User experience quality
+- [x] **Decision Criteria**
+  - [x] Cross-platform support (Windows, macOS, Linux)
+  - [x] Ease of development and maintenance
+  - [x] Package size and distribution complexity
+  - [x] User experience quality
+
+### Technology Decision: PySide6 (Qt for Python)
+
+**Selected Framework**: PySide6
+
+**Justification**:
+- **Native desktop experience**: Qt provides professional, native-looking UI that matches user expectations for Anki-related tools
+- **Rich widget library**: Built-in QFileDialog, QProgressBar, QMessageBox, and other widgets directly map to Phase 1 requirements
+- **Qt Designer**: Visual WYSIWYG editor for rapid UI prototyping
+- **Scalability**: Easy to extend with advanced features (visual editor, card preview, YAML validation) planned in Phase 2+
+- **Python native**: Direct integration with existing Python codebase (genanki, builder, exporter modules)
+- **Cross-platform**: Full support for Windows, macOS, and Linux
+- **License**: PySide6 uses LGPL, avoiding GPL restrictions
+
+**Alternative considered**: NiceGUI (web-based) was runner-up for development speed, but lacks native desktop feel
 
 ### 5.2 GUI Features (Phase 1)
 
@@ -504,7 +519,32 @@ Define the core interaction modes for the GUI application, providing both manual
   - [ ] Settings panel for defaults (AnkiConnect URL, timeouts)
   - [ ] Dark mode support
 
-### 5.4 GUI Features (Phase 2)
+### 5.4 Implementation Plan
+
+- [ ] **Project Setup**
+  - [ ] Add PySide6 to dependencies in pyproject.toml
+  - [ ] Create src/anki_yaml_tool/gui/ directory structure
+  - [ ] Set up logging for GUI module
+
+- [ ] **Core GUI Architecture**
+  - [ ] Create main window class (AnkiDeckToolWindow)
+  - [ ] Implement application entry point with CLI fallback
+  - [ ] Set up signal/slot connections for events
+
+- [ ] **Phase 1 Features**
+  - [ ] Implement file picker widgets (config and data files)
+  - [ ] Add output path selector
+  - [ ] Create deck name input field
+  - [ ] Implement build button with QProgressBar
+  - [ ] Add success/error QMessageBox notifications
+  - [ ] Connect GUI to existing builder.py functions
+
+- [ ] **Distribution**
+  - [ ] Configure PyInstaller for GUI executable
+  - [ ] Test cross-platform builds
+  - [ ] Add GUI icon from assets/
+
+### 5.5 GUI Features (Phase 2)
 
 - [ ] **Editor Integration**
   - [ ] Built-in config editor with templates
