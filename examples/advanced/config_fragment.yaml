@@ -1,0 +1,17 @@
+# Fragmento de configuración de ejemplo para demostrar YAML Includes
+# Este archivo puede ser incluido en otros archivos YAML usando !include
+
+name: Plantilla Básica
+fields:
+  - Front
+  - Back
+templates:
+  - name: Card 1
+    qfmt: '<div>{{Front}}</div>'
+    afmt: '<div>{{Front}}</div><hr><div>{{Back}}</div>'
+css: |
+  .card {
+    font-family: Arial;
+    font-size: 20px;
+    text-align: center;
+  }
