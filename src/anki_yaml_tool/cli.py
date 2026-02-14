@@ -3,6 +3,7 @@
 This module provides the CLI entry points for building and pushing Anki decks.
 """
 
+import fnmatch
 import sys
 import threading
 from concurrent.futures import Future, ThreadPoolExecutor
@@ -532,17 +533,101 @@ def pull(list_decks: bool, deck: str | None, all_decks: bool, output: str) -> No
     help="Directory containing exported deck (config.yaml + data.yaml)",
 )
 @click.option("--deck-name", help="Optional override for target deck name")
-@click.option("--sync", is_flag=True, help="Sync with AnkiWeb after pushing")
-def push_yaml(deck_dir: str, deck_name: str | None, sync: bool) -> None:
-    """Push notes from an exported deck directory back to Anki."""
+@click.option(
+    "--sync",
+    "anki_sync",
+    is_flag=True,
+    help="Sync with AnkiWeb after pushing",
+)
+@click.option(
+    "--replace",
+    "replace",
+    is_flag=True,
+    help="Sync mode: delete notes in Anki that are not in YAML (bidirectional sync)",
+)
+@click.option(
+    "--incremental",
+    "incremental",
+    is_flag=True,
+    help="Only push notes that have changed (compare content before pushing)",
+)
+def push_yaml(
+    deck_dir: str,
+    deck_name: str | None,
+    anki_sync: bool,
+    replace: bool,
+    incremental: bool,
+) -> None:
+    """Push notes from an exported deck directory back to Anki.
+
+    Examples:
+      - Basic push: anki-yaml-tool push-yaml --dir ./my-deck
+      - Replace mode (sync): anki-yaml-tool push-yaml --dir ./my-deck --replace
+      - Incremental: anki-yaml-tool push-yaml --dir ./my-deck --incremental
+
+    The --replace flag enables bidirectional sync:
+      - Notes in YAML are updated/created in Anki
+      - Notes in Anki NOT present in YAML are DELETED
+
+    The --incremental flag enables change detection:
+      - Notes that haven't changed since last sync are skipped
+      - Uses note ID and content hash for comparison
+    """
     from anki_yaml_tool.core.pusher import push_deck_from_dir
 
     click.echo(f"Pushing YAML from {deck_dir} to Anki...")
+    if replace:
+        click.echo(
+            click.style(
+                "  Mode: REPLACE (notes not in YAML will be deleted)", fg="yellow"
+            )
+        )
+    if incremental:
+        click.echo(
+            click.style(
+                "  Mode: INCREMENTAL (only changed notes will be pushed)", fg="yellow"
+            )
+        )
+
     connector = AnkiConnector()
 
     try:
-        push_deck_from_dir(connector, Path(deck_dir), deck_name=deck_name, sync=sync)
+        stats = push_deck_from_dir(
+            connector,
+            Path(deck_dir),
+            deck_name=deck_name,
+            sync=anki_sync,
+            replace=replace,
+            incremental=incremental,
+        )
+
+        # Display summary
+        click.echo("\n" + "=" * 40)
+        click.echo(click.style("Push Summary:", fg="green", bold=True))
+
+        added = stats.get("added", 0)
+        updated = stats.get("updated", 0)
+        deleted = stats.get("deleted", 0)
+        unchanged = stats.get("unchanged", 0)
+        failed = stats.get("failed", 0)
+
+        if added > 0:
+            click.echo(f"  {click.style('+', fg='green')} {added} added")
+        if updated > 0:
+            click.echo(f"  {click.style('~', fg='blue')} {updated} updated")
+        if deleted > 0:
+            click.echo(f"  {click.style('-', fg='red')} {deleted} deleted")
+        if unchanged > 0:
+            click.echo(f"  {click.style('=', fg='gray')} {unchanged} unchanged")
+        if failed > 0:
+            click.echo(f"  {click.style('!', fg='red')} {failed} failed")
+
+        if added == 0 and updated == 0 and deleted == 0 and failed == 0:
+            click.echo(click.style("  All notes already up to date!", fg="green"))
+
+        click.echo("=" * 40)
         click.echo("Push completed successfully")
+
     except AnkiConnectError as e:
         click.echo(f"Error: {e}", err=True)
         raise click.Abort() from e
@@ -551,6 +636,217 @@ def push_yaml(deck_dir: str, deck_name: str | None, sync: bool) -> None:
         raise click.Abort() from e
     except Exception as e:
         click.echo(f"Unexpected error: {e}", err=True)
+        raise click.Abort() from e
+
+
+@cli.command()
+@click.option(
+    "--file",
+    "deck_file",
+    type=click.Path(exists=True),
+    required=True,
+    help="Path to deck YAML file to watch",
+)
+@click.option(
+    "--output",
+    "output_file",
+    type=click.Path(),
+    default="deck.apkg",
+    help="Output .apkg path",
+)
+@click.option(
+    "--push",
+    "auto_push",
+    is_flag=True,
+    help="Automatically push to Anki after building",
+)
+@click.option(
+    "--debounce",
+    "debounce_seconds",
+    type=float,
+    default=1.0,
+    help="Seconds to wait after a change before rebuilding (default: 1.0)",
+)
+@click.option(
+    "--deck-name",
+    help="Name of the Anki deck (overrides deck file setting)",
+)
+@click.option(
+    "--media-dir",
+    type=click.Path(exists=True),
+    help="Directory containing media files (overrides deck file setting)",
+)
+def watch(
+    deck_file: str,
+    output_file: str,
+    auto_push: bool,
+    debounce_seconds: float,
+    deck_name: str | None,
+    media_dir: str | None,
+) -> None:
+    """Watch a deck YAML file and automatically rebuild on changes.
+
+    This command watches the specified YAML file for changes and automatically
+    rebuilds the .apkg file when changes are detected. Optionally, it can also
+    push the built deck to Anki.
+
+    Examples:
+      - Watch and rebuild: anki-yaml-tool watch --file ./deck.yaml
+      - Watch, rebuild and push: anki-yaml-tool watch --file ./deck.yaml --push
+      - Custom debounce time: anki-yaml-tool watch --file ./deck.yaml --debounce 2.0
+
+    Note: This feature requires the watchdog package. Install it with:
+      pip install anki-yaml-tool[watch]
+    """
+    from anki_yaml_tool.core.watcher import FileWatcher
+
+    deck_path = Path(deck_file)
+
+    # Validate the file exists
+    if not deck_path.exists():
+        click.echo(f"Error: File not found: {deck_file}", err=True)
+        raise click.Abort()
+
+    # Import builder components here to ensure they're available
+    from typing import cast
+
+    from anki_yaml_tool.core.builder import AnkiBuilder, ModelConfigComplete
+    from anki_yaml_tool.core.config import load_deck_file
+    from anki_yaml_tool.core.connector import AnkiConnector
+
+    def build_and_push() -> None:
+        """Build the deck and optionally push to Anki."""
+        click.echo("\n" + "=" * 50)
+        click.echo(
+            click.style("Change detected! Building deck...", fg="cyan", bold=True)
+        )
+        click.echo("=" * 50)
+
+        try:
+            # Load deck file (same logic as build command)
+            log.info("Loading deck file: %s", deck_file)
+            model_config, items, file_deck_name, file_media_dir = load_deck_file(
+                deck_file
+            )
+            model_configs = cast(list[ModelConfigComplete], [model_config])
+
+            # Use provided deck-name or fall back to file deck-name
+            final_deck_name = deck_name if deck_name is not None else file_deck_name
+
+            # Final fallback to filename if no name provided anywhere
+            if final_deck_name is None:
+                if deck_path.stem == "deck":
+                    final_deck_name = deck_path.parent.name or "Deck"
+                else:
+                    final_deck_name = deck_path.stem
+
+            # Use provided media-dir or fall back to file media-dir
+            media_folder: Path | None = Path(media_dir) if media_dir else file_media_dir
+
+            click.echo(f"Building deck '{final_deck_name}' to {output_file}...")
+            builder = AnkiBuilder(final_deck_name, model_configs, media_folder)
+
+            # Map model names to their field lists
+            model_fields_map = {cfg["name"]: cfg["fields"] for cfg in model_configs}
+            first_model_name = model_configs[0]["name"]
+
+            # Track media references
+            all_media_refs: set[str] = set()
+
+            for item in items:
+                target_model_name = item.get(
+                    "model", item.get("type", first_model_name)
+                )
+                if not isinstance(target_model_name, str):
+                    target_model_name = str(target_model_name)
+
+                if target_model_name not in model_fields_map:
+                    target_model_name = first_model_name
+
+                fields = model_fields_map[target_model_name]
+                item_lower = {k.lower(): v for k, v in item.items()}
+                field_values = [str(item_lower.get(f.lower(), "")) for f in fields]
+
+                for field_value in field_values:
+                    refs = get_media_references(field_value)
+                    all_media_refs.update(refs)
+
+                tags_raw = item.get("tags", [])
+                tags = tags_raw if isinstance(tags_raw, list) else [str(tags_raw)]
+
+                builder.add_note(field_values, tags=tags, model_name=target_model_name)
+
+            # Build the package
+            output_path = Path(output_file)
+            builder.write_to_file(output_path)
+
+            click.echo(
+                click.style(f"Deck built successfully: {output_path}", fg="green")
+            )
+
+            # Optionally push to Anki
+            if auto_push:
+                click.echo("\nPushing to Anki...")
+                connector = AnkiConnector()
+                try:
+                    result = connector.import_package(output_path)
+                    if result:
+                        click.echo(
+                            click.style("Deck pushed to Anki successfully!", fg="green")
+                        )
+                    else:
+                        click.echo(
+                            click.style("Failed to push deck to Anki", fg="red"),
+                            err=True,
+                        )
+                except AnkiConnectError as e:
+                    click.echo(f"Error connecting to Anki: {e}", err=True)
+
+        except FileNotFoundError as e:
+            click.echo(f"Error: {e}", err=True)
+        except DeckBuildError as e:
+            click.echo(f"Error building deck: {e}", err=True)
+        except Exception as e:
+            click.echo(f"Unexpected error: {e}", err=True)
+            log.exception("Error during watch rebuild")
+
+    # Create and start the watcher
+    try:
+        watcher = FileWatcher(
+            watch_path=deck_path,
+            debounce_seconds=debounce_seconds,
+        )
+
+        click.echo(click.style("Starting file watcher...", fg="cyan"))
+        click.echo(f"  Watching: {deck_file}")
+        click.echo(f"  Output: {output_file}")
+        if auto_push:
+            click.echo(click.style("  Auto-push: enabled", fg="yellow"))
+        click.echo(f"  Debounce: {debounce_seconds}s")
+        click.echo("\nPress Ctrl+C to stop watching.")
+
+        watcher.start(build_and_push)
+
+        # Wait for keyboard interrupt
+        import time
+
+        try:
+            while watcher.is_running():
+                time.sleep(1)
+        except KeyboardInterrupt:
+            click.echo("\n" + click.style("Stopping watcher...", fg="yellow"))
+        finally:
+            watcher.stop()
+
+    except ImportError as e:
+        click.echo(
+            click.style(
+                "Error: watchdog package not installed.\n"
+                "Install it with: pip install anki-yaml-tool[watch]",
+                fg="red",
+            ),
+            err=True,
+        )
         raise click.Abort() from e
 
 
@@ -668,6 +964,11 @@ def init(project_name: str, template: str, force: bool) -> None:
     help="Recursively scan subdirectories (default: True)",
 )
 @click.option(
+    "--deck-filter",
+    "-df",
+    help="Filter decks by name pattern (supports wildcards: * matches any characters, ? matches single character). Example: --deck-filter 'spanish*'",
+)
+@click.option(
     "--pattern",
     default="deck.yaml",
     help="Filename pattern to match in directory scan (default: deck.yaml)",
@@ -710,10 +1011,18 @@ def init(project_name: str, template: str, force: bool) -> None:
     is_flag=True,
     help="Sync with AnkiWeb after pushing (requires --push)",
 )
+@click.option(
+    "--workers",
+    "-w",
+    type=int,
+    default=None,
+    help="Number of parallel workers for concurrent building (default: 4, use 1-8)",
+)
 def batch_build(
     files: tuple[str, ...],
     input_dir: str | None,
     recursive: bool,
+    deck_filter: str | None,
     pattern: str,
     output_dir: str,
     merge: bool,
@@ -722,6 +1031,7 @@ def batch_build(
     push: bool,
     delete_after: bool,
     sync: bool,
+    workers: int | None,
 ) -> None:
     """Build multiple decks from YAML files.
 
@@ -791,10 +1101,63 @@ def batch_build(
     file_list = sorted(set(file_list))
 
     click.echo(f"Found {len(file_list)} deck files to process")
+
+    # Apply deck name filter if specified
+    if deck_filter:
+        filtered_list = []
+        for file_path in file_list:
+            # Determine deck name for filtering
+            # Priority: YAML deck-name > Hierarchical Name (if base_dir) > special deck.yaml handling > file stem
+            try:
+                _, _, file_deck_name, _ = load_deck_file(str(file_path))
+                if file_deck_name:
+                    deck_name_for_filter = file_deck_name
+                elif base_dir:
+                    deck_name_for_filter = get_deck_name_from_path(file_path, base_dir)
+                elif file_path.stem == "deck":
+                    deck_name_for_filter = file_path.parent.name or "Deck"
+                else:
+                    deck_name_for_filter = file_path.stem
+
+                # Apply fnmatch pattern
+                if fnmatch.fnmatch(deck_name_for_filter.lower(), deck_filter.lower()):
+                    filtered_list.append(file_path)
+                    log.debug(
+                        "Deck '%s' matches filter '%s'",
+                        deck_name_for_filter,
+                        deck_filter,
+                    )
+                else:
+                    log.debug(
+                        "Deck '%s' does not match filter '%s'",
+                        deck_name_for_filter,
+                        deck_filter,
+                    )
+            except (ConfigValidationError, DataValidationError) as e:
+                # Skip files that can't be loaded, but log the error
+                log.warning("Skipping %s: %s", file_path.name, e)
+
+        original_count = len(file_list)
+        file_list = filtered_list
+        click.echo(
+            f"Filtered to {len(file_list)} decks matching pattern '{deck_filter}'"
+        )
+        if len(file_list) == 0:
+            click.echo(
+                f"Error: No decks match filter '{deck_filter}' (from {original_count} decks)",
+                err=True,
+            )
+            raise click.Abort()
+
     log.debug("Files: %s", [str(f) for f in file_list])
 
     output_path = Path(output_dir)
     output_path.mkdir(parents=True, exist_ok=True)
+
+    # Default workers to 4 if not specified, cap at 8 to avoid overwhelming AnkiConnect
+    if workers is None:
+        workers = 4
+    workers = min(max(workers, 1), 8)  # Ensure between 1-8
 
     if merge:
         # Merge mode: combine all files into one deck
@@ -808,6 +1171,7 @@ def batch_build(
             push,
             delete_after,
             sync,
+            workers,
         )
 
 
@@ -958,6 +1322,7 @@ def _batch_build_separate(
     push: bool = False,
     delete_after: bool = False,
     sync: bool = False,
+    workers: int = 4,
 ) -> None:
     """Build each file as a separate deck.
 
@@ -1076,12 +1441,18 @@ def _batch_build_separate(
     # Print initial table
     print_table(first_time=True)
 
-    # Use a thread pool for push operations (max 1 concurrent push)
-    # This allows building the next deck while the previous one is pushing
+    # Use a thread pool for concurrent build operations
+    # This allows building multiple decks in parallel
     push_futures: list[Future] = []
 
-    with ThreadPoolExecutor(max_workers=1) as executor:
+    with ThreadPoolExecutor(max_workers=workers) as executor:
         for i, file_path in enumerate(file_list):
+            # Show progress: Building deck X of Y...
+            current_deck_name = deck_names[i] if i < len(deck_names) else file_path.stem
+            click.echo(
+                f"Building deck {i + 1} of {len(file_list)}: {current_deck_name}..."
+            )
+
             # Update status to building
             with lock:
                 status[i] = "🔨"

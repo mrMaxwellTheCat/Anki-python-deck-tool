@@ -126,6 +126,9 @@ class AnkiBuilder:
         Converts:
         - $$...$$ to \[...\] (display math)
         - $...$ to \(...\) (inline math)
+        - Preserves already converted \(...\) and \[...\]
+        - Does not convert escaped \$ or # in text
+        - Does not convert $ in URLs or query parameters
 
         Args:
             text: The text containing math delimiters.
@@ -133,10 +136,111 @@ class AnkiBuilder:
         Returns:
             Text with math delimiters converted to Anki LaTeX format.
         """
-        # First replace block math $$ ... $$ (must be done before inline)
-        text = re.sub(r"\$\$(.*?)\$\$", r"\\[\1\\]", text, flags=re.DOTALL)
-        # Then replace inline math $ ... $
-        text = re.sub(r"\$(.*?)\$", r"\\(\1\\)", text)
+        # Use unique placeholders to protect already converted Anki-style delimiters
+        # We use different markers for opening and closing to avoid confusion
+        placeholder_inline_open = "__ANKILATEX_INLINE_OPEN__"
+        placeholder_inline_close = "__ANKILATEX_INLINE_CLOSE__"
+        placeholder_block_open = "__ANKILATEX_BLOCK_OPEN__"
+        placeholder_block_close = "__ANKILATEX_BLOCK_CLOSE__"
+
+        # Protect escaped characters first: \$ and \#
+        # These should not be converted
+        placeholder_escaped_dollar = "__ANKILATEX_ESCAPED_DOLLAR__"
+        placeholder_escaped_hash = "__ANKILATEX_ESCAPED_HASH__"
+
+        # Protect escaped \$ (single backslash before dollar sign)
+        text = re.sub(r"\\\$", placeholder_escaped_dollar, text)
+        # Protect escaped \#
+        text = re.sub(r"\\#", placeholder_escaped_hash, text)
+
+        # Protect already converted Anki-style delimiters \(...\) and \[...\]
+        text = re.sub(
+            r"\\\((.*?)\\\)",
+            lambda m: placeholder_inline_open + m.group(1) + placeholder_inline_close,
+            text,
+            flags=re.DOTALL,
+        )
+        text = re.sub(
+            r"\\\[(.*?)\\\]",
+            lambda m: placeholder_block_open + m.group(1) + placeholder_block_close,
+            text,
+            flags=re.DOTALL,
+        )
+
+        # Helper function to check if we're in a URL context
+        def is_in_url_context(pos: int, txt: str) -> bool:
+            """Check if position is likely within a URL or query string."""
+            if pos == 0:
+                return False
+
+            prefix = txt[:pos]
+
+            # Check for URL scheme
+            url_scheme_match = re.search(r"https?://[^\s]*", prefix)
+            if url_scheme_match:
+                scheme_end = url_scheme_match.end()
+                # Check if current position is within the URL
+                if pos <= scheme_end:
+                    return True
+                # Check for query parameters or path after scheme
+                remaining = prefix[scheme_end:]
+                if "?" in remaining or "&" in remaining:
+                    # Find the last query indicator
+                    last_indicator = max(remaining.rfind("?"), remaining.rfind("&"))
+                    if last_indicator != -1:
+                        # Check if we're within a reasonable distance
+                        if pos - scheme_end - last_indicator - 1 < 100:
+                            return True
+
+            # Check for file paths that might look like URLs
+            # but be more conservative - only if clearly a path
+            if re.search(r"^[a-zA-Z]:[/\\]", prefix) or prefix.startswith("/"):
+                # This is likely a file path, not a URL with query params
+                return False
+
+            return False
+
+        # Replace block math $ ... $ with \[...\]
+        def replace_block_math(match):
+            content = match.group(1)
+            start_pos = match.start()
+            # Check if preceded by backslash (escaped)
+            if start_pos > 0 and text[start_pos - 1] == "\\":
+                return match.group(0)  # Don't convert, it's escaped
+            return "\\[" + content + "\\]"
+
+        text = re.sub(r"\$\$([^$]+?)\$\$", replace_block_math, text, flags=re.DOTALL)
+
+        # Replace inline math $ ... $ with \(...\)
+        def replace_inline_math(match):
+            content = match.group(1)
+            start_pos = match.start()
+
+            # Check if preceded by backslash (escaped like \$)
+            # The placeholder was already applied, so check if the char before is the placeholder
+            if start_pos > 0 and text[start_pos - 1] == "\\":
+                return match.group(0)  # Don't convert, it's escaped
+
+            # Check if in URL context
+            if is_in_url_context(start_pos, text):
+                return match.group(0)  # Don't convert, likely in URL
+
+            return "\\(" + content + "\\)"
+
+        # Replace $...$ but not escaped \$, not in URLs
+        # Use a more precise pattern that excludes \$ by checking it's not preceded by \
+        text = re.sub(r"(?<!\\)\$([^$\n]+?)\$", replace_inline_math, text)
+
+        # Restore protected Anki-style delimiters
+        text = text.replace(placeholder_inline_open, "\\(")
+        text = text.replace(placeholder_inline_close, "\\)")
+        text = text.replace(placeholder_block_open, "\\[")
+        text = text.replace(placeholder_block_close, "\\]")
+
+        # Restore escaped characters
+        text = text.replace(placeholder_escaped_dollar, "\\$")
+        text = text.replace(placeholder_escaped_hash, "\\#")
+
         return text
 
     def _build_models(self) -> ModelMap:
