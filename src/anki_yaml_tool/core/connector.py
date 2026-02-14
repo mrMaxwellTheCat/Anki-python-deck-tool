@@ -5,12 +5,16 @@ Anki via the AnkiConnect add-on API.
 """
 
 import base64
+import logging
 from pathlib import Path
 from typing import cast
 
 import requests
 
 from anki_yaml_tool.core.exceptions import AnkiConnectError
+
+# Logger for this module
+logger = logging.getLogger("anki_yaml_tool.core.connector")
 
 # Type alias for JSON values returned by AnkiConnect
 JSONValue = dict[str, "JSONValue"] | list["JSONValue"] | str | int | float | bool | None
@@ -21,25 +25,38 @@ class AnkiConnector:
 
     Args:
         url: The URL where AnkiConnect is listening (default: http://127.0.0.1:8765).
+        timeout_short: Timeout for quick operations in seconds (default: 30).
+        timeout_long: Timeout for long operations like imports in seconds (default: 120).
 
     Raises:
         AnkiConnectError: If communication with AnkiConnect fails.
     """
 
-    def __init__(self, url: str = "http://127.0.0.1:8765"):
+    def __init__(
+        self,
+        url: str = "http://127.0.0.1:8765",
+        timeout_short: int = 30,
+        timeout_long: int = 120,
+    ):
         """Initialize the AnkiConnect client.
 
         Args:
             url: The URL where AnkiConnect is listening.
+            timeout_short: Timeout for quick operations in seconds.
+            timeout_long: Timeout for long operations like imports in seconds.
         """
         self.url = url
+        self.timeout_short = timeout_short
+        self.timeout_long = timeout_long
+        self._session = requests.Session()
 
-    def invoke(self, action: str, **params) -> JSONValue:
+    def invoke(self, action: str, **params: JSONValue | int) -> JSONValue:
         """Invoke an AnkiConnect API action.
 
         Args:
             action: The AnkiConnect action name.
-            **params: Parameters to pass to the action.
+            **params: Parameters to pass to the action. Use '_timeout' to specify
+                a custom timeout in seconds.
 
         Returns:
             The result from AnkiConnect.
@@ -47,13 +64,17 @@ class AnkiConnector:
         Raises:
             AnkiConnectError: If the connection fails or AnkiConnect returns an error.
         """
+        timeout: int = self.timeout_short
+        if "_timeout" in params:
+            timeout = int(params.pop("_timeout"))  # type: ignore[arg-type]
+
         payload = {
             "action": action,
             "version": 6,
             "params": params,
         }
         try:
-            response = requests.post(self.url, json=payload, timeout=30)
+            response = self._session.post(self.url, json=payload, timeout=timeout)
             response.raise_for_status()
         except requests.exceptions.ConnectionError as e:
             raise AnkiConnectError(
@@ -93,11 +114,13 @@ class AnkiConnector:
                     .decode("utf-8")
                     .strip()
                 )
-            except Exception:
-                # Fallback to original path if conversion fails
-                pass
+            except Exception as e:
+                logger.warning(
+                    f"WSL path conversion failed for '{path_str}'. "
+                    f"Falling back to original path. Error: {e}"
+                )
 
-        self.invoke("importPackage", path=path_str)
+        self.invoke("importPackage", path=path_str, _timeout=self.timeout_long)
         self.invoke("reloadCollection")
 
     def sync(self) -> None:
@@ -125,7 +148,27 @@ class AnkiConnector:
 
         content = file_path.read_bytes()
         encoded = base64.b64encode(content).decode("utf-8")
-        self.invoke("storeMediaFile", filename=filename, data=encoded)
+        self.invoke(
+            "storeMediaFile",
+            filename=filename,
+            data=encoded,
+            _timeout=self.timeout_long,
+        )
+
+    def close(self) -> None:
+        """Close the underlying requests session.
+
+        Should be called when done using the connector to release resources.
+        """
+        self._session.close()
+
+    def __enter__(self):
+        """Context manager entry."""
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        """Context manager exit."""
+        self.close()
 
     def get_deck_names(self) -> list[str]:
         """Return a sorted list of deck names available in Anki."""
@@ -236,3 +279,34 @@ class AnkiConnector:
         if not isinstance(result, int):
             raise AnkiConnectError("Unexpected response from addNote", action="addNote")
         return result
+
+    def delete_notes(self, note_ids: list[int]) -> None:
+        """Delete notes from Anki by their IDs.
+
+        Uses AnkiConnect's `deleteNotes` action.
+
+        Args:
+            note_ids: List of note IDs to delete.
+
+        Raises:
+            AnkiConnectError: If the delete operation fails.
+        """
+        if not note_ids:
+            return
+        self.invoke("deleteNotes", notes=note_ids)
+
+    def get_note_tags(self, note_id: int) -> list[str]:
+        """Get the tags for a specific note.
+
+        Uses AnkiConnect's `getNoteTags` action.
+
+        Args:
+            note_id: The ID of the note to get tags for.
+
+        Returns:
+            List of tags for the note.
+        """
+        result = self.invoke("getNoteTags", note=note_id)
+        if not isinstance(result, list):
+            return []
+        return [str(t) for t in result]

@@ -186,22 +186,36 @@ def export_deck(connector: AnkiConnector, deck_name: str, output_dir: Path) -> P
         media_dir.mkdir(exist_ok=True)
         for ref in all_media_refs:
             try:
-                # Normalize and validate media reference to prevent path
-                # traversal (reject absolute paths or references containing
-                # parent segments).
+                # Validate media reference to prevent path traversal attacks.
+                # This validation MUST happen BEFORE retrieving the file to
+                # ensure we don't access files outside the media directory.
                 ref_path = Path(ref)
+
+                # Reject absolute paths or references containing parent
+                # segments (../)
                 if ref_path.is_absolute() or ".." in ref_path.parts:
-                    # Skip suspicious media refs
                     continue
 
-                content = connector.retrieve_media_file(ref)
+                # Build target path and resolve it to detect traversal
                 target = media_dir / ref_path
-                # Ensure parent exists (filenames may include path)
-                target.parent.mkdir(parents=True, exist_ok=True)
+                # Resolve symlinks and relative paths to get the real path
+                try:
+                    resolved_target = target.resolve()
+                    resolved_media_dir = media_dir.resolve()
+                except (OSError, RuntimeError):
+                    # If path resolution fails, skip this file
+                    continue
 
                 # Enforce that the resolved target remains within media_dir
-                if not str(target.resolve()).startswith(str(media_dir.resolve())):
+                # This prevents symlink and path traversal attacks
+                if not str(resolved_target).startswith(str(resolved_media_dir)):
                     continue
+
+                # Only retrieve the file AFTER validation passes
+                content = connector.retrieve_media_file(ref)
+
+                # Ensure parent exists (filenames may include path)
+                target.parent.mkdir(parents=True, exist_ok=True)
 
                 with open(target, "wb") as mf:
                     mf.write(content)

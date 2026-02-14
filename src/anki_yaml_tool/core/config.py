@@ -2,24 +2,42 @@
 
 This module provides functions for loading and validating configuration
 and data files for Anki deck building.
+
+Supports advanced YAML features:
+- YAML Includes (!include): Include fragments from other YAML files
+- Variables & Templates: Jinja2 templating and environment variable substitution
+- Conditional Content: Conditional inclusion based on tags or flags
 """
 
 from pathlib import Path
-from typing import cast
+from typing import Any, cast
 
 import yaml
 from pydantic import ValidationError
 
+from anki_yaml_tool.core import yaml_advanced
 from anki_yaml_tool.core.builder import ModelConfigComplete
 from anki_yaml_tool.core.exceptions import ConfigValidationError, DataValidationError
 from anki_yaml_tool.core.validators import ModelConfigSchema
 
 
-def load_model_config(config_path: Path | str) -> ModelConfigComplete:
+def load_model_config(
+    config_path: Path | str,
+    *,
+    # Advanced YAML options
+    use_advanced: bool = True,
+    env_vars: bool = True,
+    jinja_templates: bool = True,
+    jinja_context: dict[str, Any] | None = None,
+) -> ModelConfigComplete:
     """Load and validate a model configuration from a YAML file.
 
     Args:
         config_path: Path to the configuration YAML file.
+        use_advanced: Enable advanced YAML features (includes, templates, etc.)
+        env_vars: Enable environment variable substitution
+        jinja_templates: Enable Jinja2 template processing
+        jinja_context: Additional context for Jinja2 templates
 
     Returns:
         The loaded and validated model configuration.
@@ -33,8 +51,17 @@ def load_model_config(config_path: Path | str) -> ModelConfigComplete:
     if not path.exists():
         raise FileNotFoundError(f"Configuration file not found: {config_path}")
 
-    with open(path, encoding="utf-8") as f:
-        raw_config = yaml.safe_load(f)
+    if use_advanced:
+        raw_config = yaml_advanced.load_yaml_advanced(
+            path,
+            env_vars=env_vars,
+            jinja_templates=jinja_templates,
+            jinja_context=jinja_context,
+            conditional=False,  # Don't filter config
+        )
+    else:
+        with open(path, encoding="utf-8") as f:
+            raw_config = yaml.safe_load(f)
 
     if not raw_config:
         raise ConfigValidationError("Config file is empty", str(config_path))
@@ -58,11 +85,25 @@ def load_model_config(config_path: Path | str) -> ModelConfigComplete:
         ) from e
 
 
-def load_deck_data(data_path: Path | str) -> list[dict[str, str | list[str]]]:
+def load_deck_data(
+    data_path: Path | str,
+    *,
+    # Advanced YAML options
+    use_advanced: bool = True,
+    env_vars: bool = True,
+    jinja_templates: bool = True,
+    jinja_context: dict[str, Any] | None = None,
+    include_tags: list[str] | None = None,
+) -> list[dict[str, str | list[str]]]:
     """Load deck data from a YAML file.
 
     Args:
         data_path: Path to the data YAML file.
+        use_advanced: Enable advanced YAML features (includes, templates, etc.)
+        env_vars: Enable environment variable substitution
+        jinja_templates: Enable Jinja2 template processing
+        jinja_context: Additional context for Jinja2 templates
+        include_tags: Tags to include for conditional filtering
 
     Returns:
         A list of dictionaries containing note data.
@@ -76,8 +117,18 @@ def load_deck_data(data_path: Path | str) -> list[dict[str, str | list[str]]]:
     if not path.exists():
         raise FileNotFoundError(f"Data file not found: {data_path}")
 
-    with open(path, encoding="utf-8") as f:
-        items = yaml.safe_load(f)
+    if use_advanced:
+        items = yaml_advanced.load_yaml_advanced(
+            path,
+            env_vars=env_vars,
+            jinja_templates=jinja_templates,
+            jinja_context=jinja_context,
+            conditional=True,
+            include_tags=include_tags,
+        )
+    else:
+        with open(path, encoding="utf-8") as f:
+            items = yaml.safe_load(f)
 
     if not items:
         raise DataValidationError("Data file is empty", str(data_path))
@@ -93,6 +144,13 @@ def load_deck_data(data_path: Path | str) -> list[dict[str, str | list[str]]]:
 
 def load_deck_file(
     deck_path: Path | str,
+    *,
+    # Advanced YAML options
+    use_advanced: bool = True,
+    env_vars: bool = True,
+    jinja_templates: bool = True,
+    jinja_context: dict[str, Any] | None = None,
+    include_tags: list[str] | None = None,
 ) -> tuple[
     ModelConfigComplete, list[dict[str, str | list[str]]], str | None, Path | None
 ]:
@@ -100,6 +158,11 @@ def load_deck_file(
 
     Args:
         deck_path: Path to the deck YAML file.
+        use_advanced: Enable advanced YAML features (includes, templates, etc.)
+        env_vars: Enable environment variable substitution
+        jinja_templates: Enable Jinja2 template processing
+        jinja_context: Additional context for Jinja2 templates
+        include_tags: Tags to include for conditional filtering
 
     Returns:
         A tuple containing:
@@ -118,8 +181,18 @@ def load_deck_file(
     if not path.exists():
         raise FileNotFoundError(f"Deck file not found: {deck_path}")
 
-    with open(path, encoding="utf-8") as f:
-        raw_deck = yaml.safe_load(f)
+    if use_advanced:
+        raw_deck = yaml_advanced.load_yaml_advanced(
+            path,
+            env_vars=env_vars,
+            jinja_templates=jinja_templates,
+            jinja_context=jinja_context,
+            conditional=True,
+            include_tags=include_tags,
+        )
+    else:
+        with open(path, encoding="utf-8") as f:
+            raw_deck = yaml.safe_load(f)
 
     if not raw_deck:
         raise ConfigValidationError("Deck file is empty", str(deck_path))

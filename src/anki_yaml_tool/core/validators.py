@@ -191,15 +191,138 @@ def validate_html_tags(text: str, check_unclosed: bool = True) -> list[str]:
     warnings: list[str] = []
 
     if check_unclosed:
-        # Find all opening and closing tags
-        open_tags = re.findall(r"<(\w+)[^>]*(?<!/)>", text)
+        # HTML5 void elements - these don't need closing tags
+        # Reference: https://html.spec.whatwg.org/multipage/syntax.html#elements-2
+        void_elements = {
+            "area",
+            "base",
+            "br",
+            "col",
+            "embed",
+            "hr",
+            "img",
+            "input",
+            "link",
+            "meta",
+            "param",
+            "source",
+            "track",
+            "wbr",
+            # Deprecated but still valid void elements
+            "basefont",
+            "frame",
+            "keygen",
+            "menuitem",
+        }
+
+        def _find_tag_end(tag_text: str, start_pos: int) -> int:
+            """Find the closing > for a tag, handling > inside quotes."""
+            i = start_pos
+            in_single_quote = False
+            in_double_quote = False
+
+            while i < len(tag_text):
+                char = tag_text[i]
+
+                # Handle escape sequences
+                if char == "\\" and i + 1 < len(tag_text):
+                    i += 2
+                    continue
+
+                # Track quote state
+                if char == "'" and not in_double_quote:
+                    in_single_quote = not in_single_quote
+                elif char == '"' and not in_single_quote:
+                    in_double_quote = not in_double_quote
+                elif char == ">" and not in_single_quote and not in_double_quote:
+                    return i
+
+                i += 1
+
+            return -1  # No closing > found
+
+        def _find_open_tags(html_text: str) -> list[str]:
+            """Find opening tags that need closing, handling > in attributes."""
+            open_tags = []
+            i = 0
+
+            while i < len(html_text):
+                # Find next <
+                tag_start = html_text.find("<", i)
+                if tag_start == -1:
+                    break
+
+                # Check for closing tag or comment or CDATA
+                if tag_start + 1 < len(html_text):
+                    next_char = html_text[tag_start + 1]
+
+                    # Skip closing tags
+                    if next_char == "/":
+                        tag_end = _find_tag_end(html_text, tag_start)
+                        if tag_end == -1:
+                            break
+                        i = tag_end + 1
+                        continue
+
+                    # Skip comments <!-- -->
+                    if html_text[tag_start : tag_start + 4] == "<!--":
+                        comment_end = html_text.find("-->", tag_start + 4)
+                        if comment_end == -1:
+                            break
+                        i = comment_end + 3
+                        continue
+
+                    # Skip CDATA <![CDATA[ ]]>
+                    if html_text[tag_start : tag_start + 9] == "<![CDATA[":
+                        cdata_end = html_text.find("]]>", tag_start + 9)
+                        if cdata_end == -1:
+                            break
+                        i = cdata_end + 3
+                        continue
+
+                # Find the closing >
+                tag_end = _find_tag_end(html_text, tag_start)
+                if tag_end == -1:
+                    break
+
+                # Extract tag content
+                tag_content = html_text[tag_start + 1 : tag_end]
+
+                # Check if it's a closing tag
+                if tag_content.startswith("/"):
+                    i = tag_end + 1
+                    continue
+
+                # Parse tag name (first word)
+                parts = tag_content.split()
+                if not parts:
+                    i = tag_end + 1
+                    continue
+
+                tag_name = parts[0]
+
+                # Skip if empty or not a valid tag name
+                if not tag_name or not tag_name.isalnum():
+                    i = tag_end + 1
+                    continue
+
+                # Check if it's self-closing (/> at end) or void element
+                tag_content_stripped = tag_content.strip()
+                is_self_closing = tag_content_stripped.endswith("/")
+                is_void = tag_name.lower() in void_elements
+
+                if not is_self_closing and not is_void:
+                    open_tags.append(tag_name)
+
+                i = tag_end + 1
+
+            return open_tags
+
+        # Find closing tags
         close_tags = re.findall(r"</(\w+)>", text)
 
-        # Self-closing tags that don't need a closing tag
-        self_closing = {"img", "br", "hr", "input", "meta", "link"}
-
-        # Filter out self-closing tags
-        open_tags = [tag for tag in open_tags if tag.lower() not in self_closing]
+        # Find opening tags with proper handling of > in attributes
+        open_tags = _find_open_tags(text)
 
         # Check if every opening tag has a corresponding closing tag
         from collections import Counter
