@@ -76,11 +76,17 @@ Transform the Anki Python Deck Tool into a comprehensive, user-friendly solution
   - [x] Add tests for media file handling.
   - [x] Add tests for interactive terminal UI (`tests/test_interactive.py`) ✅
 
-- [ ] **Integration Tests**
-  - [ ] Test the full pipeline: YAML Input → Builder → `.apkg` file creation.
-  - [ ] Test multiple note types in one deck.
-  - [ ] Test handling of invalid YAML configurations (graceful failure).
-  - [ ] Test media file inclusion in generated packages.
+- [x] **Integration Tests**
+  - [x] Test the full pipeline: YAML Input → Builder → `.apkg` file creation.
+  - [x] Test multiple note types in one deck.
+  - [x] Test handling of invalid YAML configurations (graceful failure).
+  - [x] Test media file inclusion in generated packages.
+
+  **Implementation:** Tests added in `tests/test_integration.py` covering:
+  - Full pipeline tests with real YAML parsing and `.apkg` file generation
+  - Multiple note type handling in single deck builds
+  - Invalid YAML error handling with proper exception catching
+  - Media file inclusion verification in package generation
 
 - [x] **Fixture Management**
   - [x] Create example YAML files for testing various scenarios (in `examples/` directory).
@@ -103,9 +109,10 @@ Priority fixes identified from code analysis. These issues cause functional fail
   - [x] Implemented: Added specific exception handling (KeyError, AnkiConnectError, generic Exception)
   - [x] Logging with WARNING level and user-facing messages via click.echo
 
-- [ ] **Fix: WSL Path Conversion Silent Fallback** (`connector.py:96-98`)
-  - Improve error handling for WSL path conversion
-  - Add warning when path conversion fails instead of silent fallback
+- [x] **Fix: WSL Path Conversion Silent Fallback** (`connector.py:100-104`)
+  - [x] Improve error handling for WSL path conversion
+  - [x] Add warning when path conversion fails instead of silent fallback
+  - [x] Implemented: Added logging WARNING when path conversion fails
   - Location: `src/anki_yaml_tool/core/connector.py`
 
 - [x] **Fix: Pass media_folder to AnkiBuilder in build command** (`cli.py:152`)
@@ -116,172 +123,50 @@ Priority fixes identified from code analysis. These issues cause functional fail
 
 ### High Priority
 
-- [ ] **Fix: Concurrency in Batch Build** (`cli.py:1046`)
-  - Increase `max_workers` in ThreadPoolExecutor to allow parallel push operations
-  - Current value of 1 eliminates concurrency benefits
+- [x] **Fix: Concurrency in Batch Build** (`cli.py:1046`)
+  - [x] Increase `max_workers` in ThreadPoolExecutor to allow parallel push operations
+  - [x] Current value of 1 eliminates concurrency benefits
+  - [x] Implemented: max_workers increased to 4 (configurable 1-8)
   - Location: `src/anki_yaml_tool/cli.py`
 
-- [ ] **Fix: Robust Note Update Handling** (`pusher.py:77-97`)
-  - Handle `update_note_fields` failures gracefully when note doesn't exist
-  - Fallback to creating new note instead of aborting entire process
+- [x] **Fix: Robust Note Update Handling** (`pusher.py:77-145`)
+  - [x] Handle `update_note_fields` failures gracefully when note doesn't exist
+  - [x] Fallback to creating new note instead of aborting entire process
+  - [x] Implemented: Added fallback from update to create operation
   - Location: `src/anki_yaml_tool/core/pusher.py`
 
-- [ ] **Fix: Path Traversal in Export** (`exporter.py:192-205`)
-  - Move validation BEFORE attempting to retrieve media files
-  - Improve validation logic for path traversal attacks
+- [x] **Fix: Path Traversal in Export** (`exporter.py:192-225`)
+  - [x] Move validation BEFORE attempting to retrieve media files
+  - [x] Improve validation logic for path traversal attacks
+  - [x] Implemented: Validation moved before file retrieval
   - Location: `src/anki_yaml_tool/core/exporter.py`
 
 ### Medium Priority
 
-- [ ] **Improve: HTML Validation Regex** (`validators.py:195-196`)
-  - Fix regex to handle tags with `>` in attributes
-  - Handle self-closing tags properly (`<br/>`)
-  - Handle HTML5 void elements correctly
+- [x] **Improve: HTML Validation Regex** (`validators.py:195-196`)
+  - [x] Fix regex to handle tags with `>` in attributes
+  - [x] Handle self-closing tags properly (`<br/>`)
+  - [x] Handle HTML5 void elements correctly
+  - [x] Implemented: Regex improved with state machine approach
   - Location: `src/anki_yaml_tool/core/validators.py`
 
-- [ ] **Improve: LaTeX Math Delimiter Conversion** (`builder.py:136-139`)
-  - Handle escaped delimiters (`\# Project Roadmap
-
-This document outlines the detailed development plan for the Anki Python Deck Tool. Our vision is to create a flexible, general-purpose tool for creating Anki decks from various sources, with support for multiple note types, media files, and both CLI and GUI interfaces.
-
-## Vision Statement
-
-Transform the Anki Python Deck Tool into a comprehensive, user-friendly solution for creating and managing Anki decks from structured data sources (primarily YAML), supporting diverse use cases from language learning to technical memorization, with both command-line and graphical interfaces.
-
-## Core Principles
-
-1. **Flexibility**: Support multiple note types, templates, and data formats
-2. **Ease of Use**: Simple for beginners, powerful for advanced users
-3. **Quality**: Well-tested, type-safe, and properly documented code
-4. **Extensibility**: Plugin architecture for custom processors and validators
-5. **Cross-Platform**: Works seamlessly on Windows, macOS, and Linux
-
-## 1. Infrastructure (CI/CD, Packaging)
-
-- [x] **Packaging Upgrade**
-  - [x] Create `requirements.txt` for consistent environment setup.
-  - [x] Update `pyproject.toml` with modern build system configuration.
-  - [x] Set up optional extras for dev dependencies.
-  - [ ] Evaluate `poetry` or `uv` for advanced dependency management (current setup is sufficient).
-
-- [x] **GitHub Actions Workflows**
-  - [x] Create `.github/workflows/ci.yml` for Continuous Integration.
-    - [x] Job: Run `ruff` linting and formatting check.
-    - [x] Job: Run `mypy` static type checking.
-    - [x] Job: Run `pytest` suite on Ubuntu-latest, Windows-latest, and macOS-latest.
-    - [x] Job: Upload coverage to Codecov.
-  - [x] Create `.github/workflows/release.yml` for automated releases.
-    - [x] Trigger on tag push (v\*).
-    - [x] Build distribution (wheel/sdist).
-    - [x] Publish to PyPI.
-  - [x] Create `.github/workflows/security.yml` for security scanning.
-    - [x] Job: Run `bandit` for security linting.
-    - [x] Job: Run `pip-audit` for dependency vulnerability scanning.
-  - [x] Create `.github/workflows/build_release.yml` for executable building.
-    - [x] Build standalone executables for Windows, macOS, and Linux.
-  - [x] Set up Dependabot for automated dependency updates.
-
-- [x] **Local Development Experience**
-  - [x] Configure `ruff` and `mypy` in `pyproject.toml` with strict rules.
-  - [x] Add `.pre-commit-config.yaml` to enforce linting before commit.
-  - [x] Add `Makefile` for common tasks (`make test`, `make lint`, `make build-exe`, etc.).
-
-## 2. Code Quality & Standards
-
-- [x] **Static Type Checking**
-  - [x] Configure `mypy` settings in `pyproject.toml`.
-  - [x] Add type hints to all public functions.
-  - [x] Eliminate all `Any` types in core modules.
-  - [x] Add generic type support for Deck definitions.
-
-- [x] **Docstrings & Documentation**
-  - [x] Add Google-style docstrings to all public APIs.
-  - [x] Document exception handling in functions.
-  - [x] Add clear help strings to CLI commands.
-
-- [x] **Refactoring**
-  - [x] **Error Handling**: Custom exceptions (`AnkiConnectError`, `ConfigValidationError`, etc.).
-  - [x] **Decouple Parser**: Extract configuration loading into `src/anki_yaml_tool/core/config.py`.
-  - [x] **Media Handler**: Create dedicated `src/anki_yaml_tool/core/media.py` for media file operations.
-  - [x] **Validator Module**: Create `src/anki_yaml_tool/core/validators.py` for schema validation.
-
-, `$`)
-  - Handle `# Project Roadmap
-
-This document outlines the detailed development plan for the Anki Python Deck Tool. Our vision is to create a flexible, general-purpose tool for creating Anki decks from various sources, with support for multiple note types, media files, and both CLI and GUI interfaces.
-
-## Vision Statement
-
-Transform the Anki Python Deck Tool into a comprehensive, user-friendly solution for creating and managing Anki decks from structured data sources (primarily YAML), supporting diverse use cases from language learning to technical memorization, with both command-line and graphical interfaces.
-
-## Core Principles
-
-1. **Flexibility**: Support multiple note types, templates, and data formats
-2. **Ease of Use**: Simple for beginners, powerful for advanced users
-3. **Quality**: Well-tested, type-safe, and properly documented code
-4. **Extensibility**: Plugin architecture for custom processors and validators
-5. **Cross-Platform**: Works seamlessly on Windows, macOS, and Linux
-
-## 1. Infrastructure (CI/CD, Packaging)
-
-- [x] **Packaging Upgrade**
-  - [x] Create `requirements.txt` for consistent environment setup.
-  - [x] Update `pyproject.toml` with modern build system configuration.
-  - [x] Set up optional extras for dev dependencies.
-  - [ ] Evaluate `poetry` or `uv` for advanced dependency management (current setup is sufficient).
-
-- [x] **GitHub Actions Workflows**
-  - [x] Create `.github/workflows/ci.yml` for Continuous Integration.
-    - [x] Job: Run `ruff` linting and formatting check.
-    - [x] Job: Run `mypy` static type checking.
-    - [x] Job: Run `pytest` suite on Ubuntu-latest, Windows-latest, and macOS-latest.
-    - [x] Job: Upload coverage to Codecov.
-  - [x] Create `.github/workflows/release.yml` for automated releases.
-    - [x] Trigger on tag push (v\*).
-    - [x] Build distribution (wheel/sdist).
-    - [x] Publish to PyPI.
-  - [x] Create `.github/workflows/security.yml` for security scanning.
-    - [x] Job: Run `bandit` for security linting.
-    - [x] Job: Run `pip-audit` for dependency vulnerability scanning.
-  - [x] Create `.github/workflows/build_release.yml` for executable building.
-    - [x] Build standalone executables for Windows, macOS, and Linux.
-  - [x] Set up Dependabot for automated dependency updates.
-
-- [x] **Local Development Experience**
-  - [x] Configure `ruff` and `mypy` in `pyproject.toml` with strict rules.
-  - [x] Add `.pre-commit-config.yaml` to enforce linting before commit.
-  - [x] Add `Makefile` for common tasks (`make test`, `make lint`, `make build-exe`, etc.).
-
-## 2. Code Quality & Standards
-
-- [x] **Static Type Checking**
-  - [x] Configure `mypy` settings in `pyproject.toml`.
-  - [x] Add type hints to all public functions.
-  - [x] Eliminate all `Any` types in core modules.
-  - [x] Add generic type support for Deck definitions.
-
-- [x] **Docstrings & Documentation**
-  - [x] Add Google-style docstrings to all public APIs.
-  - [x] Document exception handling in functions.
-  - [x] Add clear help strings to CLI commands.
-
-- [x] **Refactoring**
-  - [x] **Error Handling**: Custom exceptions (`AnkiConnectError`, `ConfigValidationError`, etc.).
-  - [x] **Decouple Parser**: Extract configuration loading into `src/anki_yaml_tool/core/config.py`.
-  - [x] **Media Handler**: Create dedicated `src/anki_yaml_tool/core/media.py` for media file operations.
-  - [x] **Validator Module**: Create `src/anki_yaml_tool/core/validators.py` for schema validation.
-
- in URLs or code properly
+- [x] **Improve: LaTeX Math Delimiter Conversion** (`builder.py:136-139`)
+  - [x] Handle escaped delimiters (`\#`, `\$`)
+  - [x] Handle `$` in URLs or code properly
+  - [x] Implemented: Handles escaped delimiters and URLs
   - Location: `src/anki_yaml_tool/core/builder.py`
 
-- [ ] **Improve: Configurable Timeouts** (`connector.py:56`)
-  - Add timeout configuration per operation type
-  - Allow longer timeouts for large imports and sync operations
+
+- [x] **Improve: Configurable Timeouts** (`connector.py:56`)
+  - [x] Add timeout configuration per operation type
+  - [x] Allow longer timeouts for large imports and sync operations
+  - [x] Implemented: timeout_short and timeout_long configurable
   - Location: `src/anki_yaml_tool/core/connector.py`
 
-- [ ] **Improve: Use requests.Session()** (`connector.py`)
-  - Implement persistent HTTP connections using Session
-  - Improve performance for multiple AnkiConnect operations
+- [x] **Improve: Use requests.Session()** (`connector.py`)
+  - [x] Implement persistent HTTP connections using Session
+  - [x] Improve performance for multiple AnkiConnect operations
+  - [x] Implemented: Session persistent connection implemented
   - Location: `src/anki_yaml_tool/core/connector.py`
 
 ### Lower Priority (Tech Debt)
@@ -388,9 +273,12 @@ Transform the Anki Python Deck Tool into a comprehensive, user-friendly solution
   - [x] Added `--pattern` option for custom filename matching
   - [x] Added `--hierarchical` flag for directory-based deck naming
   - [x] Implemented `scan_directory_for_decks()` and `get_deck_name_from_path()` utilities
-    - [ ] Add progress tracking for multi-deck builds
-    - [ ] Support filtering by deck name pattern
-    - [ ] Handle errors gracefully (skip invalid pairs, report at end)
+    - [x] Add progress tracking for multi-deck builds
+    - [x] Support filtering by deck name pattern
+    - [x] Handle errors gracefully (skip invalid pairs, report at end)
+
+  **Implementation:** Progress tracking added via `tqdm` library, `--deck-filter` option implemented in CLI, error handling with summary reporting at end of batch operations.
+
   - [ ] **CLI Interface**
     - [ ] `anki-yaml-tool build --input-dir ./decks`
     - [ ] `anki-yaml-tool build --input-dir ./decks --deck-filter "spanish*"`
