@@ -111,8 +111,9 @@ def cli(
 
 
 # Register command groups
-from anki_yaml_tool.cli_deck import deck_cli
-from anki_yaml_tool.cli_package import package_cli
+# Register command groups
+from anki_yaml_tool.cli.deck import deck_cli
+from anki_yaml_tool.cli.package import package_cli
 
 cli.add_command(deck_cli)
 cli.add_command(package_cli)
