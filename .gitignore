@@ -21,7 +21,7 @@ build/
 
 # Project Specific
 .backup/
-*.apkg
+**/*.apkg
 *.colpkg
 output/
 
