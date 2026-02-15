@@ -18,7 +18,7 @@ from pydantic import ValidationError
 from anki_yaml_tool.core import yaml_advanced
 from anki_yaml_tool.core.builder import ModelConfigComplete
 from anki_yaml_tool.core.exceptions import ConfigValidationError, DataValidationError
-from anki_yaml_tool.core.validators import ModelConfigSchema
+from anki_yaml_tool.core.validators import DeckFileSchema, ModelConfigSchema
 
 
 def load_model_config(
@@ -232,10 +232,10 @@ def load_deck_file(
         if resolved_path.exists():
             media_folder_path = resolved_path
 
-    # Validate model config using Pydantic
+    # Validate the entire deck file using DeckFileSchema
     try:
-        validated_config = ModelConfigSchema(**config_section)
-        model_config = cast(ModelConfigComplete, validated_config.model_dump())
+        validated = DeckFileSchema(**raw_deck)
+        model_config = cast(ModelConfigComplete, validated.config.model_dump())
     except ValidationError as e:
         error_messages = []
         for error in e.errors():
@@ -243,10 +243,27 @@ def load_deck_file(
             msg = error["msg"]
             error_messages.append(f"{field}: {msg}")
 
-        raise ConfigValidationError(
-            "Invalid configuration:\n  " + "\n  ".join(error_messages),
-            str(deck_path),
-        ) from e
+        # Route to the appropriate exception type based on error location
+        config_fields = {
+            "config",
+            "deck-name",
+            "deck_name",
+            "media-folder",
+            "media_folder",
+        }
+        has_config_error = any(
+            str(err["loc"][0]) in config_fields for err in e.errors() if err["loc"]
+        )
+        if has_config_error:
+            raise ConfigValidationError(
+                "Invalid configuration:\n  " + "\n  ".join(error_messages),
+                str(deck_path),
+            ) from e
+        else:
+            raise DataValidationError(
+                "Invalid data:\n  " + "\n  ".join(error_messages),
+                str(deck_path),
+            ) from e
 
     # Extract data section
     if "data" not in raw_deck:

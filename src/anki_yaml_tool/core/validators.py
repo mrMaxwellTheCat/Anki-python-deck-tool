@@ -4,9 +4,9 @@ This module provides Pydantic models for validating configuration
 and data files, with detailed error messages.
 """
 
-from typing import Literal
+from typing import Any, Literal
 
-from pydantic import BaseModel, Field, field_validator
+from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 
 class ModelTemplate(BaseModel):
@@ -111,6 +111,33 @@ class NoteData(BaseModel):
             return [v]
         # Filter out empty and None values, convert to strings
         return [str(tag).strip() for tag in v if tag is not None and str(tag).strip()]
+
+
+class DeckFileSchema(BaseModel):
+    """Schema for a complete deck YAML file.
+
+    Validates the top-level structure of a deck file containing both
+    configuration and data sections.
+
+    Attributes:
+        deck_name: Optional name for the deck.
+        config: Model configuration section.
+        data: List of note data dictionaries (at least one required).
+        media_folder: Optional path to a media folder.
+    """
+
+    model_config = ConfigDict(populate_by_name=True)
+
+    deck_name: str | None = Field(
+        default=None, alias="deck-name", description="Name of the deck"
+    )
+    config: ModelConfigSchema = Field(..., description="Model configuration")
+    data: list[dict[str, Any]] = Field(
+        ..., min_length=1, description="List of note data dictionaries"
+    )
+    media_folder: str | None = Field(
+        default=None, alias="media-folder", description="Path to media folder"
+    )
 
 
 def validate_note_fields(

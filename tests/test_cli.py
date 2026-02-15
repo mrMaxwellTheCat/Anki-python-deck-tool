@@ -11,6 +11,9 @@ from unittest.mock import Mock, patch
 import pytest
 import yaml
 from anki_yaml_tool.cli import build, cli, push, validate
+from anki_yaml_tool.core.deck_service import (
+    BuildResult,
+)
 from anki_yaml_tool.core.exceptions import (
     AnkiConnectError,
     DeckBuildError,
@@ -92,11 +95,14 @@ class TestBuildCommand:
         result = runner.invoke(build, [])
         assert result.exit_code != 0
 
-    @patch("anki_yaml_tool.cli.AnkiBuilder")
-    def test_build_successful(self, mock_builder, runner, temp_files):
+    @patch("anki_yaml_tool.cli.build_deck")
+    def test_build_successful(self, mock_build, runner, temp_files):
         """Test successful deck build."""
-        mock_instance = Mock()
-        mock_builder.return_value = mock_instance
+        mock_build.return_value = BuildResult(
+            output_path=Path(temp_files["output"]),
+            deck_name="Test Deck",
+            notes_processed=2,
+        )
 
         result = runner.invoke(
             build,
@@ -111,23 +117,25 @@ class TestBuildCommand:
         )
 
         assert result.exit_code == 0
-        assert "Building deck 'Test Deck'" in result.output
+        assert "Deck 'Test Deck'" in result.output
+        assert "2 notes" in result.output
         assert f"Successfully created {temp_files['output']}" in result.output
 
-        # Check that builder was called with a list of configs
-        called_args, _ = mock_builder.call_args
-        assert called_args[0] == "Test Deck"
-        assert isinstance(called_args[1], list)
-        assert called_args[1][0]["name"] == "Test Model"
+        mock_build.assert_called_once_with(
+            deck_path=temp_files["file"],
+            output_path=temp_files["output"],
+            deck_name_override="Test Deck",
+            media_dir_override=None,
+        )
 
-        assert mock_instance.add_note.call_count == 2
-        mock_instance.write_to_file.assert_called_once()
-
-    @patch("anki_yaml_tool.cli.AnkiBuilder")
-    def test_build_with_tags(self, mock_builder, runner, temp_files):
-        """Test that tags are properly passed to notes."""
-        mock_instance = Mock()
-        mock_builder.return_value = mock_instance
+    @patch("anki_yaml_tool.cli.build_deck")
+    def test_build_with_tags(self, mock_build, runner, temp_files):
+        """Test that build completes successfully with tagged notes."""
+        mock_build.return_value = BuildResult(
+            output_path=Path(temp_files["output"]),
+            deck_name="Test",
+            notes_processed=2,
+        )
 
         result = runner.invoke(
             build,
@@ -140,17 +148,16 @@ class TestBuildCommand:
         )
 
         assert result.exit_code == 0
-        # Check that tags were passed
-        calls = mock_instance.add_note.call_args_list
-        assert len(calls) == 2
-        assert "test" in calls[0][1]["tags"]
-        assert "basic" in calls[1][1]["tags"]
+        assert "2 notes" in result.output
 
-    @patch("anki_yaml_tool.cli.AnkiBuilder")
-    def test_build_with_id_tag(self, mock_builder, runner, tmp_path):
-        """Test that id field is converted to id:: tag."""
-        mock_instance = Mock()
-        mock_builder.return_value = mock_instance
+    @patch("anki_yaml_tool.cli.build_deck")
+    def test_build_with_id_tag(self, mock_build, runner, tmp_path):
+        """Test that build succeeds with notes that have IDs."""
+        mock_build.return_value = BuildResult(
+            output_path=tmp_path / "out.apkg",
+            deck_name="Test",
+            notes_processed=1,
+        )
 
         deck_data = {
             "config": {
@@ -177,9 +184,7 @@ class TestBuildCommand:
         )
 
         assert result.exit_code == 0
-        calls = mock_instance.add_note.call_args_list
-        assert "id::test_123" in calls[0][1]["tags"]
-        assert "basic" in calls[0][1]["tags"]
+        mock_build.assert_called_once()
 
     def test_build_empty_config(self, runner, tmp_path):
         """Test that empty config section raises ConfigValidationError."""
@@ -245,50 +250,55 @@ class TestBuildCommand:
 
         assert result.exit_code != 0
 
-    def test_build_default_output_path(self, runner, temp_files):
+    @patch("anki_yaml_tool.cli.build_deck")
+    def test_build_default_output_path(self, mock_build, runner, temp_files):
         """Test that build uses default output path when not specified."""
-        with patch("anki_yaml_tool.cli.AnkiBuilder") as mock_builder:
-            mock_instance = Mock()
-            mock_builder.return_value = mock_instance
+        mock_build.return_value = BuildResult(
+            output_path=Path("deck.apkg"),
+            deck_name="Test",
+            notes_processed=2,
+        )
 
-            result = runner.invoke(
-                build,
-                [
-                    "--file",
-                    temp_files["file"],
-                ],
-            )
+        result = runner.invoke(
+            build,
+            [
+                "--file",
+                temp_files["file"],
+            ],
+        )
 
-            assert result.exit_code == 0
-            # Check that write_to_file was called with Path("deck.apkg")
-            call_args = mock_instance.write_to_file.call_args[0]
-            assert call_args[0] == Path("deck.apkg")
+        assert result.exit_code == 0
+        call_kwargs = mock_build.call_args[1]
+        assert call_kwargs["output_path"] == "deck.apkg"
 
-    def test_build_default_deck_name(self, runner, temp_files):
-        """Test that build uses default deck name when not specified."""
-        with patch("anki_yaml_tool.cli.AnkiBuilder") as mock_builder:
-            mock_instance = Mock()
-            mock_builder.return_value = mock_instance
+    @patch("anki_yaml_tool.cli.build_deck")
+    def test_build_default_deck_name(self, mock_build, runner, temp_files):
+        """Test that build delegates deck name resolution to deck_service."""
+        expected_name = Path(temp_files["file"]).parent.name
+        mock_build.return_value = BuildResult(
+            output_path=Path("deck.apkg"),
+            deck_name=expected_name,
+            notes_processed=2,
+        )
 
-            result = runner.invoke(
-                build,
-                [
-                    "--file",
-                    temp_files["file"],
-                ],
-            )
+        result = runner.invoke(
+            build,
+            [
+                "--file",
+                temp_files["file"],
+            ],
+        )
 
-            assert result.exit_code == 0
-            # Since deck_file is named "deck.yaml", it uses the parent directory name
-            expected_name = Path(temp_files["file"]).parent.name
-            assert f"Building deck '{expected_name}'" in result.output
-            mock_builder.assert_called_once()
-            assert mock_builder.call_args[0][0] == expected_name
+        assert result.exit_code == 0
+        assert f"Deck '{expected_name}'" in result.output
+        # Verify deck_name_override is None when not specified
+        call_kwargs = mock_build.call_args[1]
+        assert call_kwargs["deck_name_override"] is None
 
-    @patch("anki_yaml_tool.cli.AnkiBuilder")
-    def test_build_handles_deck_build_error(self, mock_builder, runner, temp_files):
+    @patch("anki_yaml_tool.cli.build_deck")
+    def test_build_handles_deck_build_error(self, mock_build, runner, temp_files):
         """Test that DeckBuildError is handled gracefully."""
-        mock_builder.side_effect = DeckBuildError("Build failed")
+        mock_build.side_effect = DeckBuildError("Build failed")
 
         result = runner.invoke(
             build,
@@ -301,31 +311,30 @@ class TestBuildCommand:
         assert result.exit_code == 1
         assert "Error: Build failed" in result.output
 
-    def test_build_handles_unexpected_error(self, runner, temp_files):
+    @patch("anki_yaml_tool.cli.build_deck")
+    def test_build_handles_unexpected_error(self, mock_build, runner, temp_files):
         """Test that unexpected errors are handled."""
-        with patch("anki_yaml_tool.cli.AnkiBuilder") as mock_builder:
-            mock_builder.side_effect = Exception("Unexpected error")
+        mock_build.side_effect = Exception("Unexpected error")
 
-            result = runner.invoke(
-                build,
-                [
-                    "--file",
-                    temp_files["file"],
-                ],
-            )
+        result = runner.invoke(
+            build,
+            [
+                "--file",
+                temp_files["file"],
+            ],
+        )
 
-            assert result.exit_code == 1
-            assert "Unexpected error" in result.output
+        assert result.exit_code == 1
+        assert "Unexpected error" in result.output
 
-    @patch("anki_yaml_tool.cli.AnkiBuilder")
-    def test_build_case_insensitive_fields(self, mock_builder, runner, tmp_path):
-        """Test that field matching is case-insensitive.
-
-        Ensures that data keys with different casing than field names
-        are properly matched (e.g., 'Concept' field matches 'concept' data key).
-        """
-        mock_instance = Mock()
-        mock_builder.return_value = mock_instance
+    @patch("anki_yaml_tool.cli.build_deck")
+    def test_build_case_insensitive_fields(self, mock_build, runner, tmp_path):
+        """Test that build delegates to deck_service (which handles case insensitivity)."""
+        mock_build.return_value = BuildResult(
+            output_path=tmp_path / "out.apkg",
+            deck_name="Test",
+            notes_processed=1,
+        )
 
         # Define fields with capitalized names
         deck_data = {
@@ -364,16 +373,8 @@ class TestBuildCommand:
         )
 
         assert result.exit_code == 0
-
-        # Verify that add_note was called with correct field values
-        calls = mock_instance.add_note.call_args_list
-        assert len(calls) == 1
-
-        # Check that field values were correctly extracted
-        field_values = calls[0][0][0]
-        assert field_values[0] == "List Comprehension"
-        assert field_values[1] == "[x**2 for x in nums]"
-        assert field_values[2] == "python"
+        assert "1 notes" in result.output
+        mock_build.assert_called_once()
 
 
 class TestValidateCommand:
@@ -474,8 +475,7 @@ class TestValidateCommand:
             ["--file", str(deck_path)],
         )
         assert result.exit_code == 0
-        assert "Duplicate note IDs found:" in result.output
-        assert "ID 'dup' appears 2 times" in result.output
+        assert "Duplicate ID 'dup' appears 2 times" in result.output
 
 
 class TestPushCommand:
@@ -492,8 +492,9 @@ class TestPushCommand:
         result = runner.invoke(push, [])
         assert result.exit_code != 0
 
+    @patch("anki_yaml_tool.cli.push_apkg")
     @patch("anki_yaml_tool.cli.AnkiConnector")
-    def test_push_successful(self, mock_connector, runner, tmp_path):
+    def test_push_successful(self, mock_connector, mock_push, runner, tmp_path):
         """Test successful package push."""
         mock_instance = Mock()
         mock_connector.return_value = mock_instance
@@ -507,11 +508,11 @@ class TestPushCommand:
         assert result.exit_code == 0
         assert f"Pushing {apkg_file} to Anki" in result.output
         assert "Successfully imported into Anki" in result.output
-        mock_instance.import_package.assert_called_once_with(Path(apkg_file))
-        mock_instance.sync.assert_not_called()
+        mock_push.assert_called_once()
 
+    @patch("anki_yaml_tool.cli.push_apkg")
     @patch("anki_yaml_tool.cli.AnkiConnector")
-    def test_push_with_sync(self, mock_connector, runner, tmp_path):
+    def test_push_with_sync(self, mock_connector, mock_push, runner, tmp_path):
         """Test push with sync flag."""
         mock_instance = Mock()
         mock_connector.return_value = mock_instance
@@ -524,20 +525,24 @@ class TestPushCommand:
 
         assert result.exit_code == 0
         assert "Successfully imported into Anki" in result.output
-        mock_instance.import_package.assert_called_once()
-        mock_instance.sync.assert_called_once()
+        mock_push.assert_called_once()
+        # Verify sync=True was passed
+        call_kwargs = mock_push.call_args[1]
+        assert call_kwargs["sync"] is True
 
     def test_push_nonexistent_file(self, runner):
         """Test that push handles nonexistent .apkg file."""
         result = runner.invoke(push, ["--apkg", "nonexistent.apkg"])
         assert result.exit_code != 0
 
+    @patch("anki_yaml_tool.cli.push_apkg")
     @patch("anki_yaml_tool.cli.AnkiConnector")
-    def test_push_handles_ankiconnect_error(self, mock_connector, runner, tmp_path):
+    def test_push_handles_ankiconnect_error(
+        self, mock_connector, mock_push, runner, tmp_path
+    ):
         """Test that AnkiConnectError is handled gracefully."""
-        mock_instance = Mock()
-        mock_instance.import_package.side_effect = AnkiConnectError("Connection failed")
-        mock_connector.return_value = mock_instance
+        mock_push.side_effect = AnkiConnectError("Connection failed")
+        mock_connector.return_value = Mock()
 
         apkg_file = tmp_path / "test.apkg"
         with zipfile.ZipFile(apkg_file, "w") as zf:
@@ -548,12 +553,12 @@ class TestPushCommand:
         assert result.exit_code == 1
         assert "Error: Connection failed" in result.output
 
+    @patch("anki_yaml_tool.cli.push_apkg")
     @patch("anki_yaml_tool.cli.AnkiConnector")
-    def test_push_handles_sync_error(self, mock_connector, runner, tmp_path):
+    def test_push_handles_sync_error(self, mock_connector, mock_push, runner, tmp_path):
         """Test that sync errors are handled."""
-        mock_instance = Mock()
-        mock_instance.sync.side_effect = AnkiConnectError("Sync failed")
-        mock_connector.return_value = mock_instance
+        mock_push.side_effect = AnkiConnectError("Sync failed")
+        mock_connector.return_value = Mock()
 
         apkg_file = tmp_path / "test.apkg"
         with zipfile.ZipFile(apkg_file, "w") as zf:
@@ -564,12 +569,14 @@ class TestPushCommand:
         assert result.exit_code == 1
         assert "Error: Sync failed" in result.output
 
+    @patch("anki_yaml_tool.cli.push_apkg")
     @patch("anki_yaml_tool.cli.AnkiConnector")
-    def test_push_handles_unexpected_error(self, mock_connector, runner, tmp_path):
+    def test_push_handles_unexpected_error(
+        self, mock_connector, mock_push, runner, tmp_path
+    ):
         """Test that unexpected errors are handled."""
-        mock_instance = Mock()
-        mock_instance.import_package.side_effect = Exception("Unexpected error")
-        mock_connector.return_value = mock_instance
+        mock_push.side_effect = Exception("Unexpected error")
+        mock_connector.return_value = Mock()
 
         apkg_file = tmp_path / "test.apkg"
         with zipfile.ZipFile(apkg_file, "w") as zf:

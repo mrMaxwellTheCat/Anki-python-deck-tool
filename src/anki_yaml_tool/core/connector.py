@@ -2,6 +2,9 @@
 
 This module provides the AnkiConnector class for communicating with
 Anki via the AnkiConnect add-on API.
+
+``AnkiConnector`` satisfies the :class:`~anki_yaml_tool.core.adapter.AnkiAdapter`
+protocol via structural subtyping – no explicit inheritance is required.
 """
 
 import base64
