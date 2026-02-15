@@ -1,84 +1,75 @@
 """Tests for AnkiConnector read methods (deck/model/notes/media retrieval)."""
 
-from unittest.mock import Mock, patch
+import base64
+
+import pytest
 
 from anki_yaml_tool.core.connector import AnkiConnector
 
+from unittest.mock import Mock
 
-@patch("anki_yaml_tool.core.connector.requests.post")
-def test_get_deck_names(mock_post):
-    mock_resp = Mock()
-    mock_resp.json.return_value = {"result": ["B", "A"], "error": None}
-    mock_post.return_value = mock_resp
 
-    c = AnkiConnector()
-    names = c.get_deck_names()
+@pytest.fixture
+def connector() -> AnkiConnector:
+    """Create a connector with a mocked session."""
+    conn = AnkiConnector()
+    conn._session = Mock()
+    return conn
+
+
+def _mock_response(result=None, error=None) -> Mock:
+    resp = Mock()
+    resp.json.return_value = {"result": result, "error": error}
+    return resp
+
+
+def test_get_deck_names(connector: AnkiConnector) -> None:
+    connector._session.post.return_value = _mock_response(result=["B", "A"])
+
+    names = connector.get_deck_names()
     assert names == ["A", "B"]
 
 
-@patch("anki_yaml_tool.core.connector.requests.post")
-def test_get_model_names(mock_post):
-    mock_resp = Mock()
-    mock_resp.json.return_value = {"result": ["Model1"], "error": None}
-    mock_post.return_value = mock_resp
+def test_get_model_names(connector: AnkiConnector) -> None:
+    connector._session.post.return_value = _mock_response(result=["Model1"])
 
-    c = AnkiConnector()
-    names = c.get_model_names()
+    names = connector.get_model_names()
     assert names == ["Model1"]
 
 
-@patch("anki_yaml_tool.core.connector.requests.post")
-def test_get_notes_empty(mock_post):
-    # findNotes returns empty list
-    mock_find = Mock()
-    mock_find.json.return_value = {"result": [], "error": None}
+def test_get_notes_empty(connector: AnkiConnector) -> None:
+    connector._session.post.return_value = _mock_response(result=[])
 
-    mock_post.return_value = mock_find
-
-    c = AnkiConnector()
-    notes = c.get_notes("EmptyDeck")
+    notes = connector.get_notes("EmptyDeck")
     assert notes == []
 
 
-@patch("anki_yaml_tool.core.connector.requests.post")
-def test_get_notes_success(mock_post):
+def test_get_notes_success(connector: AnkiConnector) -> None:
     # Simulate two calls: findNotes -> notesInfo
-    mock_find = Mock()
-    mock_find.json.return_value = {"result": [101], "error": None}
-
-    mock_notes = Mock()
-    mock_notes.json.return_value = {
-        "result": [
+    mock_find = _mock_response(result=[101])
+    mock_notes = _mock_response(
+        result=[
             {
                 "noteId": 101,
                 "fields": {"Front": {"value": "Q1"}, "Back": {"value": "A1"}},
                 "tags": ["tag1"],
                 "modelName": "Basic",
             }
-        ],
-        "error": None,
-    }
+        ]
+    )
+    connector._session.post.side_effect = [mock_find, mock_notes]
 
-    mock_post.side_effect = [mock_find, mock_notes]
-
-    c = AnkiConnector()
-    notes = c.get_notes("MyDeck")
+    notes = connector.get_notes("MyDeck")
     assert len(notes) == 1
     assert notes[0]["noteId"] == 101
     assert notes[0]["fields"]["Front"]["value"] == "Q1"
 
 
-@patch("anki_yaml_tool.core.connector.requests.post")
-def test_retrieve_media_file(mock_post):
-    import base64
-
+def test_retrieve_media_file(connector: AnkiConnector) -> None:
     content = b"fake-binary"
     encoded = base64.b64encode(content).decode("utf-8")
 
-    mock_resp = Mock()
-    mock_resp.json.return_value = {"result": encoded, "error": None}
-    mock_post.return_value = mock_resp
+    connector._session.post.return_value = _mock_response(result=encoded)
 
-    c = AnkiConnector()
-    out = c.retrieve_media_file("image.jpg")
+    out = connector.retrieve_media_file("image.jpg")
     assert out == content

@@ -31,9 +31,10 @@ Users who want to manage Anki flashcards programmatically or via text files with
 4. **Data Models (`src/models`):** Pydantic models or dataclasses defining Decks, Cards, and configuration.
 
 ### Key Dependencies
-- **CLI Framework:** Click (Chosen for explicit command structure).
-- **YAML Parser:** PyYAML (Chosen for reliable parsing).
-- **Anki Interaction:** genanki (Chosen for generating Anki packages).
+- **CLI Framework:** Click (explicit command structure & composability).
+- **YAML Parser:** PyYAML
+- **Anki Package Generation:** genanki.
+- **Anki Communication:** AnkiConnect API via `requests`.
 
 ---
 
@@ -41,7 +42,7 @@ Users who want to manage Anki flashcards programmatically or via text files with
 
 ### Command Structure
 
-The CLI is organized by resources (`deck`, `package`) followed by actions.
+The CLI is organized by resources followed by actions.
 
 **Global Options:**
 - `--verbose / -v`: Enable detailed logging.
@@ -108,7 +109,7 @@ config:
         {{FrontSide}}
         <hr id=answer>
         <div class="destino">{{field-2}}</div>
-  media-folder: "path/to/media/folder" # Optional; if specified, media files in this folder will be added to the anki deck
+  media-folder: "path/to/media/folder" # Optional; media files added to the deck
 data:
   - field-1: 'field-1 value for note 1'
     field-2: 'field-2 value for note 1'
@@ -123,6 +124,7 @@ data:
 2. `data` list cannot be empty.
 3. `fields` in `config` must be defined and non-empty.
 4. `templates` in `config` must be defined and non-empty.
+5. Media files referenced in fields must exist when `media-folder` is specified.
 
 ---
 
@@ -136,8 +138,10 @@ data:
     - *Content:* Description, Args, Returns, Raises.
 
 ### Error Handling
-- **Exceptions:** Use custom exception classes inheriting from a base `ProjectError`.
-- **Granularity:** Catch specific errors (e.g., `FileNotFoundError`, `AnkiConnectionError`) rather than bare `Exception`.
+- **Exceptions:** Use custom exception classes inheriting from `AnkiToolError`.
+  - `ConfigValidationError`, `DataValidationError`, `DeckBuildError` for build issues.
+  - `AnkiConnectError` for Anki communication failures.
+- **Granularity:** Catch specific errors rather than bare `Exception`.
 - **Fail Fast:** Validate inputs early (CLI arguments, YAML structure) before attempting logic.
 
 ### Anti-Patterns (Do NOT do this)
@@ -155,60 +159,67 @@ data:
 **Rationale:**
 *   **Performance:** Significantly faster dependency resolution than pip/poetry.
 *   **Reproducibility:** Strict locking via `uv.lock` ensures consistent environments.
-*   **Python Versioning:** Automatically manages Python versions, ensuring the project runs on the specified version (e.g., 3.12) regardless of the host's system Python.
+*   **Python Versioning:** Automatically manages Python versions.
 
 ### Workflow Commands
-*   **Setup:** `uv sync` (Installs dependencies and creates virtualenv).
-*   **Add Dependency:** `uv add <package>` (Adds to `pyproject.toml` and updates lockfile).
-*   **Run CLI:** `uv run anki-tool deck create ...` (Executes inside the virtualenv).
-*   **Build:** `uv build` (Creates distribution packages).
+| Command | Purpose |
+|---------|---------|
+| `uv sync` | Install dependencies and create virtualenv. |
+| `uv add <package>` | Add a dependency to `pyproject.toml`. |
+| `uv run anki-yaml-tool [COMMAND]` | Run the CLI. |
+| `uv run pytest` | Run the test suite. |
+| `uv build` | Create distribution packages. |
 
-## Architecture Decision Records (ADR) - Snapshot
+---
+
+## Architecture Decision Records (ADR)
 
 ### Logic Placement
 **Decision:** Business logic must be decoupled from CLI code.
 **Reason:** To facilitate the future migration to a GUI without rewriting core logic.
-**Implication:** CLI functions should only parse arguments and call Core functions.
+**Implication:** CLI functions should only parse arguments and call `deck_service` functions. The `deck_service.py` module is the central orchestrator for `build_deck()`, `validate_deck()`, and `push_apkg()`.
 
 ### Anki Communication
 **Decision:** Use an Adapter pattern for Anki communication.
 **Reason:** Anki integration might change (e.g., moving from a local library to AnkiConnect API).
-**Implication:** Core logic should not import Anki libraries directly; it should use an interface.
+**Implication:** Core logic uses the `AnkiAdapter` protocol; `AnkiConnector` is the concrete implementation using the AnkiConnect HTTP API.
 
 ---
 
 ## Testing Strategy
 
 ### Framework & Tools
-- **Test Runner:** `pytest` for its powerful fixture system and extensive plugin ecosystem.
-- **Code Coverage:** `pytest-cov` to track and maintain code quality.
-- **Static Analysis:** `ruff` for linting and formatting, `mypy` for static type checking.
+- **Test Runner:** `pytest` with fixtures and parametrization.
+- **Code Coverage:** `pytest-cov` (threshold: 80%).
+- **Static Analysis:** `ruff` for linting and formatting, `mypy` for type checking.
+- **Mocking:** `unittest.mock` for isolating HTTP calls, file I/O, and Anki interactions.
 
 ### Test Architecture
 1. **Unit Tests:**
-   - Isolated tests for core logic in `src/core`.
-   - Validation of Pydantic models in `src/models`.
-   - Parser logic for YAML files.
+   - Isolated tests for core logic in `core/` (validators, config, builder, etc.).
+   - YAML parser tests (includes, Jinja, env vars, anchors, conditionals).
+   - Pusher tests (add/update/delete/incremental/replace modes).
 2. **Integration Tests:**
    - CLI command validation using `click.testing.CliRunner`.
-   - Interaction between the Core logic and the Anki Adapter (using mocks/fakes for Anki Connect).
+   - Connector tests mocking `requests.Session` instead of live Anki.
 3. **Regression Tests:**
-   - End-to-end flows from YAML input to generated `.apkg` or Anki Connect calls.
+   - End-to-end flows from YAML input to generated `.apkg`.
    - Comparison of expected output for known valid/invalid YAML schemas.
 
 ### Guidelines
-- **Threshold:** Maintain a minimum of 80% code coverage.
-- **Automation:**
-  - Run `just test` (if using justfile) or `uv run pytest` before pushing.
-  - Integration with GitHub Actions for every PR.
-- **Fixtures:** Keep test data in `tests/fixtures` (YAML samples, sample media).
+- **Threshold:** Maintain a minimum of 80% code coverage (excluding non-refactored code).
+- **Automation:** Run `uv run pytest` before pushing. CI via GitHub Actions.
+- **Fixtures:** Test data in `tests/fixtures/` (YAML samples, sample media).
+- **Connector mocking:** Always mock `connector._session` (not `requests.post`) since the connector uses a `requests.Session`.
 
 ---
 
 ## Refactoring Checklist
 
-- [ ] Isolate CLI specific code into `src/cli`.
-- [ ] Define Pydantic models for YAML data.
-- [ ] Implement the Anki Adapter interface.
-- [ ] Add Type Hints to all legacy functions.
-- [ ] Write unit tests for the YAML parser.
+- [x] Isolate CLI specific code: `build`, `validate`, `push`, `watch`, `batch_build` commands now delegate to `core/deck_service.py`.
+- [x] Define Pydantic models for YAML data (`core/models.py`).
+- [x] Implement the Anki Adapter interface (`core/adapter.py` + `core/connector.py`).
+- [x] Add Type Hints to all legacy functions.
+- [x] Write unit tests for the YAML parser.
+- [x] Fix pre-existing test failures (connector mocking, Jinja template quoting).
+- [x] Achieve 80% code coverage.

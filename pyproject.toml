@@ -65,7 +65,14 @@ addopts = "-v --tb=short --cov=anki_yaml_tool --cov-report=term-missing --cov-re
 
 [tool.coverage.run]
 source = ["src/anki_yaml_tool"]
-omit = ["*/tests/*", "*/__pycache__/*", "*/venv/*"]
+omit = [
+    "*/tests/*",
+    "*/__pycache__/*",
+    "*/venv/*",
+    "*/gui/*",
+    "*/interactive.py",
+    "*/watcher.py",
+]
 
 [tool.coverage.report]
 exclude_lines = [

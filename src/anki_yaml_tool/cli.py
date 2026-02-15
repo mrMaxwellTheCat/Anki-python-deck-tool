@@ -32,9 +32,6 @@ from anki_yaml_tool.core.exceptions import (
     DeckBuildError,
 )
 from anki_yaml_tool.core.logging_config import get_logger, setup_logging
-from anki_yaml_tool.core.media import (
-    get_media_references,
-)
 
 # Get logger for this module
 log = get_logger("cli")
@@ -497,13 +494,6 @@ def watch(
         click.echo(f"Error: File not found: {deck_file}", err=True)
         raise click.Abort()
 
-    # Import builder components here to ensure they're available
-    from typing import cast
-
-    from anki_yaml_tool.core.builder import AnkiBuilder, ModelConfigComplete
-    from anki_yaml_tool.core.config import load_deck_file
-    from anki_yaml_tool.core.connector import AnkiConnector
-
     def build_and_push() -> None:
         """Build the deck and optionally push to Anki."""
         click.echo("\n" + "=" * 50)
@@ -513,65 +503,17 @@ def watch(
         click.echo("=" * 50)
 
         try:
-            # Load deck file (same logic as build command)
-            log.info("Loading deck file: %s", deck_file)
-            model_config, items, file_deck_name, file_media_dir = load_deck_file(
-                deck_file
+            result = build_deck(
+                deck_path=deck_file,
+                output_path=output_file,
+                deck_name_override=deck_name,
+                media_dir_override=media_dir,
             )
-            model_configs = cast(list[ModelConfigComplete], [model_config])
-
-            # Use provided deck-name or fall back to file deck-name
-            final_deck_name = deck_name if deck_name is not None else file_deck_name
-
-            # Final fallback to filename if no name provided anywhere
-            if final_deck_name is None:
-                if deck_path.stem == "deck":
-                    final_deck_name = deck_path.parent.name or "Deck"
-                else:
-                    final_deck_name = deck_path.stem
-
-            # Use provided media-dir or fall back to file media-dir
-            media_folder: Path | None = Path(media_dir) if media_dir else file_media_dir
-
-            click.echo(f"Building deck '{final_deck_name}' to {output_file}...")
-            builder = AnkiBuilder(final_deck_name, model_configs, media_folder)
-
-            # Map model names to their field lists
-            model_fields_map = {cfg["name"]: cfg["fields"] for cfg in model_configs}
-            first_model_name = model_configs[0]["name"]
-
-            # Track media references
-            all_media_refs: set[str] = set()
-
-            for item in items:
-                target_model_name = item.get(
-                    "model", item.get("type", first_model_name)
-                )
-                if not isinstance(target_model_name, str):
-                    target_model_name = str(target_model_name)
-
-                if target_model_name not in model_fields_map:
-                    target_model_name = first_model_name
-
-                fields = model_fields_map[target_model_name]
-                item_lower = {k.lower(): v for k, v in item.items()}
-                field_values = [str(item_lower.get(f.lower(), "")) for f in fields]
-
-                for field_value in field_values:
-                    refs = get_media_references(field_value)
-                    all_media_refs.update(refs)
-
-                tags_raw = item.get("tags", [])
-                tags = tags_raw if isinstance(tags_raw, list) else [str(tags_raw)]
-
-                builder.add_note(field_values, tags=tags, model_name=target_model_name)
-
-            # Build the package
-            output_path = Path(output_file)
-            builder.write_to_file(output_path)
-
             click.echo(
-                click.style(f"Deck built successfully: {output_path}", fg="green")
+                click.style(
+                    f"Deck '{result.deck_name}' built — {result.notes_processed} notes",
+                    fg="green",
+                )
             )
 
             # Optionally push to Anki
@@ -579,23 +521,15 @@ def watch(
                 click.echo("\nPushing to Anki...")
                 connector = AnkiConnector()
                 try:
-                    result = connector.import_package(output_path)
-                    if result:
-                        click.echo(
-                            click.style("Deck pushed to Anki successfully!", fg="green")
-                        )
-                    else:
-                        click.echo(
-                            click.style("Failed to push deck to Anki", fg="red"),
-                            err=True,
-                        )
+                    push_apkg(output_file, connector)
+                    click.echo(
+                        click.style("Deck pushed to Anki successfully!", fg="green")
+                    )
                 except AnkiConnectError as e:
                     click.echo(f"Error connecting to Anki: {e}", err=True)
 
-        except FileNotFoundError as e:
+        except AnkiToolError as e:
             click.echo(f"Error: {e}", err=True)
-        except DeckBuildError as e:
-            click.echo(f"Error building deck: {e}", err=True)
         except Exception as e:
             click.echo(f"Unexpected error: {e}", err=True)
             log.exception("Error during watch rebuild")
@@ -1039,57 +973,11 @@ def _batch_build_merged(
     click.echo(f"Successfully created {output_file}")
 
     if push:
-        import base64
-        import json
-        import zipfile
-
-        from anki_yaml_tool.core.connector import AnkiConnector
-
         click.echo(f"Pushing merged deck '{final_deck_name}' to Anki...")
         connector = AnkiConnector()
 
         try:
-            # Extract and store media files
-            with zipfile.ZipFile(output_file, "r") as zf:
-                if "media" in zf.namelist():
-                    media_map = json.loads(zf.read("media").decode("utf-8"))
-                    if media_map:
-                        click.echo(f"Storing {len(media_map)} media files...")
-                        for idx, filename in media_map.items():
-                            try:
-                                content = zf.read(idx)
-                                encoded = base64.b64encode(content).decode("utf-8")
-                                connector.invoke(
-                                    "storeMediaFile", filename=filename, data=encoded
-                                )
-                            except KeyError as e:
-                                log.warning(
-                                    "Media file %s not found in package: %s", idx, e
-                                )
-                                click.echo(
-                                    f"Warning: Media file '{idx}' not found in package",
-                                    err=True,
-                                )
-                            except AnkiConnectError as e:
-                                log.warning(
-                                    "Failed to store media file '%s': %s", filename, e
-                                )
-                                click.echo(
-                                    f"Warning: Failed to store media file: {filename}",
-                                    err=True,
-                                )
-                            except Exception as e:
-                                log.warning(
-                                    "Unexpected error storing media file '%s': %s",
-                                    filename,
-                                    e,
-                                )
-                                click.echo(
-                                    f"Warning: Unexpected error with media file: {filename}",
-                                    err=True,
-                                )
-
-            connector.import_package(output_file)
+            push_apkg(output_file, connector)
             click.echo("✅ Pushed successfully")
 
             if delete_after:
@@ -1151,7 +1039,7 @@ def _batch_build_separate(
     max_name_len = max(max_name_len, 10)  # Minimum width
     table_height = len(file_list) + 4
 
-    def print_table(first_time: bool = False):
+    def print_table(first_time: bool = False) -> None:
         """Print the status table with cursor positioning."""
         with lock:
             if not first_time:
@@ -1166,46 +1054,13 @@ def _batch_build_separate(
             print(f"└{'─' * (max_name_len + 2)}┴────────┘")
             sys.stdout.flush()
 
-    def push_deck(idx: int, output_file: Path, file_name: str) -> bool:
+    def push_deck_to_anki(idx: int, output_file: Path, file_name: str) -> bool:
         """Push a deck to Anki in background thread. Returns True on success."""
         nonlocal success_count, error_count
 
         try:
-            import base64
-            import json
-            import zipfile
-
-            from anki_yaml_tool.core.connector import AnkiConnector
-
             connector = AnkiConnector()
-
-            # Extract and store media files
-            with zipfile.ZipFile(output_file, "r") as zf:
-                if "media" in zf.namelist():
-                    media_map = json.loads(zf.read("media").decode("utf-8"))
-                    for media_idx, media_filename in media_map.items():
-                        try:
-                            content = zf.read(media_idx)
-                            encoded = base64.b64encode(content).decode("utf-8")
-                            connector.invoke(
-                                "storeMediaFile", filename=media_filename, data=encoded
-                            )
-                        except KeyError as e:
-                            log.warning(
-                                "Media file %s not found in package: %s", media_idx, e
-                            )
-                        except AnkiConnectError as e:
-                            log.warning(
-                                "Failed to store media file '%s': %s", media_filename, e
-                            )
-                        except Exception as e:
-                            log.warning(
-                                "Unexpected error storing media file '%s': %s",
-                                media_filename,
-                                e,
-                            )
-
-            connector.import_package(output_file)
+            push_apkg(output_file, connector)
             log.info("Pushed: %s", output_file.name)
 
             # Delete after successful push if requested
@@ -1249,55 +1104,20 @@ def _batch_build_separate(
             print_table()
 
             try:
-                # Load deck file and get media folder
-                model_config, items, file_deck_name, media_folder = load_deck_file(
-                    str(file_path)
+                # Use hierarchical name as override when base_dir is set
+                name_override = (
+                    get_deck_name_from_path(file_path, base_dir)
+                    if base_dir
+                    else None
                 )
 
-                # Priority: YAML deck-name > Hierarchical Name (if base_dir) > special deck.yaml handling > file stem
-                if file_deck_name:
-                    final_deck_name = file_deck_name
-                elif base_dir:
-                    final_deck_name = get_deck_name_from_path(file_path, base_dir)
-                elif file_path.stem == "deck":
-                    final_deck_name = file_path.parent.name or "Deck"
-                else:
-                    final_deck_name = file_path.stem
-
-                # Pass media_folder to builder for automatic media discovery
-                builder = AnkiBuilder(
-                    final_deck_name, [model_config], media_folder=media_folder
+                result = build_deck(
+                    deck_path=file_path,
+                    output_path=output_path / f"{current_deck_name.replace('::', '_').replace(' ', '_')}.apkg",
+                    deck_name_override=name_override,
                 )
 
-                fields = model_config["fields"]
-                for item in items:
-                    item_lower = {k.lower(): v for k, v in item.items()}
-                    field_values = [str(item_lower.get(f.lower(), "")) for f in fields]
-
-                    tags_raw = item.get("tags", [])
-                    tags: list[str] = (
-                        tags_raw if isinstance(tags_raw, list) else [str(tags_raw)]
-                    )
-
-                    if "id" in item:
-                        tags.append(f"id::{item['id']}")
-
-                    builder.add_note(field_values, tags=tags)
-
-                # Determine output filename
-                # Use sanitized deck name if possible, otherwise fallback to stem/parent
-                safe_name = final_deck_name.replace("::", "_").replace(" ", "_")
-                # Keep it somewhat descriptive of the original file if no deck-name was found
-                if not file_deck_name:
-                    if file_path.stem == "deck":
-                        output_name = f"{file_path.parent.name}.apkg"
-                    else:
-                        output_name = f"{file_path.stem}.apkg"
-                else:
-                    output_name = f"{safe_name}.apkg"
-
-                output_file = output_path / output_name
-                builder.write_to_file(output_file)
+                output_file = result.output_path
                 log.info("Built: %s -> %s", file_path.name, output_file.name)
 
                 if push:
@@ -1305,7 +1125,9 @@ def _batch_build_separate(
                         status[i] = "📤"
                     print_table()
                     # Submit to thread pool
-                    future = executor.submit(push_deck, i, output_file, file_path.name)
+                    future = executor.submit(
+                        push_deck_to_anki, i, output_file, file_path.name
+                    )
                     push_futures.append(future)
                 else:
                     with lock:
@@ -1345,8 +1167,6 @@ def _batch_build_separate(
     if push and sync and success_count > 0:
         click.echo("\nSyncing with AnkiWeb...")
         try:
-            from anki_yaml_tool.core.connector import AnkiConnector
-
             connector = AnkiConnector()
             connector.sync()
             click.echo("✅ Sync complete")

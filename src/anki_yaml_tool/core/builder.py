@@ -7,70 +7,25 @@ from configuration and data.
 import hashlib
 import re
 from pathlib import Path
-from typing import TypeAlias, TypedDict
+from typing import TypeAlias
 
 import genanki  # type: ignore
 
 from anki_yaml_tool.core.exceptions import DeckBuildError
+from anki_yaml_tool.core.models import (
+    FieldValues,
+    MediaFileList,
+    ModelConfigDictComplete,
+    ModelName,
+    TagList,
+)
 
+# Re-export for backward compatibility
+ModelConfigComplete = ModelConfigDictComplete
 
-class ModelTemplate(TypedDict):
-    """Type definition for a model template.
-
-    Attributes:
-        name: The template name.
-        qfmt: The question format (HTML).
-        afmt: The answer format (HTML).
-    """
-
-    name: str
-    qfmt: str
-    afmt: str
-
-
-class ModelConfig(TypedDict):
-    """Type definition for a model configuration.
-
-    Attributes:
-        name: The model name (required).
-        fields: List of field names (required).
-        templates: List of card templates (required).
-        css: Optional CSS styling.
-    """
-
-    name: str
-    fields: list[str]
-    templates: list[ModelTemplate]
-
-
-class ModelConfigComplete(ModelConfig, total=False):
-    """Extended model config with optional fields.
-
-    Attributes:
-        css: Optional CSS styling for the model.
-    """
-
-    css: str
-
-
-# Type aliases for improved type safety
-ModelName: TypeAlias = str
-"""Type alias for model names."""
-
-FieldValue: TypeAlias = str
-"""Type alias for field values."""
-
-FieldValues: TypeAlias = list[FieldValue]
-"""Type alias for a list of field values."""
-
-TagList: TypeAlias = list[str]
-"""Type alias for a list of tags."""
-
+# Type alias for genanki Model map (depends on genanki, so stays here)
 ModelMap: TypeAlias = dict[ModelName, genanki.Model]
 """Type alias for a dictionary mapping model names to genanki.Model instances."""
-
-MediaFileList: TypeAlias = list[str]
-"""Type alias for a list of media file paths."""
 
 
 class AnkiBuilder:
