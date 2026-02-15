@@ -177,6 +177,34 @@ data:
 
 ---
 
+## Testing Strategy
+
+### Framework & Tools
+- **Test Runner:** `pytest` for its powerful fixture system and extensive plugin ecosystem.
+- **Code Coverage:** `pytest-cov` to track and maintain code quality.
+- **Static Analysis:** `ruff` for linting and formatting, `mypy` for static type checking.
+
+### Test Architecture
+1. **Unit Tests:**
+   - Isolated tests for core logic in `src/core`.
+   - Validation of Pydantic models in `src/models`.
+   - Parser logic for YAML files.
+2. **Integration Tests:**
+   - CLI command validation using `click.testing.CliRunner`.
+   - Interaction between the Core logic and the Anki Adapter (using mocks/fakes for Anki Connect).
+3. **Regression Tests:**
+   - End-to-end flows from YAML input to generated `.apkg` or Anki Connect calls.
+   - Comparison of expected output for known valid/invalid YAML schemas.
+
+### Guidelines
+- **Threshold:** Maintain a minimum of 80% code coverage.
+- **Automation:**
+  - Run `just test` (if using justfile) or `uv run pytest` before pushing.
+  - Integration with GitHub Actions for every PR.
+- **Fixtures:** Keep test data in `tests/fixtures` (YAML samples, sample media).
+
+---
+
 ## Refactoring Checklist
 
 - [ ] Isolate CLI specific code into `src/cli`.
