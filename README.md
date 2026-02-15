@@ -7,12 +7,12 @@
 
 A tool to manage Anki decks from YAML files and push them directly to Anki via AnkiConnect.
 
-# This repository is under major refactoring. Past versions will not be similar to the new ones.
+# Disclaimer
+This repository is under major refactoring. Past versions will not be similar to the new ones. The final design is being defined in the [DESIGN.md](DESIGN.md) file.
 
 ## Development
 
 This project welcomes contributions! For detailed setup instructions, coding standards, and workflow guidelines, please see [CONTRIBUTING.md](CONTRIBUTING.md).
-
 
 ## License
 
