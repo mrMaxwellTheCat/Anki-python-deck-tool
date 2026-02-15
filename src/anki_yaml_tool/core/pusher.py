@@ -13,6 +13,7 @@ from pathlib import Path
 from typing import Any
 
 from anki_yaml_tool.core.config import load_deck_data, load_model_config
+from anki_yaml_tool.core.builder import ModelConfigComplete
 from anki_yaml_tool.core.connector import AnkiConnector
 from anki_yaml_tool.core.exceptions import AnkiConnectError
 from anki_yaml_tool.core.media import get_media_references
@@ -54,47 +55,21 @@ def _map_fields_for_model(model_fields: list[str], data_item: dict) -> dict[str,
     return mapped
 
 
-def push_deck_from_dir(
+def _push_deck_data(
     connector: AnkiConnector,
-    deck_dir: Path,
-    deck_name: str | None = None,
+    model_config: ModelConfigComplete,
+    items: list[dict[str, str | list[str]]],
+    media_dir: Path | None,
+    deck_name_override: str | None = None,
     sync: bool = False,
     replace: bool = False,
     incremental: bool = False,
 ) -> dict[str, int]:
-    """Push notes from an exported deck directory back into Anki.
-
-    Args:
-        connector: AnkiConnector instance.
-        deck_dir: Directory containing `config.yaml` and `data.yaml` (and optional `media/`).
-        deck_name: Optional override for target deck name (otherwise uses config deck-name or provided deck_dir name).
-        sync: Whether to trigger AnkiWeb sync after pushing.
-        replace: If True, delete notes in Anki that are not present in YAML (sync mode).
-        incremental: If True, only push notes that have changed.
-
-    Returns:
-        Dictionary with statistics: {"added": X, "updated": Y, "deleted": Z, "unchanged": W, "failed": F}
-
-    Behavior:
-        - For each note in `data.yaml`, if `note_id` is present, update fields
-          via `updateNoteFields`. Tags are added (not removed).
-        - If `note_id` missing, a new note is created using `addNote`.
-        - Media files referenced in fields are uploaded if present under `media/`.
-        - With replace=True: Delete notes in Anki that don't have matching IDs in YAML
-        - With incremental=True: Compare note content and only update if changed
-    """
-    config_path = deck_dir / "config.yaml"
-    data_path = deck_dir / "data.yaml"
-
-    if not config_path.exists() or not data_path.exists():
-        raise FileNotFoundError("config.yaml or data.yaml not found in deck directory")
-
-    model_config = load_model_config(config_path)
-    items = load_deck_data(data_path)
-
-    target_deck = deck_name or model_config.get("deck-name") or deck_dir.name
-
-    media_dir = deck_dir / "media"
+    """Internal function to push loaded deck data to Anki."""
+    target_deck = deck_name_override or model_config.get("deck-name")
+    if not target_deck:
+        # Should be caught by caller, but safe fallback
+        target_deck = "Default"
 
     # Track statistics for summary
     stats = {
@@ -129,10 +104,12 @@ def push_deck_from_dir(
     notes_to_delete_from_yaml: list[int] = []  # Notes marked with _deleted: true
 
     for item in items:
-        nid = item.get("note_id")
+        # Cast to dict to satisfy type checker (items is list[dict[str, str|list[str]]])
+        item_dict = cast(dict[str, Any], item)
+        nid = item_dict.get("note_id")
 
         # Check if note is marked as deleted in YAML
-        if item.get("_deleted", False) is True:
+        if item_dict.get("_deleted", False) is True:
             if nid is not None:
                 try:
                     notes_to_delete_from_yaml.append(int(str(nid)))
@@ -149,23 +126,26 @@ def push_deck_from_dir(
 
     # Process each note from YAML
     for idx, item in enumerate(items):
+        item_dict = cast(dict[str, Any], item)
+
         # Prepare fields mapping
-        mapped_fields = _map_fields_for_model(model_config["fields"], item)
+        mapped_fields = _map_fields_for_model(model_config["fields"], item_dict)
 
         # Upload referenced media if available
-        text_values = " ".join(mapped_fields.values())
-        refs = get_media_references(text_values)
-        for ref in refs:
-            media_file = media_dir / ref
-            if media_file.exists():
-                connector.store_media_file(media_file, filename=ref)
+        if media_dir:
+            text_values = " ".join(mapped_fields.values())
+            refs = get_media_references(text_values)
+            for ref in refs:
+                media_file = media_dir / ref
+                if media_file.exists():
+                    connector.store_media_file(media_file, filename=ref)
 
         # Tags
-        tags = item.get("tags", [])
+        tags = item_dict.get("tags", [])
         if not isinstance(tags, list):
             tags = [str(tags)]
 
-        nid = item.get("note_id")
+        nid = item_dict.get("note_id")
 
         # Check if we should skip this note (incremental mode - no changes)
         if incremental and nid is not None:
@@ -301,3 +281,70 @@ def push_deck_from_dir(
         connector.sync()
 
     return stats
+
+
+def push_deck_from_dir(
+    connector: AnkiConnector,
+    deck_dir: Path,
+    deck_name: str | None = None,
+    sync: bool = False,
+    replace: bool = False,
+    incremental: bool = False,
+) -> dict[str, int]:
+    """Push notes from an exported deck directory back into Anki."""
+    config_path = deck_dir / "config.yaml"
+    data_path = deck_dir / "data.yaml"
+
+    if not config_path.exists() or not data_path.exists():
+        raise FileNotFoundError("config.yaml or data.yaml not found in deck directory")
+
+    model_config = load_model_config(config_path)
+    items = load_deck_data(data_path)
+    # The config.py load_deck_data returns list[dict[str, str | list[str]]]
+    # but uses TypeVar or internal logic. We cast it or trust it.
+
+    # Use directory name as fallback for deck name
+    final_deck_name = deck_name or model_config.get("deck-name") or deck_dir.name
+    media_dir = deck_dir / "media"
+
+    return _push_deck_data(
+        connector=connector,
+        model_config=model_config,
+        items=items,
+        media_dir=media_dir,
+        deck_name_override=final_deck_name,
+        sync=sync,
+        replace=replace,
+        incremental=incremental,
+    )
+
+
+def push_deck_from_file(
+    connector: AnkiConnector,
+    deck_path: Path,
+    deck_name: str | None = None,
+    sync: bool = False,
+    replace: bool = False,
+    incremental: bool = False,
+) -> dict[str, int]:
+    """Push notes from a single deck file back into Anki."""
+    from anki_yaml_tool.core.config import load_deck_file
+
+    if not deck_path.exists():
+        raise FileNotFoundError(f"Deck file not found: {deck_path}")
+
+    model_config, items, file_deck_name, media_folder = load_deck_file(deck_path)
+
+    # Use file base name or file-defined deck name if no override provided
+    final_deck_name = deck_name or file_deck_name or deck_path.stem
+
+    return _push_deck_data(
+        connector=connector,
+        model_config=model_config,
+        items=items,
+        media_dir=media_folder,
+        deck_name_override=final_deck_name,
+        sync=sync,
+        replace=replace,
+        incremental=incremental,
+    )
