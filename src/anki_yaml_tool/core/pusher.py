@@ -10,7 +10,7 @@ Supports three modes:
 import hashlib
 import logging
 from pathlib import Path
-from typing import Any
+from typing import Any, cast
 
 from anki_yaml_tool.core.config import load_deck_data, load_model_config
 from anki_yaml_tool.core.builder import ModelConfigComplete
@@ -48,9 +48,13 @@ def _map_fields_for_model(model_fields: list[str], data_item: dict) -> dict[str,
     we look up each model field by its lowercase name.
     """
     mapped: dict[str, str] = {}
+
+    # Create a case-insensitive lookup map for data items
+    data_lookup = {k.lower(): v for k, v in data_item.items()}
+
     for field_name in model_fields:
         key = field_name.lower()
-        val = data_item.get(key, "")
+        val = data_lookup.get(key, "")
         mapped[field_name] = str(val)
     return mapped
 
@@ -71,6 +75,13 @@ def _push_deck_data(
         # Should be caught by caller, but safe fallback
         target_deck = "Default"
 
+    # Ensure deck exists
+    try:
+        connector.invoke("createDeck", deck=target_deck)
+    except AnkiConnectError as e:
+        logger.warning(f"Failed to ensure deck exists: {e}")
+
+
     # Track statistics for summary
     stats = {
         "added": 0,
@@ -80,9 +91,129 @@ def _push_deck_data(
         "failed": 0,
     }
 
-    # In replace or incremental mode, get existing notes from Anki
+    # Ensure model exists
+    model_name = model_config.get("name")
+    if model_name:
+        try:
+            existing_models = connector.get_model_names()
+            if model_name not in existing_models:
+                logger.info(f"Model '{model_name}' not found. Creating it...")
+                # Prepare card templates
+                raw_templates = model_config.get("templates")
+                final_templates = []
+                if raw_templates:
+                    for t in raw_templates:
+                        # Handle both dict and Pydantic model dump
+                        t_dict = t if isinstance(t, dict) else t.model_dump()
+                        name = t_dict.get("name", "Card 1")
+                        front = t_dict.get("qfmt") or t_dict.get("Front") or ""
+                        back = t_dict.get("afmt") or t_dict.get("Back") or ""
+                        final_templates.append({
+                            "Name": name,
+                            "Front": front,
+                            "Back": back
+                        })
+                else:
+                    # Generate default template using actual field names
+                    fields = model_config.get("fields", ["Front", "Back"])
+                    f1 = fields[0] if len(fields) > 0 else "Front"
+                    f2 = fields[1] if len(fields) > 1 else f1
+                    final_templates.append({
+                        "Name": "Card 1",
+                        "Front": f"{{{{{f1}}}}}",
+                        "Back": f"{{{{FrontSide}}}}<hr id=answer>{{{{{f2}}}}}"
+                    })
+
+                connector.create_model(
+                    model_name=model_name,
+                    in_order_fields=model_config.get("fields", ["Front", "Back"]),
+                    css=model_config.get("css", ""),
+                    is_cloze=model_config.get("isCloze", False),
+                    card_templates=final_templates
+                )
+                logger.info(f"Created model '{model_name}'")
+        except AnkiConnectError as e:
+             logger.error(f"Failed to check/create model: {e}")
+             # We continue, maybe it exists but get_model_names failed?
+             # Or add_note will fail later, which is handled.
+
+    # Check for template mismatch in existing model
+    if model_name:
+        try:
+            model_def = connector.get_model(model_name)
+            existing_templates = model_def.get("templates", [])
+
+            # Prepare intended templates
+            raw_templates = model_config.get("templates")
+            final_templates = []
+            if raw_templates:
+                for t in raw_templates:
+                    t_dict = t if isinstance(t, dict) else t.model_dump()
+                    final_templates.append({
+                        "Name": t_dict.get("name", "Card 1"),
+                        "Front": t_dict.get("qfmt") or t_dict.get("Front") or "",
+                        "Back": t_dict.get("afmt") or t_dict.get("Back") or ""
+                    })
+            else:
+                # Generate default template using actual field names
+                fields = model_config.get("fields", ["Front", "Back"])
+                f1 = fields[0] if len(fields) > 0 else "Front"
+                f2 = fields[1] if len(fields) > 1 else f1
+                final_templates.append({
+                    "Name": "Card 1",
+                    "Front": f"{{{{{f1}}}}}",
+                    "Back": f"{{{{FrontSide}}}}<hr id=answer>{{{{{f2}}}}}"
+                })
+
+            existing_fields = model_def.get("fields", [])
+            existing_first_field = existing_fields[0] if existing_fields else "Front"
+            updates = {}
+            # Update matching templates and suppress extras
+            yaml_tmpl_names = {t["Name"] for t in final_templates}
+
+            for ext_tmpl in existing_templates:
+                name = ext_tmpl["Name"]
+                if name in yaml_tmpl_names:
+                    # Update content to match YAML
+                    target = next(t for t in final_templates if t["Name"] == name)
+                    target_front = target["Front"]
+                    target_back = target["Back"]
+
+                    if ext_tmpl.get("Front") != target_front or ext_tmpl.get("Back") != target_back:
+                         updates[name] = {
+                             "Front": target_front,
+                             "Back": target_back,
+                             "qfmt": target_front,
+                             "afmt": target_back
+                         }
+                else:
+                    # Extra template in Anki! Suppress it.
+                    # Use {{#FirstField}}{{/FirstField}} pattern which renders empty but is valid for Anki
+                    logger.warning(f"Suppressing extra template '{name}' in model '{model_name}'")
+                    # Use simple string concatenation to avoid f-string brace escaping hell
+                    suppress_val = "{{#" + existing_first_field + "}}{{/" + existing_first_field + "}}"
+                    updates[name] = {
+                        "Front": suppress_val,
+                        "Back": "",
+                        "qfmt": suppress_val,
+                        "afmt": ""
+                    }
+
+            if updates:
+                logger.info(f"Updating {len(updates)} templates in model '{model_name}'")
+                connector.update_model_templates(model_name, updates)
+
+        except Exception as e:
+            logger.warning(f"Failed to sync model templates: {e}")
+
+    # In replace or incremental mode, OR if we need to look up IDs (any item missing ID),
+    # get existing notes from Anki
+
+    # Check if we need to lookup IDs
+    needs_id_lookup = any(item.get("note_id") is None for item in items)
+
     existing_notes: dict[int, dict] = {}
-    if replace or incremental:
+    if replace or incremental or needs_id_lookup:
         try:
             anki_notes = connector.get_notes(str(target_deck))
             for note in anki_notes:
@@ -94,8 +225,10 @@ def _push_deck_data(
             )
         except AnkiConnectError as e:
             logger.warning(
-                f"Could not fetch existing notes: {e}. Continuing without replace/incremental."
+                f"Could not fetch existing notes: {e}. duplicate handling might fail."
             )
+            # If we needed lookup but failed, we might create duplicates.
+            # But we proceed. replace/incremental are disabled on error.
             replace = False
             incremental = False
 
@@ -103,10 +236,54 @@ def _push_deck_data(
     yaml_note_ids: set[int] = set()
     notes_to_delete_from_yaml: list[int] = []  # Notes marked with _deleted: true
 
+    # Build a lookup map for existing notes by their first field value
+    # This allows matching YAML notes to Anki notes when note_id is missing
+    # (e.g., when creating a deck from scratch or manual YAML editing)
+    existing_notes_by_first_field: dict[str, int] = {}
+    if existing_notes:
+        for nid, note in existing_notes.items():
+            fields = note.get("fields", {})
+            # Get the first field value (Anki's sort field / primary key equivalent)
+            if fields:
+                # Anki returns fields as {"Front": {"value": "...", "order": 0}, ...}
+                # We need to find the field with order 0, or just use the first one if not sorted
+                # Actually, AnkiConnect returns fields as a dict. Order might not be preserved.
+                # But typically "Front" or the first defined field is key.
+                # Let's try to be smart: use the model's first field name if available
+                first_field_name = model_config["fields"][0] if model_config.get("fields") else None
+                first_val = ""
+
+                if first_field_name:
+                    # Case-insensitive lookup for field name
+                    for f_name, f_data in fields.items():
+                        if f_name.lower() == first_field_name.lower():
+                            if isinstance(f_data, dict):
+                                first_val = f_data.get("value", "")
+                            else:
+                                first_val = str(f_data)
+                            break
+
+                if first_val:
+                     existing_notes_by_first_field[first_val] = nid
+
     for item in items:
         # Cast to dict to satisfy type checker (items is list[dict[str, str|list[str]]])
         item_dict = cast(dict[str, Any], item)
         nid = item_dict.get("note_id")
+
+        # If ID is missing, try to lookup by first field
+        if nid is None:
+             # Map fields from YAML to get the first field value
+             mapped = _map_fields_for_model(model_config["fields"], item_dict)
+             if model_config.get("fields"):
+                 first_field = model_config["fields"][0]
+                 first_val = mapped.get(first_field, "")
+
+                 if first_val in existing_notes_by_first_field:
+                     nid = existing_notes_by_first_field[first_val]
+                     # Update the item with the found ID so we treat it as an update later
+                     item_dict["note_id"] = nid
+                     logger.debug(f"Matched YAML note '{first_val[:20]}...' to existing ID {nid}")
 
         # Check if note is marked as deleted in YAML
         if item_dict.get("_deleted", False) is True:

@@ -10,7 +10,7 @@ protocol via structural subtyping – no explicit inheritance is required.
 import base64
 import logging
 from pathlib import Path
-from typing import cast
+from typing import Any, cast
 
 import requests
 
@@ -226,8 +226,16 @@ class AnkiConnector:
                 "Unexpected response from modelFieldNames", action="modelFieldNames"
             )
 
-        # templates is expected to be a list of dicts; fall back to empty
-        templates_list = templates if isinstance(templates, list) else []
+        # templates from modelTemplates is a dict: { "Name": { "Front": "...", "Back": "..." } }
+        templates_list = []
+        if isinstance(templates, dict):
+            for name, content in templates.items():
+                tmpl = {"Name": name}
+                if isinstance(content, dict):
+                    tmpl.update(content)
+                templates_list.append(tmpl)
+        elif isinstance(templates, list):
+             templates_list = templates
 
         return {
             "name": model_name,
@@ -285,6 +293,46 @@ class AnkiConnector:
             raise AnkiConnectError("Unexpected response from addNote", action="addNote")
         return result
 
+    def create_model(
+        self,
+        model_name: str,
+        in_order_fields: list[str],
+        css: str = "",
+        is_cloze: bool = False,
+        card_templates: list[dict[str, str]] | None = None,
+    ) -> dict[str, Any] | None:
+        """Create a new model in Anki.
+
+        Uses AnkiConnect's `createModel` action.
+
+        Args:
+            model_name: Name of the new model.
+            in_order_fields: List of field names in order.
+            css: CSS styling for the model.
+            is_cloze: Whether the model is a cloze deletion model.
+            card_templates: List of card templates (dicts with "Name", "Front", "Back").
+
+        Returns:
+            The result from createModel (usually dict with model info) or None if fails/already exists?
+            Actually createModel returns the model structure.
+            If it fails (e.g. exists), AnkiConnect returns error.
+        """
+        if card_templates is None:
+             card_templates = [{
+                 "Name": "Card 1",
+                 "Front": "{{Front}}",
+                 "Back": "{{FrontSide}}<hr id=answer>{{Back}}"
+             }]
+
+        params: dict[str, Any] = {
+            "modelName": model_name,
+            "inOrderFields": in_order_fields,
+            "css": css,
+            "isCloze": is_cloze,
+            "cardTemplates": card_templates
+        }
+        return cast(dict[str, Any], self.invoke("createModel", **params))
+
     def delete_notes(self, note_ids: list[int]) -> None:
         """Delete notes from Anki by their IDs.
 
@@ -315,3 +363,20 @@ class AnkiConnector:
         if not isinstance(result, list):
             return []
         return [str(t) for t in result]
+
+    def update_model_templates(self, model_name: str, templates: dict[str, dict[str, str]]) -> None:
+        """Update templates for a specific model.
+
+        Uses AnkiConnect's `updateModelTemplates` action.
+
+        Args:
+            model_name: The name of the model to update.
+            templates: A dictionary mapping template names to their new configuration.
+                       Format: { "Template Name": { "Front": "...", "Back": "..." } }
+        """
+        model = {
+            "name": model_name,
+            "templates": templates
+        }
+        self.invoke("updateModelTemplates", model=model)
+

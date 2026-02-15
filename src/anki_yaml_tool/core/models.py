@@ -105,8 +105,8 @@ class ModelConfigSchema(BaseModel):
 
     name: str = Field(..., min_length=1, description="Model name")
     fields: list[str] = Field(..., min_length=1, description="List of field names")
-    templates: list[ModelTemplate] = Field(
-        ..., min_length=1, description="List of card templates"
+    templates: list[ModelTemplate] | None = Field(
+        default=None, description="List of card templates"
     )
     css: str = Field(default="", description="CSS styling")
 
@@ -138,12 +138,23 @@ class ModelConfigSchema(BaseModel):
 
     @field_validator("templates")
     @classmethod
-    def validate_templates(cls, v: list[ModelTemplate]) -> list[ModelTemplate]:
+    def validate_templates(cls, v: list[ModelTemplate] | None) -> list[ModelTemplate] | None:
         """Validate that template names are unique."""
+        if v is None:
+            return None
+
         if not v:
-            raise ValueError("At least one template is required")
+            # We allow empty list if provided (though Schema field previously enforced min_length=1)
+            # But since field is optional now, empty list is fine? No, let's keep it consistent.
+            # If templates is provided, it should probably not be empty.
+            # But the field definition allows None.
+            # If the user provides `templates: []`, this validator runs.
+            # If the user omits `templates`, `v` is `None`.
+            return []
 
         names = [t.name for t in v]
+
+
         if len(names) != len(set(names)):
             raise ValueError("Template names must be unique")
 
