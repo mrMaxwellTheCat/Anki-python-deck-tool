@@ -4,6 +4,7 @@ from pathlib import Path
 from typing import cast
 
 import yaml
+
 from anki_yaml_tool.core.connector import AnkiConnector
 from anki_yaml_tool.core.exporter import export_deck
 

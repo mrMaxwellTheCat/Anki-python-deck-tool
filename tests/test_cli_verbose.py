@@ -7,9 +7,10 @@ and the logging configuration.
 from unittest.mock import patch
 
 import pytest
+from click.testing import CliRunner
+
 from anki_yaml_tool.cli import cli
 from anki_yaml_tool.core.logging_config import get_logger, setup_logging
-from click.testing import CliRunner
 
 
 @pytest.fixture

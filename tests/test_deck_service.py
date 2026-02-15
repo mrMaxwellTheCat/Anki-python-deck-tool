@@ -8,6 +8,7 @@ from unittest.mock import Mock
 
 import pytest
 import yaml
+
 from anki_yaml_tool.core.deck_service import (
     BuildResult,
     ValidationIssue,

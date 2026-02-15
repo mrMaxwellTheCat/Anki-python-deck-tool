@@ -6,8 +6,9 @@ config file loading utilities.
 
 import pytest
 import yaml
-from anki_yaml_tool.cli import cli
 from click.testing import CliRunner
+
+from anki_yaml_tool.cli import cli
 
 
 @pytest.fixture

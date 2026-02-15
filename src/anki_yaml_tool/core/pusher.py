@@ -12,8 +12,8 @@ import logging
 from pathlib import Path
 from typing import Any, cast
 
-from anki_yaml_tool.core.config import load_deck_data, load_model_config
 from anki_yaml_tool.core.builder import ModelConfigComplete
+from anki_yaml_tool.core.config import load_deck_data, load_model_config
 from anki_yaml_tool.core.connector import AnkiConnector
 from anki_yaml_tool.core.exceptions import AnkiConnectError
 from anki_yaml_tool.core.media import get_media_references
@@ -81,7 +81,6 @@ def _push_deck_data(
     except AnkiConnectError as e:
         logger.warning(f"Failed to ensure deck exists: {e}")
 
-
     # Track statistics for summary
     stats = {
         "added": 0,
@@ -108,34 +107,34 @@ def _push_deck_data(
                         name = t_dict.get("name", "Card 1")
                         front = t_dict.get("qfmt") or t_dict.get("Front") or ""
                         back = t_dict.get("afmt") or t_dict.get("Back") or ""
-                        final_templates.append({
-                            "Name": name,
-                            "Front": front,
-                            "Back": back
-                        })
+                        final_templates.append(
+                            {"Name": name, "Front": front, "Back": back}
+                        )
                 else:
                     # Generate default template using actual field names
                     fields = model_config.get("fields", ["Front", "Back"])
                     f1 = fields[0] if len(fields) > 0 else "Front"
                     f2 = fields[1] if len(fields) > 1 else f1
-                    final_templates.append({
-                        "Name": "Card 1",
-                        "Front": f"{{{{{f1}}}}}",
-                        "Back": f"{{{{FrontSide}}}}<hr id=answer>{{{{{f2}}}}}"
-                    })
+                    final_templates.append(
+                        {
+                            "Name": "Card 1",
+                            "Front": f"{{{{{f1}}}}}",
+                            "Back": f"{{{{FrontSide}}}}<hr id=answer>{{{{{f2}}}}}",
+                        }
+                    )
 
                 connector.create_model(
                     model_name=model_name,
                     in_order_fields=model_config.get("fields", ["Front", "Back"]),
                     css=model_config.get("css", ""),
                     is_cloze=model_config.get("isCloze", False),
-                    card_templates=final_templates
+                    card_templates=final_templates,
                 )
                 logger.info(f"Created model '{model_name}'")
         except AnkiConnectError as e:
-             logger.error(f"Failed to check/create model: {e}")
-             # We continue, maybe it exists but get_model_names failed?
-             # Or add_note will fail later, which is handled.
+            logger.error(f"Failed to check/create model: {e}")
+            # We continue, maybe it exists but get_model_names failed?
+            # Or add_note will fail later, which is handled.
 
     # Check for template mismatch in existing model
     if model_name:
@@ -149,21 +148,25 @@ def _push_deck_data(
             if raw_templates:
                 for t in raw_templates:
                     t_dict = t if isinstance(t, dict) else t.model_dump()
-                    final_templates.append({
-                        "Name": t_dict.get("name", "Card 1"),
-                        "Front": t_dict.get("qfmt") or t_dict.get("Front") or "",
-                        "Back": t_dict.get("afmt") or t_dict.get("Back") or ""
-                    })
+                    final_templates.append(
+                        {
+                            "Name": t_dict.get("name", "Card 1"),
+                            "Front": t_dict.get("qfmt") or t_dict.get("Front") or "",
+                            "Back": t_dict.get("afmt") or t_dict.get("Back") or "",
+                        }
+                    )
             else:
                 # Generate default template using actual field names
                 fields = model_config.get("fields", ["Front", "Back"])
                 f1 = fields[0] if len(fields) > 0 else "Front"
                 f2 = fields[1] if len(fields) > 1 else f1
-                final_templates.append({
-                    "Name": "Card 1",
-                    "Front": f"{{{{{f1}}}}}",
-                    "Back": f"{{{{FrontSide}}}}<hr id=answer>{{{{{f2}}}}}"
-                })
+                final_templates.append(
+                    {
+                        "Name": "Card 1",
+                        "Front": f"{{{{{f1}}}}}",
+                        "Back": f"{{{{FrontSide}}}}<hr id=answer>{{{{{f2}}}}}",
+                    }
+                )
 
             existing_fields = model_def.get("fields", [])
             existing_first_field = existing_fields[0] if existing_fields else "Front"
@@ -179,28 +182,41 @@ def _push_deck_data(
                     target_front = target["Front"]
                     target_back = target["Back"]
 
-                    if ext_tmpl.get("Front") != target_front or ext_tmpl.get("Back") != target_back:
-                         updates[name] = {
-                             "Front": target_front,
-                             "Back": target_back,
-                             "qfmt": target_front,
-                             "afmt": target_back
-                         }
+                    if (
+                        ext_tmpl.get("Front") != target_front
+                        or ext_tmpl.get("Back") != target_back
+                    ):
+                        updates[name] = {
+                            "Front": target_front,
+                            "Back": target_back,
+                            "qfmt": target_front,
+                            "afmt": target_back,
+                        }
                 else:
                     # Extra template in Anki! Suppress it.
                     # Use {{#FirstField}}{{/FirstField}} pattern which renders empty but is valid for Anki
-                    logger.warning(f"Suppressing extra template '{name}' in model '{model_name}'")
+                    logger.warning(
+                        f"Suppressing extra template '{name}' in model '{model_name}'"
+                    )
                     # Use simple string concatenation to avoid f-string brace escaping hell
-                    suppress_val = "{{#" + existing_first_field + "}}{{/" + existing_first_field + "}}"
+                    suppress_val = (
+                        "{{#"
+                        + existing_first_field
+                        + "}}{{/"
+                        + existing_first_field
+                        + "}}"
+                    )
                     updates[name] = {
                         "Front": suppress_val,
                         "Back": "",
                         "qfmt": suppress_val,
-                        "afmt": ""
+                        "afmt": "",
                     }
 
             if updates:
-                logger.info(f"Updating {len(updates)} templates in model '{model_name}'")
+                logger.info(
+                    f"Updating {len(updates)} templates in model '{model_name}'"
+                )
                 connector.update_model_templates(model_name, updates)
 
         except Exception as e:
@@ -250,7 +266,9 @@ def _push_deck_data(
                 # Actually, AnkiConnect returns fields as a dict. Order might not be preserved.
                 # But typically "Front" or the first defined field is key.
                 # Let's try to be smart: use the model's first field name if available
-                first_field_name = model_config["fields"][0] if model_config.get("fields") else None
+                first_field_name = (
+                    model_config["fields"][0] if model_config.get("fields") else None
+                )
                 first_val = ""
 
                 if first_field_name:
@@ -264,7 +282,7 @@ def _push_deck_data(
                             break
 
                 if first_val:
-                     existing_notes_by_first_field[first_val] = nid
+                    existing_notes_by_first_field[first_val] = nid
 
     for item in items:
         # Cast to dict to satisfy type checker (items is list[dict[str, str|list[str]]])
@@ -273,17 +291,19 @@ def _push_deck_data(
 
         # If ID is missing, try to lookup by first field
         if nid is None:
-             # Map fields from YAML to get the first field value
-             mapped = _map_fields_for_model(model_config["fields"], item_dict)
-             if model_config.get("fields"):
-                 first_field = model_config["fields"][0]
-                 first_val = mapped.get(first_field, "")
+            # Map fields from YAML to get the first field value
+            mapped = _map_fields_for_model(model_config["fields"], item_dict)
+            if model_config.get("fields"):
+                first_field = model_config["fields"][0]
+                first_val = mapped.get(first_field, "")
 
-                 if first_val in existing_notes_by_first_field:
-                     nid = existing_notes_by_first_field[first_val]
-                     # Update the item with the found ID so we treat it as an update later
-                     item_dict["note_id"] = nid
-                     logger.debug(f"Matched YAML note '{first_val[:20]}...' to existing ID {nid}")
+                if first_val in existing_notes_by_first_field:
+                    nid = existing_notes_by_first_field[first_val]
+                    # Update the item with the found ID so we treat it as an update later
+                    item_dict["note_id"] = nid
+                    logger.debug(
+                        f"Matched YAML note '{first_val[:20]}...' to existing ID {nid}"
+                    )
 
         # Check if note is marked as deleted in YAML
         if item_dict.get("_deleted", False) is True:

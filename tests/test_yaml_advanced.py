@@ -3,6 +3,7 @@
 import os
 
 import pytest
+
 from anki_yaml_tool.core import yaml_advanced
 
 

@@ -1,6 +1,7 @@
 """Tests for the AnkiBuilder class."""
 
 import pytest
+
 from anki_yaml_tool.core.builder import AnkiBuilder
 from anki_yaml_tool.core.exceptions import DeckBuildError
 

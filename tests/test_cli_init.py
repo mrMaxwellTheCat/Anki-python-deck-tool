@@ -6,8 +6,9 @@ that scaffolds new Anki deck projects.
 
 import pytest
 import yaml
-from anki_yaml_tool.cli import cli, init
 from click.testing import CliRunner
+
+from anki_yaml_tool.cli import cli, init
 
 
 @pytest.fixture

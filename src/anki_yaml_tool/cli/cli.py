@@ -13,20 +13,17 @@ from pathlib import Path
 import click
 import yaml
 
+from anki_yaml_tool.cli.deck import deck_cli
+from anki_yaml_tool.cli.package import package_cli
 from anki_yaml_tool.core.batch import get_deck_name_from_path
 from anki_yaml_tool.core.builder import AnkiBuilder, ModelConfigComplete
 from anki_yaml_tool.core.config import load_deck_file
 from anki_yaml_tool.core.connector import AnkiConnector
 from anki_yaml_tool.core.deck_service import (
-    BuildResult,
-    ValidationResult,
     build_deck,
     push_apkg,
-    validate_deck,
 )
 from anki_yaml_tool.core.exceptions import (
-    AnkiConnectError,
-    AnkiToolError,
     ConfigValidationError,
     DataValidationError,
     DeckBuildError,
@@ -110,15 +107,8 @@ def cli(
         ctx.exit()
 
 
-# Register command groups
-# Register command groups
-from anki_yaml_tool.cli.deck import deck_cli
-from anki_yaml_tool.cli.package import package_cli
-
 cli.add_command(deck_cli)
 cli.add_command(package_cli)
-
-
 
 
 @cli.command()
@@ -653,14 +643,13 @@ def _batch_build_separate(
             try:
                 # Use hierarchical name as override when base_dir is set
                 name_override = (
-                    get_deck_name_from_path(file_path, base_dir)
-                    if base_dir
-                    else None
+                    get_deck_name_from_path(file_path, base_dir) if base_dir else None
                 )
 
                 result = build_deck(
                     deck_path=file_path,
-                    output_path=output_path / f"{current_deck_name.replace('::', '_').replace(' ', '_')}.apkg",
+                    output_path=output_path
+                    / f"{current_deck_name.replace('::', '_').replace(' ', '_')}.apkg",
                     deck_name_override=name_override,
                 )
 

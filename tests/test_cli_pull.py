@@ -2,8 +2,9 @@
 
 from unittest.mock import patch
 
-from anki_yaml_tool.cli import cli
 from click.testing import CliRunner
+
+from anki_yaml_tool.cli import cli
 
 
 def test_pull_list_decks(monkeypatch):

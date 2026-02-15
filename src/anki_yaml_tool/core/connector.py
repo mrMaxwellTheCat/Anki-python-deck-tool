@@ -235,7 +235,7 @@ class AnkiConnector:
                     tmpl.update(content)
                 templates_list.append(tmpl)
         elif isinstance(templates, list):
-             templates_list = templates
+            templates_list = templates
 
         return {
             "name": model_name,
@@ -318,18 +318,20 @@ class AnkiConnector:
             If it fails (e.g. exists), AnkiConnect returns error.
         """
         if card_templates is None:
-             card_templates = [{
-                 "Name": "Card 1",
-                 "Front": "{{Front}}",
-                 "Back": "{{FrontSide}}<hr id=answer>{{Back}}"
-             }]
+            card_templates = [
+                {
+                    "Name": "Card 1",
+                    "Front": "{{Front}}",
+                    "Back": "{{FrontSide}}<hr id=answer>{{Back}}",
+                }
+            ]
 
         params: dict[str, Any] = {
             "modelName": model_name,
             "inOrderFields": in_order_fields,
             "css": css,
             "isCloze": is_cloze,
-            "cardTemplates": card_templates
+            "cardTemplates": card_templates,
         }
         return cast(dict[str, Any], self.invoke("createModel", **params))
 
@@ -364,7 +366,9 @@ class AnkiConnector:
             return []
         return [str(t) for t in result]
 
-    def update_model_templates(self, model_name: str, templates: dict[str, dict[str, str]]) -> None:
+    def update_model_templates(
+        self, model_name: str, templates: dict[str, dict[str, str]]
+    ) -> None:
         """Update templates for a specific model.
 
         Uses AnkiConnect's `updateModelTemplates` action.
@@ -374,9 +378,5 @@ class AnkiConnector:
             templates: A dictionary mapping template names to their new configuration.
                        Format: { "Template Name": { "Front": "...", "Back": "..." } }
         """
-        model = {
-            "name": model_name,
-            "templates": templates
-        }
+        model = {"name": model_name, "templates": templates}
         self.invoke("updateModelTemplates", model=model)
-

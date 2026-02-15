@@ -7,6 +7,7 @@ including multiple note types, invalid YAML handling, and media file inclusion.
 import zipfile
 
 import pytest
+
 from anki_yaml_tool.core.builder import AnkiBuilder, ModelConfigComplete
 from anki_yaml_tool.core.config import load_deck_file
 from anki_yaml_tool.core.exceptions import (

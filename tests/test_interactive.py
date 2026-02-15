@@ -2,9 +2,10 @@
 
 from unittest.mock import patch
 
+from click.testing import CliRunner
+
 from anki_yaml_tool.cli import cli
 from anki_yaml_tool.core.interactive import run_interactive
-from click.testing import CliRunner
 
 
 def test_run_interactive_list_decks(monkeypatch):

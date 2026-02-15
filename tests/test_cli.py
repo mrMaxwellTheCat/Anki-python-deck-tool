@@ -10,16 +10,13 @@ from unittest.mock import Mock, patch
 
 import pytest
 import yaml
-from anki_yaml_tool.cli import cli
 from anki_yaml_tool.cli_package import build_package, install_package
+from click.testing import CliRunner
+
+from anki_yaml_tool.cli import cli
 from anki_yaml_tool.core.deck_service import (
     BuildResult,
 )
-from anki_yaml_tool.core.exceptions import (
-    AnkiConnectError,
-    DeckBuildError,
-)
-from click.testing import CliRunner
 
 
 @pytest.fixture
@@ -119,7 +116,6 @@ class TestPackageBuildCommand:
             Path(temp_files["file"]),
             output_path=Path(temp_files["output"]),
         )
-
 
     def test_build_nonexistent_file(self, runner):
         """Test that nonexistent deck file is handled."""

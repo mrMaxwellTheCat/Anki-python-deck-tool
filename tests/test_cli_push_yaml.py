@@ -1,9 +1,10 @@
 """Tests for the `push-yaml` CLI command."""
 
-from unittest.mock import patch, Mock
+from unittest.mock import patch
+
+from click.testing import CliRunner
 
 from anki_yaml_tool.cli import cli
-from click.testing import CliRunner
 
 
 def test_cli_push_yaml_invokes_pusher(tmp_path):
@@ -18,7 +19,7 @@ def test_cli_push_yaml_invokes_pusher(tmp_path):
     (deck_dir / "data.yaml").write_text("- front: Q\n")
 
     with (
-        patch("anki_yaml_tool.cli.AnkiConnector") as mock_conn_cls,
+        patch("anki_yaml_tool.cli.AnkiConnector"),
         patch("anki_yaml_tool.core.pusher.push_deck_from_dir") as mock_push,
     ):
         mock_push.return_value = {"added": 1, "updated": 0, "deleted": 0}

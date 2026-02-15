@@ -1,18 +1,17 @@
 """Tests for the pusher module — push YAML-exported decks back to Anki."""
 
 from pathlib import Path
-from unittest.mock import Mock, patch
+from unittest.mock import Mock
 
 import pytest
 
+from anki_yaml_tool.core.exceptions import AnkiConnectError
 from anki_yaml_tool.core.pusher import (
     _compute_note_hash,
     _map_fields_for_model,
     _normalize_fields,
     push_deck_from_dir,
 )
-from anki_yaml_tool.core.exceptions import AnkiConnectError
-
 
 # ──────────────────── helper function tests ────────────────────
 
@@ -113,9 +112,7 @@ class TestPushDeckFromDir:
             "name: Basic\nfields: [Front, Back]\ntemplates:\n"
             "  - name: Card 1\n    qfmt: '{{Front}}'\n    afmt: '{{Back}}'\n"
         )
-        (deck_dir / "data.yaml").write_text(
-            "- front: Q1\n  back: A1\n  note_id: 999\n"
-        )
+        (deck_dir / "data.yaml").write_text("- front: Q1\n  back: A1\n  note_id: 999\n")
 
         stats = push_deck_from_dir(connector, deck_dir)
 
@@ -146,7 +143,7 @@ class TestPushDeckFromDir:
         )
         # Reference an image in the field
         (deck_dir / "data.yaml").write_text(
-            '- front: \'<img src="photo.jpg">\'\n  back: A1\n'
+            "- front: '<img src=\"photo.jpg\">'\n  back: A1\n"
         )
         media_dir = deck_dir / "media"
         media_dir.mkdir()
@@ -156,18 +153,14 @@ class TestPushDeckFromDir:
 
         connector.store_media_file.assert_called_once()
 
-    def test_incremental_skips_unchanged(
-        self, tmp_path: Path, connector: Mock
-    ) -> None:
+    def test_incremental_skips_unchanged(self, tmp_path: Path, connector: Mock) -> None:
         deck_dir = tmp_path / "deck"
         deck_dir.mkdir()
         (deck_dir / "config.yaml").write_text(
             "name: Basic\nfields: [Front, Back]\ntemplates:\n"
             "  - name: Card 1\n    qfmt: '{{Front}}'\n    afmt: '{{Back}}'\n"
         )
-        (deck_dir / "data.yaml").write_text(
-            "- front: Q1\n  back: A1\n  note_id: 100\n"
-        )
+        (deck_dir / "data.yaml").write_text("- front: Q1\n  back: A1\n  note_id: 100\n")
 
         # Simulate existing note with same content
         connector.get_notes.return_value = [
@@ -183,18 +176,14 @@ class TestPushDeckFromDir:
         assert stats["unchanged"] == 1
         assert stats["updated"] == 0
 
-    def test_replace_deletes_extra_notes(
-        self, tmp_path: Path, connector: Mock
-    ) -> None:
+    def test_replace_deletes_extra_notes(self, tmp_path: Path, connector: Mock) -> None:
         deck_dir = tmp_path / "deck"
         deck_dir.mkdir()
         (deck_dir / "config.yaml").write_text(
             "name: Basic\nfields: [Front, Back]\ntemplates:\n"
             "  - name: Card 1\n    qfmt: '{{Front}}'\n    afmt: '{{Back}}'\n"
         )
-        (deck_dir / "data.yaml").write_text(
-            "- front: Q1\n  back: A1\n  note_id: 100\n"
-        )
+        (deck_dir / "data.yaml").write_text("- front: Q1\n  back: A1\n  note_id: 100\n")
 
         # Anki has note 100 and note 200 — note 200 should be deleted
         connector.get_notes.return_value = [
@@ -223,9 +212,7 @@ class TestPushDeckFromDir:
             "name: Basic\nfields: [Front, Back]\ntemplates:\n"
             "  - name: Card 1\n    qfmt: '{{Front}}'\n    afmt: '{{Back}}'\n"
         )
-        (deck_dir / "data.yaml").write_text(
-            "- front: Q1\n  back: A1\n  note_id: 999\n"
-        )
+        (deck_dir / "data.yaml").write_text("- front: Q1\n  back: A1\n  note_id: 999\n")
 
         # Simulate "note not found" error on update
         connector.update_note_fields.side_effect = AnkiConnectError(

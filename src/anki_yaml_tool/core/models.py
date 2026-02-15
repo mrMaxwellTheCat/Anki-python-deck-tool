@@ -36,6 +36,7 @@ MediaFileList: TypeAlias = list[str]
 
 # ────────────────────── TypedDict Bridges ──────────────────────
 
+
 class ModelTemplateDict(TypedDict):
     """Plain-dict representation of a card template.
 
@@ -72,6 +73,7 @@ class ModelConfigDictComplete(ModelConfigDict, total=False):
 
 
 # ─────────────────────── Pydantic Models ───────────────────────
+
 
 class ModelTemplate(BaseModel):
     """Schema for a card template.
@@ -138,7 +140,9 @@ class ModelConfigSchema(BaseModel):
 
     @field_validator("templates")
     @classmethod
-    def validate_templates(cls, v: list[ModelTemplate] | None) -> list[ModelTemplate] | None:
+    def validate_templates(
+        cls, v: list[ModelTemplate] | None
+    ) -> list[ModelTemplate] | None:
         """Validate that template names are unique."""
         if v is None:
             return None
@@ -153,7 +157,6 @@ class ModelConfigSchema(BaseModel):
             return []
 
         names = [t.name for t in v]
-
 
         if len(names) != len(set(names)):
             raise ValueError("Template names must be unique")

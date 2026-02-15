@@ -1,12 +1,11 @@
 """Tests for AnkiConnector read methods (deck/model/notes/media retrieval)."""
 
 import base64
+from unittest.mock import Mock
 
 import pytest
 
 from anki_yaml_tool.core.connector import AnkiConnector
-
-from unittest.mock import Mock
 
 
 @pytest.fixture

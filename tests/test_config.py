@@ -3,6 +3,8 @@
 from pathlib import Path
 
 import pytest
+import yaml
+
 from anki_yaml_tool.core.config import load_deck_data, load_deck_file, load_model_config
 from anki_yaml_tool.core.exceptions import ConfigValidationError, DataValidationError
 
@@ -56,8 +58,10 @@ def test_load_model_config_missing_required_fields(tmp_path):
     config_file.write_text(
         """
 name: "Test Model"
-fields:
-  - "Front"
+templates:
+  - name: "Card 1"
+    qfmt: "{{Front}}"
+    afmt: "{{Back}}"
 """
     )
 
@@ -66,7 +70,7 @@ fields:
 
     # Pydantic error message includes "Field required" or similar
     error_msg = str(exc_info.value).lower()
-    assert "templates" in error_msg
+    assert "fields" in error_msg
     assert "required" in error_msg or "missing" in error_msg
 
 
@@ -426,7 +430,7 @@ config:
 """
     )
 
-    with pytest.raises(Exception):
+    with pytest.raises(yaml.YAMLError):
         load_deck_file(deck_file)
 
 

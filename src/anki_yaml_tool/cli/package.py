@@ -45,13 +45,17 @@ def build_package(file: Path, output: Path | None) -> None:
         # We pass it through.
 
         click.echo(f"Building package from {file}...")
-        result = build_deck(file, output_path=output if output else "deck.apkg") # build_deck defaults to deck.apkg logic is slightly internal
+        result = build_deck(
+            file, output_path=output if output else "deck.apkg"
+        )  # build_deck defaults to deck.apkg logic is slightly internal
 
         # Determine actual filename if we want to match DESIGN.md "default: deck name"
         # Ideally build_deck handles this or returns the path.
         # build_deck returns BuildResult with output_path.
 
-        click.echo(click.style(f"Successfully built package: {result.output_path}", fg="green"))
+        click.echo(
+            click.style(f"Successfully built package: {result.output_path}", fg="green")
+        )
         click.echo(f"Notes: {result.notes_processed}, Media: {result.media_files}")
 
     except AnkiToolError as e:
