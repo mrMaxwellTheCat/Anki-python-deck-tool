@@ -411,3 +411,117 @@ data:
     model_config, items, deck_name, media_folder = load_deck_file(deck_file)
 
     assert deck_name is None
+
+
+def test_load_deck_file_malformed_yaml(tmp_path):
+    """Test loading malformed YAML that PyYAML cannot parse."""
+    deck_file = tmp_path / "malformed.yaml"
+    deck_file.write_text(
+        """
+config:
+  name: "Test Model"
+  fields:
+    - "Front
+    - unclosed quote
+"""
+    )
+
+    with pytest.raises(Exception):
+        load_deck_file(deck_file)
+
+
+def test_load_deck_file_config_as_list(tmp_path):
+    """Test loading a deck file where config is a list instead of dict."""
+    deck_file = tmp_path / "deck.yaml"
+    deck_file.write_text(
+        """
+config:
+  - name: "Test Model"
+data:
+  - front: "Q"
+"""
+    )
+
+    with pytest.raises(ConfigValidationError):
+        load_deck_file(deck_file)
+
+
+def test_load_deck_file_plain_yaml_mode(tmp_path):
+    """Test loading a deck file with use_advanced=False (plain YAML)."""
+    deck_file = tmp_path / "deck.yaml"
+    deck_file.write_text(
+        """
+config:
+  name: "Test Model"
+  fields:
+    - "Front"
+  templates:
+    - name: "Card 1"
+      qfmt: "{{Front}}"
+      afmt: "{{Front}}"
+
+data:
+  - front: "Question 1"
+"""
+    )
+
+    model_config, items, deck_name, media_folder = load_deck_file(
+        deck_file, use_advanced=False
+    )
+
+    assert model_config["name"] == "Test Model"
+    assert len(items) == 1
+    assert items[0]["front"] == "Question 1"
+
+
+def test_load_deck_file_top_level_deck_name(tmp_path):
+    """Test that top-level deck-name is used when present."""
+    deck_file = tmp_path / "deck.yaml"
+    deck_file.write_text(
+        """
+deck-name: "Top Level Name"
+config:
+  name: "Test Model"
+  deck-name: "Config Level Name"
+  fields:
+    - "Front"
+  templates:
+    - name: "Card 1"
+      qfmt: "{{Front}}"
+      afmt: "{{Front}}"
+
+data:
+  - front: "Q1"
+"""
+    )
+
+    _, _, deck_name, _ = load_deck_file(deck_file)
+    assert deck_name == "Top Level Name"
+
+
+def test_load_deck_file_top_level_media_folder(tmp_path):
+    """Test that top-level media-folder is picked up."""
+    media_dir = tmp_path / "assets"
+    media_dir.mkdir()
+
+    deck_file = tmp_path / "deck.yaml"
+    deck_file.write_text(
+        """
+media-folder: "./assets/"
+config:
+  name: "Test Model"
+  fields:
+    - "Front"
+  templates:
+    - name: "Card 1"
+      qfmt: "{{Front}}"
+      afmt: "{{Front}}"
+
+data:
+  - front: "Q1"
+"""
+    )
+
+    _, _, _, media_folder = load_deck_file(deck_file)
+    assert media_folder is not None
+    assert media_folder == media_dir.resolve()

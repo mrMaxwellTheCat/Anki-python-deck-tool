@@ -9,7 +9,6 @@ import threading
 from concurrent.futures import Future, ThreadPoolExecutor
 from importlib.metadata import version
 from pathlib import Path
-from typing import cast
 
 import click
 import yaml
@@ -18,23 +17,23 @@ from anki_yaml_tool.core.batch import get_deck_name_from_path
 from anki_yaml_tool.core.builder import AnkiBuilder, ModelConfigComplete
 from anki_yaml_tool.core.config import load_deck_file
 from anki_yaml_tool.core.connector import AnkiConnector
+from anki_yaml_tool.core.deck_service import (
+    BuildResult,
+    ValidationResult,
+    build_deck,
+    push_apkg,
+    validate_deck,
+)
 from anki_yaml_tool.core.exceptions import (
     AnkiConnectError,
+    AnkiToolError,
     ConfigValidationError,
     DataValidationError,
     DeckBuildError,
-    MediaMissingError,
 )
 from anki_yaml_tool.core.logging_config import get_logger, setup_logging
 from anki_yaml_tool.core.media import (
-    discover_media_files,
     get_media_references,
-    validate_media_file,
-)
-from anki_yaml_tool.core.validators import (
-    check_duplicate_ids,
-    validate_html_tags,
-    validate_note_fields,
 )
 
 # Get logger for this module
@@ -135,139 +134,34 @@ def cli(
     type=click.Path(exists=True),
     help="Directory containing media files (overrides deck file setting)",
 )
-def build(file, output, deck_name, media_dir):
+def build(file: str, output: str, deck_name: str | None, media_dir: str | None) -> None:
     """Build an .apkg file from YAML deck file."""
     try:
-        # Load deck file
-        log.info("Loading deck file: %s", file)
-        model_config, items, file_deck_name, file_media_dir = load_deck_file(file)
-        model_configs = cast(list[ModelConfigComplete], [model_config])
-        log.debug("Loaded model config: %s", model_config.get("name", "unknown"))
-        log.debug("Found %d notes in data section", len(items))
+        click.echo("Building deck...")
+        result: BuildResult = build_deck(
+            deck_path=file,
+            output_path=output,
+            deck_name_override=deck_name,
+            media_dir_override=media_dir,
+        )
 
-        # Use provided deck-name or fall back to file deck-name
-        final_deck_name = deck_name if deck_name is not None else file_deck_name
+        click.echo(f"Deck '{result.deck_name}' — {result.notes_processed} notes")
 
-        # Final fallback to filename if no name provided anywhere
-        if final_deck_name is None:
-            file_path = Path(file)
-            if file_path.stem == "deck":
-                final_deck_name = file_path.parent.name or "Deck"
-            else:
-                final_deck_name = file_path.stem
+        if result.media_files:
+            click.echo(f"Added {result.media_files} media files")
 
-        # Use provided media-dir or fall back to file media-dir
-        # Convert CLI string path to Path object for AnkiBuilder
-        media_folder: Path | None = Path(media_dir) if media_dir else file_media_dir
-
-        click.echo(f"Building deck '{final_deck_name}'...")
-        log.info("Output file: %s", output)
-        builder = AnkiBuilder(final_deck_name, model_configs, media_folder)
-
-        # Map model names to their field lists for easy lookup
-        model_fields_map = {cfg["name"]: cfg["fields"] for cfg in model_configs}
-        first_model_name = model_configs[0]["name"]
-
-        # Track all media references found in notes
-        all_media_refs: set[str] = set()
-
-        for item in items:
-            # Determine which model to use for this note
-            # Look for 'model' or 'type' field, default to the first model
-            target_model_name = item.get("model", item.get("type", first_model_name))
-            if not isinstance(target_model_name, str):
-                target_model_name = str(target_model_name)
-
-            if target_model_name not in model_fields_map:
-                click.echo(
-                    f"Warning: Model '{target_model_name}' not found. "
-                    f"Available: {', '.join(model_fields_map.keys())}. "
-                    f"Defaulting to '{first_model_name}'.",
-                    err=True,
-                )
-                target_model_name = first_model_name
-
-            fields = model_fields_map[target_model_name]
-
-            # Create a case-insensitive lookup dictionary
-            # Convert all data keys to lowercase for matching
-            item_lower = {k.lower(): v for k, v in item.items()}
-
-            # Map YAML keys to model fields in order
-            field_values = [str(item_lower.get(f.lower(), "")) for f in fields]
-
-            # Extract media references from all field values
-            for field_value in field_values:
-                refs = get_media_references(field_value)
-                all_media_refs.update(refs)
-
-            # Get tags, ensuring it's always a list
-            tags_raw = item.get("tags", [])
-            tags: list[str] = (
-                tags_raw if isinstance(tags_raw, list) else [str(tags_raw)]
-            )
-
-            if "id" in item:
-                tags.append(f"id::{item['id']}")
-
-            builder.add_note(field_values, tags=tags, model_name=target_model_name)
-            log.debug(
-                "Added note with model '%s' and %d tags", target_model_name, len(tags)
-            )
-
-        log.info("Processed %d notes", len(items))
-
-        # Add media files if media directory is provided
-        if media_folder:
-            media_path = media_folder
-            click.echo(f"Discovering media files in {media_path}...")
-
-            # Discover all media files in the directory
-            discovered_files = discover_media_files(media_path)
-            click.echo(f"Found {len(discovered_files)} media files")
-
-            # Add all discovered media files
-            for media_file in discovered_files:
-                builder.add_media(media_file)
-                log.debug("Added media file: %s", media_file.name)
-
-            # Validate that all referenced media files exist
-            if all_media_refs:
-                click.echo(f"Validating {len(all_media_refs)} media references...")
-                missing_refs = []
-
-                for ref in all_media_refs:
-                    ref_path = media_path / ref
-                    try:
-                        validate_media_file(ref_path)
-                    except MediaMissingError:
-                        missing_refs.append(ref)
-
-                if missing_refs:
-                    msg = (
-                        f"Warning: {len(missing_refs)} "
-                        "referenced media files not found:"
-                    )
-                    click.echo(msg, err=True)
-                    for ref in missing_refs:
-                        click.echo(f"  - {ref}", err=True)
-
-        elif all_media_refs:
+        if result.missing_media_refs:
             click.echo(
-                f"Warning: Found {len(all_media_refs)} media references "
-                "but no --media-dir specified",
+                f"Warning: {len(result.missing_media_refs)} "
+                "referenced media files not found:",
                 err=True,
             )
+            for ref in result.missing_media_refs:
+                click.echo(f"  - {ref}", err=True)
 
-        builder.write_to_file(Path(output))
-        click.echo(f"Successfully created {output}")
+        click.echo(f"Successfully created {result.output_path}")
 
-    except (
-        ConfigValidationError,
-        DataValidationError,
-        DeckBuildError,
-        MediaMissingError,
-    ) as e:
+    except AnkiToolError as e:
         click.echo(f"Error: {e}", err=True)
         raise click.Abort() from e
     except Exception as e:
@@ -287,103 +181,28 @@ def build(file, output, deck_name, media_dir):
     is_flag=True,
     help="Fail on warnings (e.g., missing fields or invalid HTML)",
 )
-def validate(file, strict):
+def validate(file: str, strict: bool) -> None:
     """Validate YAML deck file without building."""
     click.echo("Validating configuration and data...")
-    log.info("Validating file: %s", file)
-    log.debug("Strict mode: %s", strict)
-    has_errors = False
-    has_warnings = False
-
     try:
-        # Load deck file
-        try:
-            log.debug("Loading deck file...")
-            model_config, items, _, _ = load_deck_file(file)
-            model_configs = [model_config]
-            log.info("Loaded %d notes for validation", len(items))
-        except (ConfigValidationError, DataValidationError) as e:
-            click.echo(f"Error ({file}): {e}", err=True)
-            has_errors = True
-            raise click.Abort() from e
+        result: ValidationResult = validate_deck(file, strict=strict)
 
-        # 3. Perform consistency checks
-        model_names = {cfg["name"] for cfg in model_configs}
-        model_fields_map = {cfg["name"]: cfg["fields"] for cfg in model_configs}
-        first_model_name = model_configs[0]["name"]
-
-        # Check for duplicate IDs
-        duplicates = check_duplicate_ids(items)
-        if duplicates:
-            msg = "Duplicate note IDs found:"
-            click.echo(click.style(msg, fg="yellow"), err=True)
-            for id_, count in duplicates.items():
-                click.echo(f"  - ID '{id_}' appears {count} times", err=True)
-            has_warnings = True
-
-        # Validate each note
-        for i, item in enumerate(items):
-            note_ref = f"Note #{i + 1}"
-            if "id" in item:
-                note_ref += f" (ID: {item['id']})"
-
-            # Check model existence
-            target_model_name_raw = item.get(
-                "model", item.get("type", first_model_name)
-            )
-            target_model_name = (
-                target_model_name_raw
-                if isinstance(target_model_name_raw, str)
-                else str(target_model_name_raw)
-            )
-
-            if target_model_name not in model_names:
+        # Display issues
+        for issue in result.issues:
+            if issue.level == "error":
+                click.echo(click.style(f"Error: {issue.message}", fg="red"), err=True)
+            else:
                 click.echo(
-                    click.style(
-                        f"Error in {note_ref}: Model '{target_model_name}' not found.",
-                        fg="red",
-                    ),
-                    err=True,
+                    click.style(f"Warning: {issue.message}", fg="yellow"), err=True
                 )
-                has_errors = True
-                continue
 
-            # Check fields
-            fields = model_fields_map[target_model_name]
-            _is_valid, missing = validate_note_fields(
-                item, fields, validate_missing="warn"
-            )
-            if missing:
-                click.echo(
-                    click.style(
-                        f"Warning in {note_ref}: Missing fields: {', '.join(missing)}",
-                        fg="yellow",
-                    ),
-                    err=True,
-                )
-                has_warnings = True
-
-            # HTML Validation
-            for field in fields:
-                content = str(item.get(field.lower(), ""))
-                html_warnings = validate_html_tags(content)
-                for warning in html_warnings:
-                    click.echo(
-                        click.style(
-                            f"Warning in {note_ref}, field '{field}': {warning}",
-                            fg="yellow",
-                        ),
-                        err=True,
-                    )
-                    has_warnings = True
-
-        if has_errors:
+        if result.has_errors:
             click.echo(
                 click.style("\nValidation failed with errors.", fg="red"), err=True
             )
             raise click.Abort()
 
-        if strict and has_warnings:
+        if strict and result.has_warnings:
             click.echo(
                 click.style(
                     "\nValidation failed due to warnings in strict mode.", fg="red"
@@ -392,12 +211,12 @@ def validate(file, strict):
             )
             raise click.Abort()
 
-        if has_warnings:
+        if result.has_warnings:
             click.echo(click.style("\nValidation passed with warnings.", fg="yellow"))
         else:
             click.echo(click.style("\nValidation passed successfully!", fg="green"))
 
-    except (ConfigValidationError, DataValidationError) as e:
+    except AnkiToolError as e:
         click.echo(f"Error: {e}", err=True)
         raise click.Abort() from e
 
@@ -410,53 +229,13 @@ def validate(file, strict):
     help="Path to .apkg file",
 )
 @click.option("--sync", is_flag=True, help="Sync with AnkiWeb after import")
-def push(apkg, sync):
+def push(apkg: str, sync: bool) -> None:
     """Push an .apkg file to a running Anki instance."""
-    import base64
-    import json
-    import zipfile
-
     click.echo(f"Pushing {apkg} to Anki...")
-    log.info("Connecting to AnkiConnect...")
     connector = AnkiConnector()
 
     try:
-        apkg_path = Path(apkg)
-
-        # Extract and store media files from apkg
-        with zipfile.ZipFile(apkg_path, "r") as zf:
-            if "media" in zf.namelist():
-                media_map: dict[str, str] = json.loads(zf.read("media").decode("utf-8"))
-                if media_map:
-                    click.echo(f"Storing {len(media_map)} media files...")
-                    log.info("Extracting and storing %d media files", len(media_map))
-
-                    with click.progressbar(
-                        media_map.items(), label="Storing media"
-                    ) as items:  # type: ignore
-                        for idx, filename in items:
-                            try:
-                                content = zf.read(idx)
-                                encoded = base64.b64encode(content).decode("utf-8")
-                                connector.invoke(
-                                    "storeMediaFile", filename=filename, data=encoded
-                                )
-                                log.debug("Stored media file: %s", filename)
-                            except KeyError:
-                                log.warning("Media file %s not found in apkg", idx)
-                            except Exception as e:
-                                log.warning("Failed to store %s: %s", filename, e)
-
-        # Import the package
-        log.debug("Importing package: %s", apkg)
-        connector.import_package(Path(apkg))
-        log.info("Package imported successfully")
-
-        if sync:
-            log.info("Syncing with AnkiWeb...")
-            connector.sync()
-            log.debug("Sync completed")
-
+        push_apkg(apkg, connector, sync=sync)
         click.echo("Successfully imported into Anki")
     except AnkiConnectError as e:
         click.echo(f"Error: {e}", err=True)
