@@ -16,8 +16,6 @@ import yaml
 
 from anki_yaml_tool.core.batch import get_deck_name_from_path
 from anki_yaml_tool.core.builder import AnkiBuilder, ModelConfigComplete
-
-# ... existing code ...
 from anki_yaml_tool.core.config import load_deck_file
 from anki_yaml_tool.core.connector import AnkiConnector
 from anki_yaml_tool.core.exceptions import (
