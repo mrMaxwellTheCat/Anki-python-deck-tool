@@ -46,7 +46,7 @@ def clean_dir(dir_path):
 def build():
     # Define paths
     base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-    src_path = os.path.join(base_dir, "src", "anki_yaml_tool", "cli.py")
+    src_path = os.path.join(base_dir, "src", "anki_yaml_tool", "cli", "cli.py")
     assets_dir = os.path.join(base_dir, "assets")
     # build_dir = os.path.join(base_dir, "build") # Avoid using local build dir due to locks
     dist_dir = os.path.join(base_dir, "dist")
