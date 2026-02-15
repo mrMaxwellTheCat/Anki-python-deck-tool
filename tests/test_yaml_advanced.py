@@ -135,7 +135,8 @@ class TestJinjaTemplates:
     def test_template_with_loop(self, tmp_path):
         """Test template with loop."""
         main_file = tmp_path / "main.yaml"
-        main_file.write_text("items: {% for i in items %}{{ i }},{% endfor %}")
+        # The value must be quoted so the YAML scanner doesn't choke on '%'
+        main_file.write_text("items: '{% for i in items %}{{ i }},{% endfor %}'")
 
         result = yaml_advanced.load_yaml_advanced(
             main_file, jinja_context={"items": [1, 2, 3]}
