@@ -15,44 +15,7 @@ respuesta_basica: &respuesta_basica 'Esta es una respuesta básica reutilizada'
 # Incluir configuración de un archivo externo
 config: !include config_fragment.yaml
 
-# Datos del deck
-data:
-  # Incluir datos de un archivo externo
-  - !include data_fragment.yaml
-
-  # Ejemplo con variables de entorno
-  - front: 'Usuario: ${USER}'
-    back: 'Entorno: $HOME'
-    tags: [env, system]
-
-  # Ejemplo con templates Jinja2
-  - front: 'Template: {{ title }}'
-    back: 'Valor: {{ value }}'
-    tags: [jinja, template]
-    _enabled: true # Esta nota está habilitada
-
-  # Ejemplo de nota deshabilitada (se saltará)
-  - front: 'Nota deshabilitada'
-    back: 'No debería aparecer'
-    tags: [disabled]
-    _enabled: false
-
-  # Ejemplo de contenido condicional por tags
-  - front: 'Solo para desarrollo'
-    back: "Esta nota aparece si se incluye el tag 'dev'"
-    tags: [dev, conditional]
-    _tags: [dev]
-
-  - front: 'Solo para producción'
-    back: "Esta nota aparece si se incluye el tag 'prod'"
-    tags: [prod, conditional]
-    _tags: [prod]
-
-  # Ejemplo de YAML anchors (reutilización de contenido)
-  - front: 'Pregunta 1'
-    back: *respuesta_basica
-    tags: [anchor]
-
-  - front: 'Pregunta 2'
-    back: *respuesta_basica
-    tags: [anchor]
+# Incluir datos de un archivo externo
+# El archivo data_fragment.yaml contiene un objeto con clave "data"
+# y usamos !include [path, key] para extraer solo esa lista
+data: !include [data_fragment.yaml, data]

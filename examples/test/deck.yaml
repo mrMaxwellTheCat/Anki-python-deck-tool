@@ -1,15 +1,15 @@
 config:
-  name: "anki-yaml-tool::test"
-  deck-name: "Examples::test"
-  media-folder: "./media/"
+  name: 'anki-yaml-tool::test'
+  deck-name: 'Examples::test'
+  media-folder: './media/'
   fields:
-    - "Word"
-    - "IPA"
-    - "Media"
-    - "Meaning"
-    - "Example"
-    - "Language"
-    - "Difficulty"
+    - 'Word'
+    - 'IPA'
+    - 'Media'
+    - 'Meaning'
+    - 'Example'
+    - 'Language'
+    - 'Difficulty'
   css: |
     .card {
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -75,7 +75,7 @@ config:
       margin-top: 5px;
     }
   templates:
-    - name: "Listen and Recognize"
+    - name: 'Listen and Recognize'
       qfmt: |
         <div class="language">{{Language}}</div>
         <div class="audio-prompt">🔊 Listen to the pronunciation:</div>
@@ -92,7 +92,7 @@ config:
         <div class="example">{{Example}}</div>
         {{/Example}}
 
-    - name: "Word to Pronunciation"
+    - name: 'Word to Pronunciation'
       qfmt: |
         <div class="language">{{Language}}</div>
         <div class="word">{{Word}}</div>
@@ -108,20 +108,20 @@ config:
         <div class="example">{{Example}}</div>
         {{/Example}}
 data:
-  - word: "Entrepreneur"
-    ipa: "ˌɑːntrəprəˈnɜːr"
-    audio: "[sound:entrepreneur.mp3]"
-    meaning: "A person who organizes and operates a business, taking on financial risks"
-    example: "She became a successful entrepreneur by starting her own tech company"
-    language: "English"
-    difficulty: "Medium"
-    tags: ["english", "business", "pronunciation"]
+  - word: 'Entrepreneur'
+    ipa: 'ˌɑːntrəprəˈnɜːr'
+    audio: '[sound:entrepreneur.mp3]'
+    meaning: 'A person who organizes and operates a business, taking on financial risks'
+    example: 'She became a successful entrepreneur by starting her own tech company'
+    language: 'English'
+    difficulty: 'Medium'
+    tags: ['english', 'business', 'pronunciation']
 
-  - word: "Croissant"
-    ipa: "kwɑːˈsɑ̃ː"
-    audio: "[sound:croissant.mp3]"
-    meaning: "A buttery, flaky, crescent-shaped pastry"
-    example: "I had a fresh croissant for breakfast at the French café"
-    language: "French"
-    difficulty: "Hard"
-    tags: ["french", "food", "pronunciation"]
+  - word: 'Croissant'
+    ipa: 'kwɑːˈsɑ̃ː'
+    audio: '[sound:croissant.mp3]'
+    meaning: 'A buttery, flaky, crescent-shaped pastry'
+    example: 'I had a fresh croissant for breakfast at the French café'
+    language: 'French'
+    difficulty: 'Hard'
+    tags: ['french', 'food', 'pronunciation']

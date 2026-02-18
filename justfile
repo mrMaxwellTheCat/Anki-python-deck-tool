@@ -1,7 +1,5 @@
 # Anki Python Deck Tool - Just Commands
 
-python := "uv run --link-mode=copy"
-
 [private]
 default: help
 

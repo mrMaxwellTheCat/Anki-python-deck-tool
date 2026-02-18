@@ -1,0 +1,252 @@
+deck-name: '日本語::Números en Japonés'
+config:
+  name: AYT::Números en Japonés
+  fields:
+    - id # ID único para cada tarjeta, recomendado
+    - Numeral arábigo # Formateado con MathJax. Ej: \(1\), \(2\), \(3\), etc.
+    - Kanji # El número en kanji. Ej: 一, 二, 三, etc.
+    - Lectura principal # Lectura del kanji en hiragana. Ej: いち, に, さん, etc.
+    - Lectura alternativa # OPCIONAL. Lectura alternativa en hiragana. Ej: し, く, etc.
+    - Sistema # Para clasificar cada número según su sistema de conteo (sino-japonés, nativo japonés, contador de personas, etc.)
+  css: |
+    .sistema {
+      font-size: 10pt;
+      color: gray;
+      margin-bottom: 10px;
+    }
+    .card {
+      font-family: Arial, sans-serif;
+      font-size: 40pt;
+      text-align: center;
+      font-weight: medium;
+    }
+    .pista_destino {
+      font-size: 10pt;
+      color: gray;
+    }
+  templates:
+    ### desde NUMERAL ARÁBIGO ######################################################
+    #- name: Numeral arábigo -> Kanji
+    #  qfmt: |
+    #    <div class="origen">{{Numeral arábigo}}</div>
+    #    <div class="pista_destino">Kanji</div>
+    #  afmt: |
+    #    {{FrontSide}}
+    #    <hr id=answer>
+    #    <div class="destino">{{Kanji}}</div>
+    - name: Numeral arábigo -> Lectura principal
+      qfmt: |
+        <div class="sistema">Sistema {{Sistema}}</div>
+        <div class="origen">{{Numeral arábigo}}</div>
+        <div class="pista_destino">Lectura principal</div>
+      afmt: |
+        {{FrontSide}}
+        <hr id=answer>
+        <div class="destino">{{Lectura principal}}</div>
+    - name: Numeral arábigo -> Lectura alternativa
+      qfmt: |
+        <div class="sistema">Sistema {{Sistema}}</div>
+        <div class="origen">{{Numeral arábigo}}</div>
+        <div class="pista_destino">Lectura alternativa</div>
+      afmt: |
+        {{FrontSide}}
+        <hr id=answer>
+        <div class="destino">{{Lectura alternativa}}</div>
+
+    ### desde KANJI ################################################################
+    - name: Kanji -> Numeral arábigo
+      qfmt: |
+        <div class="sistema">Sistema {{Sistema}}</div>
+        <div class="origen">{{Kanji}}</div>
+        <div class="pista_destino">Numeral arábigo</div>
+      afmt: |
+        {{FrontSide}}
+        <hr id=answer>
+        <div class="destino">{{Numeral arábigo}}</div>
+    - name: Kanji -> Lectura principal
+      qfmt: |
+        <div class="sistema">Sistema {{Sistema}}</div>
+        <div class="origen">{{Kanji}}</div>
+        <div class="pista_destino">Lectura principal</div>
+      afmt: |
+        {{FrontSide}}
+        <hr id=answer>
+        <div class="destino">{{Lectura principal}}</div>
+    - name: Kanji -> Lectura alternativa
+      qfmt: |
+        <div class="sistema">Sistema {{Sistema}}</div>
+        <div class="origen">{{Kanji}}</div>
+        <div class="pista_destino">Lectura alternativa</div>
+      afmt: |
+        {{FrontSide}}
+        <hr id=answer>
+        <div class="destino">{{Lectura alternativa}}</div>
+    ## desde LECTURA PRINCIPAL #################################################
+    - name: Lectura principal -> Numeral arábigo
+      qfmt: |
+        <div class="sistema">Sistema {{Sistema}}</div>
+        <div class="origen">{{Lectura principal}}</div>
+        <div class="pista_destino">Numeral arábigo</div>
+      afmt: |
+        {{FrontSide}}
+        <hr id=answer>
+        <div class="destino">{{Numeral arábigo}}</div>
+    #- name: Lectura principal -> Kanji
+    #  qfmt: |
+    #    <div class="origen">{{Lectura principal}}</div>
+    #    <div class="pista_destino">Kanji</div>
+    #  afmt: |
+    #    {{FrontSide}}
+    #    <hr id=answer>
+    #    <div class="destino">{{Kanji}}</div>
+    - name: Lectura principal -> Lectura alternativa
+      qfmt: |
+        <div class="sistema">Sistema {{Sistema}}</div>
+        <div class="origen">{{Lectura principal}}</div>
+        <div class="pista_destino">Lectura alternativa</div>
+      afmt: |
+        {{FrontSide}}
+        <hr id=answer>
+        <div class="destino">{{Lectura alternativa}}</div>
+    # desde LECTURA ALTERNATIVA ################################################
+    - name: Lectura alternativa -> Numeral arábigo
+      qfmt: |
+        <div class="sistema">Sistema {{Sistema}}</div>
+        <div class="origen">{{Lectura alternativa}}</div>
+        <div class="pista_destino">Numeral arábigo</div>
+      afmt: |
+        {{FrontSide}}
+        <hr id=answer>
+        <div class="destino">{{Numeral arábigo}}</div>
+    #- name: Lectura alternativa -> Kanji
+    #  qfmt: |
+    #    <div class="origen">{{Lectura alternativa}}</div>
+    #    <div class="pista_destino">Kanji</div>
+    #  afmt: |
+    #    {{FrontSide}}
+    #    <hr id=answer>
+    #    <div class="destino">{{Kanji}}</div>
+    - name: Lectura alternativa -> Lectura principal
+      qfmt: |
+        <div class="sistema">Sistema {{Sistema}}</div>
+        <div class="origen">{{Lectura alternativa}}</div>
+        <div class="pista_destino">Lectura principal</div>
+      afmt: |
+        {{FrontSide}}
+        <hr id=answer>
+        <div class="destino">{{Lectura principal}}</div>
+data:
+  #### PREFIJOS DE ID: (para ordenar cada sistema) ###############################
+  # Sistema Sino-Japonés ----------------> A-
+  # Sistema Nativo Japonés --------------> B-
+  # Personas ----------------------------> C-
+  # Objetos Planos y Delgados -----------> D-
+  # Objetos Largos y Cilíndricos --------> E-
+  # Animales Pequeños -------------------> F-
+  # Máquinas y Vehículos ----------------> G-
+  # Objetos Pequeños o Tridimensionales -> H-
+  ########################## Sistema Sino-Japonés ##########################
+  - id: A-0
+    Numeral arábigo: \(0\)
+    Kanji: 零 / 〇
+    Lectura principal: れい
+    Lectura alternativa: ぜろ
+    Sistema: Sino-japonés
+  - id: A-1
+    Numeral arábigo: \(1\)
+    Kanji: 一
+    Lectura principal: いち
+    Sistema: Sino-japonés
+  - id: A-2
+    Numeral arábigo: \(2\)
+    Kanji: 二
+    Lectura principal: に
+    Sistema: Sino-japonés
+  - id: A-3
+    Numeral arábigo: \(3\)
+    Kanji: 三
+    Lectura principal: さん
+    Sistema: Sino-japonés
+  - id: A-4
+    Numeral arábigo: \(4\)
+    Kanji: 四
+    Lectura principal: よん
+    Lectura alternativa: し
+    Sistema: Sino-japonés
+  - id: A-5
+    Numeral arábigo: \(5\)
+    Kanji: 五
+    Lectura principal: ご
+    Sistema: Sino-japonés
+  - id: A-6
+    Numeral arábigo: \(6\)
+    Kanji: 六
+    Lectura principal: ろく
+    Sistema: Sino-japonés
+  - id: A-7
+    Numeral arábigo: \(7\)
+    Kanji: 七
+    Lectura principal: なな
+    Lectura alternativa: しち
+    Sistema: Sino-japonés
+  - id: A-8
+    Numeral arábigo: \(8\)
+    Kanji: 八
+    Lectura principal: はち
+    Sistema: Sino-japonés
+  - id: A-9
+    Numeral arábigo: \(9\)
+    Kanji: 九
+    Lectura principal: きゅう
+    Lectura alternativa: く
+    Sistema: Sino-japonés
+  - id: A-10
+    Numeral arábigo: \(10\)
+    Kanji: 十
+    Lectura principal: じゅう
+    Sistema: Sino-japonés
+  - id: A-100
+    Numeral arábigo: \(100\)
+    Kanji: 百
+    Lectura principal: ひゃく
+    Sistema: Sino-japonés
+  - id: A-300
+    Numeral arábigo: \(300\)
+    Kanji: 三百
+    Lectura principal: さんびゃく
+    Sistema: Sino-japonés
+  - id: A-600
+    Numeral arábigo: \(600\)
+    Kanji: 六百
+    Lectura principal: ろっぴゃく
+    Sistema: Sino-japonés
+  - id: A-800
+    Numeral arábigo: \(800\)
+    Kanji: 八百
+    Lectura principal: はっぴゃく
+    Sistema: Sino-japonés
+  - id: A-1000
+    Numeral arábigo: \(1\,000\)
+    Kanji: 千
+    Lectura principal: せん
+    Sistema: Sino-japonés
+  - id: A-3000
+    Numeral arábigo: \(3\,000\)
+    Kanji: 三千
+    Lectura principal: さんぜん
+    Sistema: Sino-japonés
+  - id: A-8000
+    Numeral arábigo: \(8\,000\)
+    Kanji: 八千
+    Lectura principal: はっせん
+    Sistema: Sino-japonés
+  - id: A-10000
+    Numeral arábigo: \(10\,000\)
+    Kanji: 万
+    Lectura principal: まん
+    Sistema: Sino-japonés
+  - id: A-1000000
+    Numeral arábigo: \(1\,000\,000\)
+    Kanji: 百万
+    Lectura principal: ひゃくまん
+    Sistema: Sino-japonés

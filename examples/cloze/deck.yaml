@@ -1,6 +1,6 @@
+deck-name: 'Examples::cloze'
 config:
-  name: "anki-yaml-tool::cloze"
-  deck-name: "Examples::cloze"
+  name: 'anki-yaml-tool::cloze'
   css: |
     .card {
       font-family: 'Helvetica Neue', Arial, sans-serif;
@@ -55,16 +55,16 @@ config:
     }
 
   fields:
-    - "Text"
-    - "Cloze1"
-    - "Cloze2"
-    - "Cloze3"
-    - "Hint"
-    - "Extra"
-    - "Category"
+    - 'Text'
+    - 'Cloze1'
+    - 'Cloze2'
+    - 'Cloze3'
+    - 'Hint'
+    - 'Extra'
+    - 'Category'
 
   templates:
-    - name: "Cloze 1"
+    - name: 'Cloze 1'
       qfmt: |
         <div class="category">{{Category}}</div>
         <div class="text">
@@ -109,8 +109,8 @@ data:
   - text: |
       The <span class='cloze'>American Civil War</span> lasted from <span class='cloze'>1861</span> to <span class='cloze'>1865</span> and resulted in the abolition of slavery.
     cloze1: American Civil War
-    cloze2: "1861"
-    cloze3: "1865"
+    cloze2: '1861'
+    cloze3: '1865'
     hint: 19th century U.S. conflict
     extra:
       The war resulted in approximately 620,000 soldier deaths, making it the deadliest
@@ -120,9 +120,7 @@ data:
       - history
       - american-history
       - 19th-century
-  - text:
-      The formula for the area of a circle is <span class='cloze'>πr²</span>, where
-      <span class='cloze'>r</span> represents the <span class='cloze'>radius</span>.
+  - text: 'The formula for the area of a circle is <span class="cloze">πr²</span>, where <span class="cloze">r</span> represents the <span class="cloze">radius</span>'
     cloze1: πr²
     cloze2: r
     cloze3: radius
@@ -159,7 +157,7 @@ data:
     cloze2: light energy
     cloze3: chemical energy
     hint: Plant process
-    extra: "The overall equation is: 6CO₂ + 6H₂O + light → C₆H₁₂O₆ + 6O₂"
+    extra: 'The overall equation is: 6CO₂ + 6H₂O + light → C₆H₁₂O₆ + 6O₂'
     category: Biology
     tags:
       - biology
@@ -169,7 +167,7 @@ data:
       The <span class='cloze'>Treaty of Versailles</span> was signed in <span class='cloze'>1919</span>,
       officially ending <span class='cloze'>World War I</span>.
     cloze1: Treaty of Versailles
-    cloze2: "1919"
+    cloze2: '1919'
     cloze3: World War I
     hint: Post-war agreement
     extra:
@@ -189,8 +187,8 @@ data:
     cloze3: ax² + bx + c = 0
     hint: Algebra formula
     extra:
-      "The discriminant (b²-4ac) determines the number and type of solutions: positive
-      gives two real solutions, zero gives one, negative gives complex solutions."
+      'The discriminant (b²-4ac) determines the number and type of solutions: positive
+      gives two real solutions, zero gives one, negative gives complex solutions.'
     category: Mathematics
     tags:
       - mathematics
@@ -201,7 +199,7 @@ data:
       around <span class='cloze'>1600</span>, one of his most famous tragedies.
     cloze1: Shakespeare
     cloze2: Hamlet
-    cloze3: "1600"
+    cloze3: '1600'
     hint: English playwright and tragedy
     extra:
       The play contains the famous soliloquy 'To be, or not to be' and explores

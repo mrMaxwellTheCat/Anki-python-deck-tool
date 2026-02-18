@@ -1,7 +1,40 @@
 # Fragmento de datos de ejemplo para demostrar YAML Includes
-- front: 'Hola'
-  back: 'Hello'
-  tags: [basic, spanish]
-- front: 'Gracias'
-  back: 'Thank you'
-  tags: [basic, spanish]
+# Se usa con !include [data_fragment.yaml, data] en deck.yaml
+
+data:
+  # Notas incluidas del fragmento
+  - front: 'Hola'
+    back: 'Hello'
+    tags: [basic, spanish]
+
+  - front: 'Gracias'
+    back: 'Thank you'
+    tags: [basic, spanish]
+
+  # Ejemplo con variables de entorno
+  - front: 'Usuario: ${USER}'
+    back: 'Entorno: $HOME'
+    tags: [env, system]
+
+  # Ejemplo con templates Jinja2
+  - front: 'Template: {{ title }}'
+    back: 'Valor: {{ value }}'
+    tags: [jinja, template]
+    _enabled: true
+
+  # Ejemplo de nota deshabilitada
+  - front: 'Nota deshabilitada'
+    back: 'No debería aparecer'
+    tags: [disabled]
+    _enabled: false
+
+  # Ejemplo de contenido condicional por tags
+  - front: 'Solo para desarrollo'
+    back: "Esta nota aparece si se incluye el tag 'dev'"
+    tags: [dev, conditional]
+    _tags: [dev]
+
+  - front: 'Solo para producción'
+    back: "Esta nota aparece si se incluye el tag 'prod'"
+    tags: [prod, conditional]
+    _tags: [prod]

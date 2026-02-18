@@ -227,6 +227,7 @@ class AnkiBuilder:
         field_values: FieldValues,
         tags: TagList | None = None,
         model_name: ModelName | None = None,
+        templates_to_include: list[str] | None = None,
     ) -> None:
         """Add a note to the deck.
 
@@ -234,6 +235,9 @@ class AnkiBuilder:
             field_values: List of field values in the same order as model fields.
             tags: Optional list of tags to apply to the note.
             model_name: Name of the model to use. If None, uses the first model.
+            templates_to_include: Optional list of template names to include.
+                If provided, only these templates will generate cards.
+                If None, all templates from the model will be used.
 
         Raises:
             DeckBuildError: If the specified model_name is not found.
@@ -241,10 +245,41 @@ class AnkiBuilder:
         if model_name is None:
             # Default to the first model
             model: genanki.Model = list(self.models.values())[0]
+            original_model_name = list(self.models.keys())[0]
         elif model_name in self.models:
             model = self.models[model_name]
+            original_model_name = model_name
         else:
             raise DeckBuildError(f"Model '{model_name}' not found in builder")
+
+        # If templates_to_include is specified, create a filtered model
+        if templates_to_include is not None and len(templates_to_include) > 0:
+            # Get the original model config
+            original_config = None
+            for cfg in self.model_configs:
+                if cfg["name"] == original_model_name:
+                    original_config = cfg
+                    break
+
+            if original_config:
+                # Filter templates to only include specified ones
+                filtered_templates = []
+                for tpl in original_config.get("templates", []):
+                    if tpl.get("name") in templates_to_include:
+                        filtered_templates.append(tpl)
+
+                if filtered_templates:
+                    # Create a new model with only the filtered templates
+                    model_id = self.stable_id(
+                        f"{original_model_name}_filtered_{'_'.join(templates_to_include)}"
+                    )
+                    model = genanki.Model(
+                        model_id,
+                        original_model_name,  # Keep original name for compatibility
+                        fields=[{"name": f} for f in original_config["fields"]],
+                        templates=filtered_templates,
+                        css=original_config.get("css", ""),
+                    )
 
         # Convert math delimiters and scan for media in all field values
         converted_values: FieldValues = []
