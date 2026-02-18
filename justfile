@@ -1,11 +1,16 @@
 # Anki Python Deck Tool - Just Commands
 
+ayt := "uv run anki-yaml-tool"
+
 [private]
 default: help
 
 [private]
 help:
     @just --list --unsorted
+
+update-ayt:
+    uv pip install -e '/mnt/c/Google Drive/Proyectos/Anki-python-deck-tool'
 
 # Install dependencies
 install:
@@ -64,5 +69,5 @@ install-system-wide:
 build-install: build-exe install-system-wide
 
 # Build, push, and clean example decks
-examples:
-    uv run -m anki_yaml_tool.cli batch-build --input-dir examples --output-dir examples/tmp/ --push --delete-after
+examples: update-ayt
+    ayt batch-build --input-dir examples --recursive --output-dir "examples/" --push --sync --delete-after
